@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:link_note/features/note/domain/entities/note.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -17,6 +19,16 @@ class NotesService {
     return notes;
   }
 
-  Future<void> update() async {}
-  Future<void> delete() async {}
+  Future<void> update(Note updatedNote) {
+    if (updatedNote.id == null) return Future.value();
+    return _instance
+        .from(NotesService.table)
+        .update(updatedNote.toMap())
+        .eq('id', updatedNote.id!);
+  }
+
+  Future<void> delete(Note note) async {
+    if (note.id == null) return Future.value();
+    return _instance.from(NotesService.table).delete().eq('id', note.id!);
+  }
 }

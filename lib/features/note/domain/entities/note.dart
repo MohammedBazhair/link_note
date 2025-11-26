@@ -35,4 +35,18 @@ class Note {
   String toString() {
     return 'Note{id: $id, uuid: $uuid, title: $title, content: $content}.\n';
   }
+
+  Note copyWith({
+    String? id,
+    String? uuid,
+    String? title,
+    String? content,
+  }) {
+    return Note(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      title: title ?? this.title,
+      content: content ?? this.content,
+    );
+  }
 }

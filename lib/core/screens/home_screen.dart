@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:link_note/features/auth/services/auth.dart';
 import 'package:link_note/features/note/domain/entities/note.dart';
 import 'package:link_note/features/note/presentation/screens/notes_list_screen.dart';
-import 'package:link_note/features/note/services/data_notes.dart';
+import 'package:link_note/features/note/services/notes_service.dart';
 import 'package:link_note/features/qr_code/presentation/screens/generate_qr_code_screen.dart';
 import 'package:link_note/features/qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import 'package:link_note/features/user/presentation/widgets/user_profile.dart';
@@ -61,15 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.add_link_rounded),
           ),
           IconButton.filled(
-            onPressed: () async {
-              final notes = await NotesService().read();
-
-              if (!context.mounted) return;
-
+            onPressed: () {
               Navigator.push(
                 context,
                 CupertinoModalPopupRoute(
-                  builder: (context) => NotesListScreen(notes),
+                  builder: (context) => NotesListScreen(),
                 ),
               );
             },
