@@ -1,0 +1,26 @@
+flutter_launcher_icons:
+  image_path: "assets/images/app_logo.png"
+
+  android: "launcher_icon"
+  min_sdk_android: 21
+
+  ios: true
+  remove_alpha_ios: true
+
+  adaptive_icon_background: "#ffffff" # خلفية بلون أبيض (تقدر تحط صورة)
+  adaptive_icon_foreground: "assets/images/app_logo.png" # نفس الشعار الأمامي
+
+  web:
+    generate: true
+    image_path: "assets/images/app_logo.png"
+    background_color: "#ffffff"
+    theme_color: "#000000"
+
+  windows:
+    generate: true
+    image_path: "assets/images/app_logo.png"
+    icon_size: 48
+
+  macos:
+    generate: true
+    image_path: "assets/images/app_logo.png"
