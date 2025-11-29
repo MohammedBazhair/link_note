@@ -4,5 +4,5 @@ class UserService {
   final _instance = Supabase.instance.client.auth;
 
   User? get currentUser => _instance.currentUser;
-
+bool get isUserLogin=> _instance.currentUser != null;
 }

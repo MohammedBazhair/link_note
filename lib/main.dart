@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:link_note/core/presentation/screens/home_screen.dart';
 import 'package:link_note/core/theme/dark_theme.dart';
+import 'package:link_note/features/user/services/user_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'core/screens/home_screen.dart';
+import 'features/auth/presentation/screens/sign_in_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +23,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: darkTheme(),
-      home: HomeScreen(),
+      home: UserService().isUserLogin?HomeScreen() : SignInScreen(),
     );
   }
 }

@@ -7,11 +7,13 @@ class UserProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = UserService().currentUser;
-    return SizedBox(
-      height: 100,
-      child: ListTile(
-        title: Text(user?.email ?? 'No email!'),
-        subtitle: Text(user?.createdAt ?? '-'),
+
+    return UserAccountsDrawerHeader(
+      accountName: null,
+      accountEmail: Text(user?.email ?? '-'),
+      currentAccountPictureSize: Size.square(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
       ),
     );
   }
