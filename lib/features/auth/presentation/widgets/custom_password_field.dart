@@ -28,7 +28,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
-      autofillHints: !isConfirmField ? [AutofillHints.password]:null,
+      autofillHints: !isConfirmField ? [AutofillHints.password] : null,
 
       obscureText: obscure,
       cursorColor: DarkColors.cursor,
@@ -64,10 +64,6 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
 
         if (value.length < 8) {
           return 'Password must be at least 8 characters';
-        }
-
-        if (!RegExp(r'[a-zA-Z]').hasMatch(value)) {
-          return 'Password must contain at least one letter';
         }
 
         if (confirmPassword != null && value != confirmPassword) {

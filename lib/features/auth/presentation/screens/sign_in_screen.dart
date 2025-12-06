@@ -1,25 +1,62 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:link_note/core/extensions/extensions.dart';
 import 'package:link_note/core/presentation/screens/home_screen.dart';
+import 'package:link_note/core/presentation/widgets/home_button.dart';
+import 'package:link_note/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:link_note/features/auth/presentation/controllers/auth_state.dart';
 import 'package:link_note/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:link_note/features/auth/presentation/widgets/custom_email_field.dart';
 import 'package:link_note/features/auth/presentation/widgets/custom_password_field.dart';
-import 'package:link_note/features/auth/services/auth.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  ConsumerState<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool isLoading = false;
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    ref.listen(authProvider, (previous, next) {
+      switch (next) {
+        case AuthInitialState():
+          break;
+
+        case AuthSuccessfullState():
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => HomeScreen()),
+          );
+
+        case AuthFailedState(:final message):
+          context.showSnakbar(message);
+      }
+    });
+    super.initState();
+  }
+
+  void onSubmit(void Function(void Function()) rebuild) async {
+    final isValid = formKey.currentState?.validate() ?? false;
+
+    if (!isValid) return;
+    rebuild(() => isLoading = true);
+
+    final password = passwordController.text;
+    final email = emailController.text;
+    await ref
+        .read(authProvider.notifier)
+        .login(email: email, password: password);
+
+    rebuild(() => isLoading = false);
+  }
 
   @override
   void dispose() {
@@ -31,6 +68,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(actions: [HomeButton()]),
       body: SafeArea(
         child: Center(
           child: Form(
@@ -39,7 +77,6 @@ class _SignInScreenState extends State<SignInScreen> {
               child: ListView(
                 padding: EdgeInsets.all(24),
                 shrinkWrap: true,
-
                 children: [
                   // عنوان الشاشة
                   Text(
@@ -47,7 +84,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 10),
 
                   Text(
                     "Login to your account",
@@ -57,7 +94,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 80),
 
                   Text(
                     "Email",
@@ -98,36 +135,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   StatefulBuilder(
                     builder: (context, rebuild) {
                       return ElevatedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () async {
-                                final isValid =
-                                    formKey.currentState?.validate() ?? false;
-
-                                if (!isValid) return;
-                                rebuild(() => isLoading = true);
-
-                                final password = passwordController.text;
-                                final email = emailController.text;
-                                final error = await AuthService().signIn(
-                                  email: email,
-                                  password: password,
-                                );
-
-                                rebuild(() => isLoading = false);
-                                if (error != null) {
-                                  context.showSnakbar(error);
-                                  return;
-                                }
-
-                                TextInput.finishAutofillContext();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => HomeScreen(),
-                                  ),
-                                );
-                              },
+                        onPressed: isLoading ? null : () => onSubmit(rebuild),
                         child: isLoading
                             ? CircularProgressIndicator()
                             : const Text("Login"),
@@ -140,7 +148,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   // الانتقال إلى التسجيل
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         CupertinoModalPopupRoute(
                           builder: (context) => SignUpScreen(),

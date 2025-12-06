@@ -74,4 +74,11 @@ ThemeData darkTheme() => ThemeData(
     circularTrackColor: const Color(0xFF227FAA),
     color: Colors.white,
   ),
+  floatingActionButtonTheme: FloatingActionButtonThemeData(
+    backgroundColor: DarkColors.primary,
+  ),
+  dialogTheme: DialogThemeData(
+    backgroundColor: Color(0xFF151825),
+    barrierColor: const Color(0x66292727),
+  ),
 );

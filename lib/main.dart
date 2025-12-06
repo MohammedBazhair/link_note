@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/features/injection.dart';
 import 'package:link_note/core/presentation/screens/home_screen.dart';
 import 'package:link_note/core/theme/dark_theme.dart';
-import 'package:link_note/features/user/services/user_service.dart';
+import 'package:link_note/features/note/injection.dart';
+import 'package:link_note/features/user/injection.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'features/auth/presentation/screens/sign_in_screen.dart';
@@ -10,8 +14,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await initSupabase();
+  await setupLocators();
 
-  runApp(const MainApp());
+  await Permission.camera.request();
+  await Permission.storage.request();
+
+  runApp(
+    ProviderScope( child: const MainApp()),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -23,7 +33,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: darkTheme(),
-      home: UserService().isUserLogin?HomeScreen() : SignInScreen(),
+      home: true ? HomeScreen() : SignInScreen(),
     );
   }
 }
@@ -34,4 +44,10 @@ Future<void> initSupabase() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZnV0bnVhaGprbm12ZG9ya3dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MDY1MDgsImV4cCI6MjA3OTQ4MjUwOH0.QMY5rWu8kzSJdayLsnSiUQnQLkMNyimRImNvrDsBu30',
   );
+}
+
+Future<void> setupLocators() async {
+  await setupCommonDependincies();
+  setupNotesDependincies();
+  setupUserDependincies();
 }

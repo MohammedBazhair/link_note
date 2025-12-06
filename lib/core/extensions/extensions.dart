@@ -5,3 +5,19 @@ extension ShowSnackbar on BuildContext {
     ScaffoldMessenger.of(this).showSnackBar(SnackBar(content: Text(msg)));
   }
 }
+
+extension RoutesNavigators on BuildContext {
+  Future<T?> pushTo<T extends Object?>(Widget screen) {
+   return Navigator.push(this, MaterialPageRoute(builder: (context) => screen));
+  }
+
+  Future<T?> pushReplacementTo<T extends Object?, TO extends Object?>(
+      Widget screen) {
+    return Navigator.pushReplacement(
+        this, MaterialPageRoute(builder: (context) => screen));
+  }
+
+  void pop<T extends Object?>([T? result]) {
+    Navigator.pop(this, result);
+  }
+}
