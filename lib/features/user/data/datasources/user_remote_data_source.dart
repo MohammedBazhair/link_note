@@ -24,7 +24,6 @@ abstract interface class UserRemoteDataSource {
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
-
   UserRemoteDataSourceImpl(
     this._client,
     this._remoteDatabase,
@@ -87,10 +86,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   Future<void> updateProfile(ProfileEntity profile, [String? avatrPath]) async {
+    if (profile.userId.isEmpty) throw ArgumentError.value(profile.userId);
+
     final profileMap = await _remoteDatabase.readRow(
       id: profile.userId,
       column: 'id',
-      table: ExternalConsts.imagesBucket,
+      table: ExternalConsts.profilesTable,
     );
     final model = ProfileModel.fromMap(profileMap);
 

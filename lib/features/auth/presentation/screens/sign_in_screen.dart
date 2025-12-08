@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/presentation/widgets/home_button.dart';
+import '../../../user/presentation/controllers/user_controller.dart';
 import '../../listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
@@ -39,7 +40,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final isValid = formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
-    ref.read(loadingProvider.notifier).state = true;
+    final loadingCtrl= ref.read(loadingProvider.notifier); 
+    final userCtrl= ref.read(userControllerProvider.notifier); 
+    
+    loadingCtrl.state = true;
 
     final password = passwordController.text;
     final email = emailController.text;
@@ -47,9 +51,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         .read(authProvider.notifier)
         .login(email: email, password: password);
 
-    ref.read(loadingProvider.notifier).state = false;
+    loadingCtrl.state = false;
+    await userCtrl.loadProfile();
   }
-
+    
   @override
   void dispose() {
     emailController.dispose();

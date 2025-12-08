@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,7 +13,6 @@ abstract interface class RemoteStorageService {
 }
 
 class RemoteStorageServiceImpl implements RemoteStorageService {
-
   RemoteStorageServiceImpl(this._storage);
   final SupabaseStorageClient _storage;
 
@@ -28,14 +26,15 @@ class RemoteStorageServiceImpl implements RemoteStorageService {
     required String filePath,
     required String storageBucket,
   }) async {
-    final random = Random().nextInt(100).toString();
     final filename = p.basename(filePath);
     final name = filename.split('.').first;
     final fileExtension = filename.split('.').last;
-    final resultName = name + random + fileExtension;
+    final resultName = '$name.$fileExtension';
     final file = File(filePath);
     final resultPath = 'public/$resultName';
-    await _storage.from(storageBucket).upload(resultPath, file);
+    await _storage
+        .from(storageBucket)
+        .upload(resultPath, file, fileOptions: const FileOptions(upsert: true));
 
     return resultPath;
   }

@@ -5,7 +5,6 @@ import '../../domain/repositories/user_repository.dart';
 import '../datasources/user_remote_data_source.dart';
 
 class UserRepositoryImpl implements UserRepository {
-
   UserRepositoryImpl(this._remoteDataSource);
   final UserRemoteDataSource _remoteDataSource;
 
@@ -36,7 +35,6 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> updateProfile(ProfileEntity profile) async {
     try {
-      
       await _remoteDataSource.updateProfile(profile);
     } catch (e) {
       throw Exception('Failed to update ${profile.username} profile');
@@ -51,6 +49,7 @@ class UserRepositoryImpl implements UserRepository {
     try {
       return await _remoteDataSource.uploadAvatarImage(profile, filePath);
     } catch (e) {
+      print(e);
       throw Exception('Failed to upload avatar');
     }
   }

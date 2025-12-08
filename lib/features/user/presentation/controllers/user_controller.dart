@@ -12,9 +12,7 @@ import '../../domain/repositories/user_repository.dart';
 import 'user_state.dart';
 
 final userControllerProvider = StateNotifierProvider<UserController, UserState>(
-  (ref) {
-    return GetIt.I<UserController>();
-  },
+  (_) => GetIt.I<UserController>(),
 );
 
 class UserController extends StateNotifier<UserState> {
@@ -34,17 +32,23 @@ class UserController extends StateNotifier<UserState> {
       );
       await _userRepository.createProfile(profile);
     } catch (e) {
-      state = UserErrorState(state.profile, 'Error: Can\' create profile ${user.username}');
+      state = UserErrorState(
+        state.profile,
+        'Error: Can\' create profile ${user.username}',
+      );
     }
   }
 
-  Future<void> loadProfile(String userId) async {
+  Future<void> loadProfile() async {
     try {
-      final newProfile = await _userRepository.getProfile(userId);
+      if (currentUser?.id == null) return;
+      final newProfile = await _userRepository.getProfile(currentUser!.id);
 
       state = UserLoadProfileState(newProfile);
+      print('loaded:');
+      print(state.profile.userId);
     } catch (e) {
-      state = UserErrorState(state.profile, 'cant get profile error');
+      state = UserErrorState(state.profile, 'Can\'t get profile error');
     }
   }
 
@@ -60,7 +64,7 @@ class UserController extends StateNotifier<UserState> {
 
   Future<void> pickAndUploadAvatar() async {
     try {
-        await Permission.camera.request();
+      await Permission.camera.request();
 
       final file = await uploadImage();
 
