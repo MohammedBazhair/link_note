@@ -9,6 +9,7 @@ import 'features/auth/injection.dart';
 import 'features/note/injection.dart';
 import 'features/user/injection.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
