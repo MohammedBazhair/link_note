@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:link_note/core/constants/colors/colors.dart';
+import '../../../../core/constants/colors/colors.dart';
 
 class CustomPasswordField extends StatefulWidget {
-  final TextEditingController controller;
-  final TextEditingController? originalController;
-  final String hintText;
-
   const CustomPasswordField({
     super.key,
     required this.controller,
     required this.hintText,
+    this.textInputAction = TextInputAction.next,
+    this.onSubmit,
     this.originalController,
   });
+  final TextEditingController controller;
+  final TextEditingController? originalController;
+  final String hintText;
+  final VoidCallback? onSubmit;
+  final TextInputAction textInputAction;
 
   @override
   State<CustomPasswordField> createState() => _CustomPasswordFieldState();
@@ -28,15 +31,16 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
-      autofillHints: !isConfirmField ? [AutofillHints.password] : null,
+      autofillHints: const [AutofillHints.password],
 
       obscureText: obscure,
       cursorColor: DarkColors.cursor,
-      cursorRadius: Radius.circular(20),
+      cursorRadius: const Radius.circular(20),
       cursorWidth: 1.3,
-      textInputAction: TextInputAction.next,
+      textInputAction: widget.textInputAction,
       onFieldSubmitted: (value) {
         FocusScope.of(context).nextFocus();
+        widget.onSubmit?.call();
       },
       inputFormatters: [
         FilteringTextInputFormatter.allow(
@@ -50,13 +54,12 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
           child: Icon(Icons.lock_outline),
         ),
         suffixIcon: IconButton(
-          padding: EdgeInsetsDirectional.only(end: 15.0),
+          padding: const EdgeInsetsDirectional.only(end: 15.0),
 
           icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
           onPressed: () => setState(() => obscure = !obscure),
         ),
       ),
-
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Password is required';

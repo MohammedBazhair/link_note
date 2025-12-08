@@ -1,9 +1,8 @@
-import 'package:link_note/features/auth/injection.dart';
-import 'package:link_note/features/user/presentation/controllers/user_controller.dart';
-
+import '../auth/injection.dart';
 import 'data/datasources/user_remote_data_source.dart';
 import 'data/repositories/user_repository_impl.dart';
 import 'domain/repositories/user_repository.dart';
+import 'presentation/controllers/user_controller.dart';
 
 void setupUserDependincies() {
   getIt.registerLazySingleton<UserRemoteDataSource>(

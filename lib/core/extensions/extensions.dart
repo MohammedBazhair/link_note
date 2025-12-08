@@ -8,16 +8,26 @@ extension ShowSnackbar on BuildContext {
 
 extension RoutesNavigators on BuildContext {
   Future<T?> pushTo<T extends Object?>(Widget screen) {
-   return Navigator.push(this, MaterialPageRoute(builder: (context) => screen));
+    return Navigator.push(
+      this,
+      MaterialPageRoute(builder: (context) => screen),
+    );
   }
 
   Future<T?> pushReplacementTo<T extends Object?, TO extends Object?>(
-      Widget screen) {
+    Widget screen,
+  ) {
     return Navigator.pushReplacement(
-        this, MaterialPageRoute(builder: (context) => screen));
+      this,
+      MaterialPageRoute(builder: (context) => screen),
+    );
   }
 
   void pop<T extends Object?>([T? result]) {
     Navigator.pop(this, result);
   }
+}
+
+extension FilesSizes on num {
+  double get bytesToMb => this/ (1024 * 1024);
 }

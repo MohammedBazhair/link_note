@@ -14,6 +14,11 @@ abstract interface class RemoteDatabaseService {
 
   Future<List<Map<String, dynamic>>> readRows({required String table});
 
+  Stream  readRowsRealTime({
+    required String table,
+    required List<String> primaryKey,
+  });
+
   Future<dynamic> update({
     required Map<String, dynamic> updated,
     required String id,
@@ -28,12 +33,10 @@ abstract interface class RemoteDatabaseService {
   });
 }
 
-
 class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
-  final SupabaseClient _client;
 
   RemoteDatabaseServiceImpl(this._client);
-
+  final SupabaseClient _client;
 
   @override
   Future<dynamic> insertRow({
@@ -73,6 +76,11 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     required String column,
     required String table,
   }) {
-    return _client.from(table).delete().eq(column,id);
+    return _client.from(table).delete().eq(column, id);
+  }
+
+  @override
+  Stream  readRowsRealTime({required String table, required List<String> primaryKey}) {
+    return _client.from(table).stream(primaryKey: primaryKey);
   }
 }

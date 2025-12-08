@@ -1,12 +1,13 @@
-import 'package:link_note/features/user/domain/entities/profile.dart';
-import 'package:link_note/features/user/data/datasources/user_remote_data_source.dart';
-import 'package:link_note/features/user/domain/repositories/user_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../domain/entities/profile.dart';
+import '../../domain/repositories/user_repository.dart';
+import '../datasources/user_remote_data_source.dart';
+
 class UserRepositoryImpl implements UserRepository {
-  final UserRemoteDataSource _remoteDataSource;
 
   UserRepositoryImpl(this._remoteDataSource);
+  final UserRemoteDataSource _remoteDataSource;
 
   @override
   bool get isUserLoggedIn => _remoteDataSource.isUserLogin;
@@ -50,7 +51,7 @@ class UserRepositoryImpl implements UserRepository {
     try {
       return await _remoteDataSource.uploadAvatarImage(profile, filePath);
     } catch (e) {
-      throw Exception('Failed to upload avatar: $e');
+      throw Exception('Failed to upload avatar');
     }
   }
 }

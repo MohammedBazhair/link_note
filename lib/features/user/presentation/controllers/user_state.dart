@@ -1,9 +1,9 @@
-import 'package:link_note/features/user/domain/entities/profile.dart';
+import '../../domain/entities/profile.dart';
 
 sealed class UserState {
-  final ProfileEntity profile;
 
   UserState(this.profile);
+  final ProfileEntity profile;
 }
 
 class UserInitialState extends UserState {
@@ -19,6 +19,6 @@ class UserLoadProfileState extends UserState {
 }
 
 class UserErrorState extends UserState {
-  final String message;
   UserErrorState(super.profile, this.message);
+  final String message;
 }

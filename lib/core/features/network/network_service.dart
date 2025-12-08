@@ -10,9 +10,9 @@ abstract interface class NetworkService {
 }
 
 class NetworkServiceImpl implements NetworkService {
-  final InternetConnection _connection;
 
   NetworkServiceImpl(this._connection);
+  final InternetConnection _connection;
 
   @override
   Future<bool> isConnected() => _connection.hasInternetAccess;

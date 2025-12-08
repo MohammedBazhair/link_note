@@ -31,12 +31,12 @@ class _ScannerQrCodeScreenState extends State<ScannerQrCodeScreen> {
 
     final scanArea = cameraArea - 60;
     return Scaffold(
-      appBar: AppBar(title: Text("Scan QR Code")),
+      appBar: AppBar(title: const Text('Scan QR Code')),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Text("Scan Qr Code to Extract a Note.", textAlign: TextAlign.center),
-          SizedBox(height: 40),
+          const Text('Scan Qr Code to Extract a Note.', textAlign: TextAlign.center),
+          const SizedBox(height: 40),
           Stack(
             alignment: Alignment.center,
             children: [
@@ -47,7 +47,6 @@ class _ScannerQrCodeScreenState extends State<ScannerQrCodeScreen> {
                   height: cameraArea,
                   child: MobileScanner(
                     controller: cameraController,
-                    fit: BoxFit.cover,
                     onDetect: (result) {
                       if (!canScan) return;
 
@@ -92,7 +91,7 @@ class _ScannerQrCodeScreenState extends State<ScannerQrCodeScreen> {
               ),
             ],
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

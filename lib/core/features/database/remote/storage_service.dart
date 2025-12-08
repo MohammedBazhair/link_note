@@ -14,9 +14,9 @@ abstract interface class RemoteStorageService {
 }
 
 class RemoteStorageServiceImpl implements RemoteStorageService {
-  final SupabaseStorageClient _storage;
 
   RemoteStorageServiceImpl(this._storage);
+  final SupabaseStorageClient _storage;
 
   @override
   String getUrlFrom({required String path, required String storageBucket}) {

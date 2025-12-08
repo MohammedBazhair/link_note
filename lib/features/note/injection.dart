@@ -1,4 +1,4 @@
-import 'package:link_note/features/auth/injection.dart';
+import '../auth/injection.dart';
 
 import 'data/datasources/notes_remote_data_source.dart';
 import 'data/repositories/notes_repository_impl.dart';

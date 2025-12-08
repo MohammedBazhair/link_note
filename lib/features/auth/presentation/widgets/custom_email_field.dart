@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:link_note/core/constants/colors/colors.dart';
+import '../../../../core/constants/colors/colors.dart';
 
 class CustomEmailField extends StatelessWidget {
   const CustomEmailField(this.controller, {super.key});
@@ -10,21 +10,21 @@ class CustomEmailField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      autofillHints: [AutofillHints.email],
+      autofillHints: const [AutofillHints.email],
       keyboardType: TextInputType.emailAddress,
       cursorColor: DarkColors.cursor,
-      cursorRadius: Radius.circular(20),
+      cursorRadius: const Radius.circular(20),
       cursorWidth: 1.3,
       textInputAction: TextInputAction.next,
 
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._-]')),
       ],
-      decoration: InputDecoration(
-        hintText: "Enter your email",
+      decoration: const InputDecoration(
+        hintText: 'Enter your email',
         prefixIcon: Padding(
           padding: EdgeInsetsDirectional.only(start: 15.0),
-          child: const Icon(Icons.email_outlined),
+          child: Icon(Icons.email_outlined),
         ),
       ),
 

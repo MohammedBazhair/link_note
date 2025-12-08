@@ -1,5 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:link_note/features/user/domain/entities/profile.dart';
+import '../../domain/entities/profile.dart';
 
 class ProfileModel extends ProfileEntity {
   final String? avatarPath;

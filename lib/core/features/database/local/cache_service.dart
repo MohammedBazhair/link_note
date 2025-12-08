@@ -26,16 +26,16 @@ abstract interface class LocalCacheService {
 }
 
 class LocalCacheServiceImpl implements LocalCacheService {
-  final SharedPreferences _prefs;
 
   LocalCacheServiceImpl(this._prefs);
+  final SharedPreferences _prefs;
 
   @override
   Future<bool> setString({
     required String key,
     required String value,
-  }) async {
-   return await _prefs.setString(key, value);
+  })  {
+   return _prefs.setString(key, value);
   }
 
   @override
@@ -49,8 +49,8 @@ class LocalCacheServiceImpl implements LocalCacheService {
   Future<bool> setBool({
     required String key,
     required bool value,
-  }) async {
-   return await _prefs.setBool(key, value);
+  })  {
+   return _prefs.setBool(key, value);
   }
 
   @override
@@ -64,8 +64,8 @@ class LocalCacheServiceImpl implements LocalCacheService {
   Future<bool> setInt({
     required String key,
     required int value,
-  }) async {
-   return await _prefs.setInt(key, value);
+  })  {
+   return _prefs.setInt(key, value);
   }
 
   @override
@@ -79,8 +79,8 @@ class LocalCacheServiceImpl implements LocalCacheService {
   Future<bool> setStringList({
     required String key,
     required List<String> value,
-  }) async {
- return   await _prefs.setStringList(key, value);
+  })  {
+ return   _prefs.setStringList(key, value);
   }
 
   @override
@@ -93,12 +93,12 @@ class LocalCacheServiceImpl implements LocalCacheService {
   @override
   Future<bool> remove({
     required String key,
-  }) async {
-   return await _prefs.remove(key);
+  })  {
+   return _prefs.remove(key);
   }
 
   @override
-  Future<bool> clear() async {
-   return await _prefs.clear();
+  Future<bool> clear()  {
+   return _prefs.clear();
   }
 }

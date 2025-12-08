@@ -1,21 +1,8 @@
 import 'dart:convert';
 
 class Note {
-  final String? id;
-  final String? uuid; // user id
-  final String title;
-  final String content;
 
   Note({this.id, this.uuid, required this.title, required this.content});
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': ?id,
-      'title': title,
-      'content': content,
-      'uuid': ?uuid,
-    };
-  }
 
   factory Note.fromMap(Map<String, dynamic> map) {
     return Note(
@@ -26,10 +13,23 @@ class Note {
     );
   }
 
-  String toJson() => json.encode(toMap());
-
   factory Note.fromJson(String source) =>
       Note.fromMap(json.decode(source) as Map<String, dynamic>);
+  final String? id;
+  final String? uuid; // user id
+  final String title;
+  final String content;
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': ?id,
+      'title': title,
+      'content': content,
+      'uuid': ?uuid,
+    };
+  }
+
+  String toJson() => json.encode(toMap());
 
   @override
   String toString() {

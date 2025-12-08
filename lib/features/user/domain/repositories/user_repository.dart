@@ -1,5 +1,6 @@
-import 'package:link_note/features/user/domain/entities/profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../entities/profile.dart';
 
 abstract interface class UserRepository {
   bool get isUserLoggedIn;

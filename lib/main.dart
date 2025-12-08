@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:link_note/core/features/injection.dart';
-import 'package:link_note/core/presentation/screens/home_screen.dart';
-import 'package:link_note/core/theme/dark_theme.dart';
-import 'package:link_note/features/note/injection.dart';
-import 'package:link_note/features/user/injection.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'features/auth/presentation/screens/sign_in_screen.dart';
+import 'core/features/injection.dart';
+import 'core/presentation/screens/auth_gate.dart';
+import 'core/theme/dark_theme.dart';
+import 'features/auth/injection.dart';
+import 'features/note/injection.dart';
+import 'features/user/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,12 +15,8 @@ void main() async {
   await initSupabase();
   await setupLocators();
 
-  await Permission.camera.request();
-  await Permission.storage.request();
 
-  runApp(
-    ProviderScope( child: const MainApp()),
-  );
+  runApp(const ProviderScope(child: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
@@ -33,7 +28,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: darkTheme(),
-      home: true ? HomeScreen() : SignInScreen(),
+      home: const AuthGate(),
     );
   }
 }
@@ -48,6 +43,7 @@ Future<void> initSupabase() async {
 
 Future<void> setupLocators() async {
   await setupCommonDependincies();
+  setupAuthDependincies();
   setupNotesDependincies();
   setupUserDependincies();
 }

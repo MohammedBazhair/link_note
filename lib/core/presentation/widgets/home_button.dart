@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:link_note/core/presentation/screens/home_screen.dart';
+import '../../../features/note/presentation/screens/notes_list_screen.dart';
 
 class HomeButton extends StatelessWidget {
   const HomeButton({super.key});
@@ -11,10 +11,10 @@ class HomeButton extends StatelessWidget {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => const NotesListScreen()),
         );
       },
-      icon: Icon(Icons.home),
+      icon: const Icon(Icons.home),
     );
   }
 }

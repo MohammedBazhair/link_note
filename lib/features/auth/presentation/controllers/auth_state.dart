@@ -2,10 +2,12 @@ sealed class AuthState {}
 
 class AuthInitialState extends AuthState {}
 
-class AuthSuccessfullState extends AuthState {}
+class AuthSuccessfullState extends AuthState {
+  AuthSuccessfullState(this.message);
+  final String message;
+}
 
 class AuthFailedState extends AuthState {
-  final String message;
-
   AuthFailedState(this.message);
+  final String message;
 }

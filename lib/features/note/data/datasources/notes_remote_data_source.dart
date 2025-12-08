@@ -1,16 +1,17 @@
-import 'package:link_note/core/features/database/remote/database_service.dart';
-import 'package:link_note/features/note/domain/entities/note.dart';
+import '../../../../core/features/database/remote/database_service.dart';
+import '../../domain/entities/note.dart';
 
 abstract interface class NotesRemoteDataSource {
   Future<void> createNote(Note note);
   Future<Set<Note>> readNotes();
+  Stream fetchNotesRealTime();
   Future<void> updateNote(Note note);
   Future<void> deleteNote(String id);
 }
 
 class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
-  final RemoteDatabaseService _database;
   NotesRemoteDataSourceImpl(this._database);
+  final RemoteDatabaseService _database;
 
   final _notesTable = 'notes';
   final _idColumn = 'id';
@@ -23,7 +24,7 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   @override
   Future<Set<Note>> readNotes() async {
     final mapList = await _database.readRows(table: _notesTable);
-    return mapList.map((m) => Note.fromMap(m)).toSet();
+    return mapList.map(Note.fromMap).toSet();
   }
 
   @override
@@ -40,5 +41,10 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   @override
   Future<void> deleteNote(String id) {
     return _database.delete(id: id, column: _idColumn, table:_notesTable);
+  }
+  
+  @override
+  Stream fetchNotesRealTime() {
+    return _database.readRowsRealTime(table: _notesTable, primaryKey: [_idColumn]);
   }
 }

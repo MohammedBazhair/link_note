@@ -1,10 +1,11 @@
 import 'package:flutter/widgets.dart';
-import 'package:link_note/core/constants/external_constants/external_constants.dart';
-import 'package:link_note/core/features/database/remote/database_service.dart';
-import 'package:link_note/core/features/database/remote/storage_service.dart';
-import 'package:link_note/features/user/data/models/profile.dart';
-import 'package:link_note/features/user/domain/entities/profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/features/database/remote/database_service.dart';
+import '../../../../core/features/database/remote/storage_service.dart';
+import '../../domain/entities/profile.dart';
+import '../models/profile.dart';
 
 abstract interface class UserRemoteDataSource {
   bool get isUserLogin;
@@ -23,15 +24,15 @@ abstract interface class UserRemoteDataSource {
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
-  final SupabaseClient _client;
-  final RemoteDatabaseService _remoteDatabase;
-  final RemoteStorageService _remoteStorage;
 
   UserRemoteDataSourceImpl(
     this._client,
     this._remoteDatabase,
     this._remoteStorage,
   );
+  final SupabaseClient _client;
+  final RemoteDatabaseService _remoteDatabase;
+  final RemoteStorageService _remoteStorage;
 
   @override
   User? get currentUser => _client.auth.currentUser;

@@ -1,9 +1,9 @@
 import 'package:get_it/get_it.dart';
-import 'package:link_note/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:link_note/features/auth/presentation/controllers/auth_controller.dart';
 
 import 'data/datasources/auth_remote_data_source.dart';
+import 'data/repositories/auth_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
+import 'presentation/controllers/auth_controller.dart';
 
 final getIt = GetIt.I;
 

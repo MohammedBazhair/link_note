@@ -1,4 +1,4 @@
-import 'package:link_note/features/user/domain/entities/user.dart';
+import '../../../user/domain/entities/user.dart';
 
 abstract interface class AuthRepository {
   Future<String?> signUp(UserEntity user);

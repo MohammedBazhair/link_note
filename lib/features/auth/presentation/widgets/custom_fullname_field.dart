@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:link_note/core/constants/colors/colors.dart';
+import '../../../../core/constants/colors/colors.dart';
 
 class CustomFullNameField extends StatelessWidget {
   const CustomFullNameField({super.key, required this.nameController});
@@ -12,15 +12,15 @@ class CustomFullNameField extends StatelessWidget {
     return TextFormField(
       controller: nameController,
       cursorColor: DarkColors.cursor,
-      cursorRadius: Radius.circular(20),
+      cursorRadius: const Radius.circular(20),
       cursorWidth: 1.3,
       textInputAction: TextInputAction.next,
 
-      decoration: InputDecoration(
-        hintText: "Enter your name",
+      decoration: const InputDecoration(
+        hintText: 'Enter your name',
         prefixIcon: Padding(
           padding: EdgeInsetsDirectional.only(start: 15.0),
-          child: const Icon(Icons.person_outline),
+          child: Icon(Icons.person_outline),
         ),
       ),
 

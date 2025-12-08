@@ -1,26 +1,64 @@
 import 'package:flutter/material.dart';
-import 'package:link_note/features/auth/presentation/screens/sign_in_screen.dart';
-import 'package:link_note/features/auth/presentation/screens/sign_up_screen.dart';
-import 'package:link_note/features/note/presentation/screens/notes_list_screen.dart';
-import 'package:link_note/features/user/presentation/widgets/user_profile.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../../features/auth/presentation/screens/sign_in_screen.dart';
+import '../../../features/auth/presentation/screens/sign_up_screen.dart';
+import '../../../features/note/presentation/screens/notes_list_screen.dart';
+import '../../../features/user/presentation/controllers/user_controller.dart';
+import '../../../features/user/presentation/widgets/user_profile.dart';
+import '../../extensions/extensions.dart';
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends ConsumerWidget {
   const CustomDrawer({super.key});
 
-  bool get isUserLogin => true;
+  @override
+  Widget build(BuildContext context, ref) {
+    final isUserLogin = ref
+        .watch(userControllerProvider.notifier)
+        .isUserLoggedIn;
+
+    return Drawer(
+      child: ListView(
+        padding: const EdgeInsets.only(
+          top: 50,
+          right: 12,
+          bottom: 12,
+          left: 12,
+        ),
+        children: [
+          if (isUserLogin) ...[
+            const UserProfile(),
+            const Divider(),
+          ] else ...[
+            const SignInTile(),
+            const SignUpTile(),
+          ],
+          const NotesTile(),
+          if (isUserLogin) const SignOutTile(),
+        ],
+      ),
+    );
+  }
+}
+
+class DrawerTile extends StatelessWidget {
+  const DrawerTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.only(top: 50),
-        children: [
-          if (isUserLogin) UserProfile() else ...[SignInTile(), SignUpTile()],
-          SizedBox(height: 15),
-          NotesTile(),
-          if (isUserLogin) SignOutTile(),
-        ],
-      ),
+    return ListTile(
+      tileColor: Colors.transparent,
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: onTap,
     );
   }
 }
@@ -30,14 +68,11 @@ class SignInTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.login),
-      title: Text('Login In'),
+    return DrawerTile(
+      icon: Icons.login,
+      title: 'Login In',
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SignInScreen()),
-        );
+        context.pushReplacementTo(const SignInScreen());
       },
     );
   }
@@ -48,32 +83,27 @@ class SignUpTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.login_outlined),
-      title: Text('Sign Up'),
+    return DrawerTile(
+      icon: Icons.login_outlined,
+      title: 'Sign Up',
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SignUpScreen()),
-        );
+        context.pushReplacementTo(const SignUpScreen());
       },
     );
   }
 }
 
-class SignOutTile extends StatelessWidget {
+class SignOutTile extends ConsumerWidget {
   const SignOutTile({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.login_outlined),
-      title: Text('Sign Out'),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SignOutTile()),
-        );
+  Widget build(BuildContext context, ref) {
+    return DrawerTile(
+      icon: Icons.login_outlined,
+      title: 'Sign Out',
+      onTap: () async {
+        await ref.read(authProvider.notifier).signOut();
+        await context.pushReplacementTo(const SignInScreen());
       },
     );
   }
@@ -84,14 +114,11 @@ class NotesTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(Icons.sticky_note_2_outlined),
-      title: Text('Notes'),
+    return DrawerTile(
+      icon: Icons.sticky_note_2_outlined,
+      title: 'Notes',
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => NotesListScreen()),
-        );
+        context.pushReplacementTo(const NotesListScreen());
       },
     );
   }

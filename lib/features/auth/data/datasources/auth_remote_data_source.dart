@@ -1,5 +1,6 @@
-import 'package:link_note/features/user/domain/entities/user.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../user/domain/entities/user.dart';
 
 abstract interface class AuthRemoteDataSource {
   Future<AuthResponse> signUp(UserEntity user);
@@ -13,11 +14,10 @@ abstract interface class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final Supabase _dataSource;
 
-  AuthRemoteDataSourceImpl(this._dataSource);
+  AuthRemoteDataSourceImpl(this._auth);
+  final GoTrueClient _auth;
 
-  GoTrueClient get _auth => _dataSource.client.auth;
 
   @override
   Future<AuthResponse> signUp(UserEntity user) {
