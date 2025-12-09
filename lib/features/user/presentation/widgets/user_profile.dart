@@ -13,6 +13,7 @@ class UserProfile extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final profile = ref.watch(userControllerProvider).profile;
     final userController = ref.read(userControllerProvider.notifier);
+
     ref.listen(userControllerProvider, (previous, next) {
       switch (next) {
         case UserInitialState():
@@ -24,44 +25,39 @@ class UserProfile extends ConsumerWidget {
           context.showSnakbar(message);
       }
     });
-    return RefreshIndicator(
-      onRefresh: () async {
-        await userController.loadProfile();
-      },
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            GestureDetector(
-              onTap: userController.pickAndUploadAvatar,
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundImage: profile.avatarUrl != null
-                        ? NetworkImage(profile.avatarUrl!)
-                        : const AssetImage(Assets.imagesBlankProfile),
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: userController.pickAndUploadAvatar,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: profile.avatarUrl != null
+                      ? NetworkImage(profile.avatarUrl!)
+                      : const AssetImage(Assets.imagesBlankProfile),
+                ),
+                const Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: CircleAvatar(
+                    radius: 15,
+                    backgroundColor: DarkColors.primary,
+                    child: Icon(Icons.edit_rounded, size: 20),
                   ),
-                  const Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: CircleAvatar(
-                      radius: 15,
-                      backgroundColor: DarkColors.primary,
-                      child: Icon(Icons.edit_rounded, size: 20),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 20),
-            Text(profile.username),
-            const SizedBox(height: 5),
-            Text(userController.currentUser?.email ?? ''),
-          ],
-        ),
+          ),
+    
+          const SizedBox(height: 20),
+          Text(profile.username),
+          const SizedBox(height: 5),
+          Text(userController.currentUser?.email ?? ''),
+        ],
       ),
     );
   }

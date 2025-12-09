@@ -20,4 +20,7 @@ class ProfileEntity {
       avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
+
+  @override
+  String toString() => 'ProfileEntity(userId: $userId, username: $username, avatarUrl: $avatarUrl)';
 }

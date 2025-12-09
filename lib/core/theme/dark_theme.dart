@@ -79,6 +79,7 @@ ThemeData darkTheme() => ThemeData(
     circularTrackColor: Color(0xFF227FAA),
     color: Colors.white,
     refreshBackgroundColor: Color(0xFF043F52),
+    linearTrackColor: Color(0xFF227FAA),
   ),
   listTileTheme: ListTileThemeData(
     tileColor: const Color(0xFF043F52),

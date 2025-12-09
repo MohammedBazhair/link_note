@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../../core/presentation/widgets/home_button.dart';
-import '../../../user/presentation/controllers/user_controller.dart';
 import '../../listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
@@ -30,8 +29,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   @override
   void initState() {
-    authSubscription = ref.listenManual(authProvider, (previous, next) {
-      authListener(context: context, previous: previous, next: next);
+    authSubscription = ref.listenManual(authProvider, (previous, next)async {
+     await authListener(context: context, previous: previous, next: next,ref: ref);
     });
     super.initState();
   }
@@ -41,7 +40,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     if (!isValid) return;
     final loadingCtrl= ref.read(loadingProvider.notifier); 
-    final userCtrl= ref.read(userControllerProvider.notifier); 
     
     loadingCtrl.state = true;
 
@@ -52,7 +50,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         .login(email: email, password: password);
 
     loadingCtrl.state = false;
-    await userCtrl.loadProfile();
+    
   }
     
   @override
@@ -133,9 +131,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     builder: (_, ref, button) {
                       final isLoading = ref.watch(loadingProvider);
                       return isLoading
-                          ? const SizedBox.shrink(
-                              child: CircularProgressIndicator(),
-                            )
+                          ? const LinearProgressIndicator()
                           : button!;
                     },
                     child: ElevatedButton(

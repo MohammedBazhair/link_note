@@ -10,7 +10,9 @@ extension RoutesNavigators on BuildContext {
   Future<T?> pushTo<T extends Object?>(Widget screen) {
     return Navigator.push(
       this,
-      MaterialPageRoute(builder: (context) => screen),
+      MaterialPageRoute(
+        builder: (context) => screen,
+      ),
     );
   }
 
@@ -19,7 +21,9 @@ extension RoutesNavigators on BuildContext {
   ) {
     return Navigator.pushReplacement(
       this,
-      MaterialPageRoute(builder: (context) => screen),
+      MaterialPageRoute(
+        builder: (context) => screen,
+      ),
     );
   }
 
@@ -29,5 +33,5 @@ extension RoutesNavigators on BuildContext {
 }
 
 extension FilesSizes on num {
-  double get bytesToMb => this/ (1024 * 1024);
+  double get bytesToMb => this / (1024 * 1024);
 }

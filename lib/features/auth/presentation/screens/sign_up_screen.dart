@@ -31,8 +31,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   void initState() {
-    authSubscription = ref.listenManual(authProvider, (previous, next) {
-      authListener(context: context, previous: previous, next: next);
+    authSubscription = ref.listenManual(authProvider, (previous, next)async {
+     await  authListener(context: context, previous: previous, next: next,ref: ref);
     });
     super.initState();
   }
@@ -157,7 +157,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       return ElevatedButton(
                         onPressed: isLoading ? null : onSubmit,
                         child: isLoading
-                            ? const CircularProgressIndicator()
+                            ? const LinearProgressIndicator()
                             : const Text('Sign Up'),
                       );
                     },

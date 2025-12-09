@@ -42,12 +42,11 @@ class UserController extends StateNotifier<UserState> {
   Future<void> loadProfile() async {
     try {
       if (currentUser?.id == null) return;
+
       final newProfile = await _userRepository.getProfile(currentUser!.id);
 
       state = UserLoadProfileState(newProfile);
-      print('loaded:');
-      print(state.profile.userId);
-    } catch (e) {
+    } catch (e, _) {
       state = UserErrorState(state.profile, 'Can\'t get profile error');
     }
   }
@@ -78,14 +77,15 @@ class UserController extends StateNotifier<UserState> {
         );
         return;
       }
-
       final newProfile = await _userRepository.uploadAvatar(
         state.profile,
         file.path,
       );
 
       state = UserUpdateProfileState(newProfile);
-    } catch (e) {
+    } catch (e, stack) {
+      print(e);
+      print(stack);
       state = UserErrorState(state.profile, "Can't upload avatar");
     }
   }

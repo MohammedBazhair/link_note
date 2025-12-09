@@ -16,26 +16,32 @@ class CustomDrawer extends ConsumerWidget {
     final isUserLogin = ref
         .watch(userControllerProvider.notifier)
         .isUserLoggedIn;
+    final userController = ref.read(userControllerProvider.notifier);
 
     return Drawer(
-      child: ListView(
-        padding: const EdgeInsets.only(
-          top: 50,
-          right: 12,
-          bottom: 12,
-          left: 12,
-        ),
-        children: [
-          if (isUserLogin) ...[
-            const UserProfile(),
-            const Divider(),
-          ] else ...[
-            const SignInTile(),
-            const SignUpTile(),
+      child: RefreshIndicator(
+        onRefresh: () async {
+          await userController.loadProfile();
+        },
+        child: ListView(
+          padding: const EdgeInsets.only(
+            top: 50,
+            right: 12,
+            bottom: 12,
+            left: 12,
+          ),
+          children: [
+            if (isUserLogin) ...[
+              const UserProfile(),
+              const Divider(),
+            ] else ...[
+              const SignInTile(),
+              const SignUpTile(),
+            ],
+            const NotesTile(),
+            if (isUserLogin) const SignOutTile(),
           ],
-          const NotesTile(),
-          if (isUserLogin) const SignOutTile(),
-        ],
+        ),
       ),
     );
   }

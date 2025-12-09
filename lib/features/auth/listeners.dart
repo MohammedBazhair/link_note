@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/extensions/extensions.dart';
 import '../note/presentation/screens/notes_list_screen.dart';
 
+import '../user/presentation/controllers/user_controller.dart';
 import 'presentation/controllers/auth_state.dart';
 
-void authListener({
+Future<void> authListener({
   required BuildContext context,
   required AuthState? previous,
   required AuthState next,
-}) {
+  required WidgetRef ref,
+}) async {
   switch (next) {
     case AuthInitialState():
       break;
 
     case AuthSuccessfullState(:final message):
       context.showSnakbar(message);
-      context.pushReplacementTo(const NotesListScreen());
+      await ref.read(userControllerProvider.notifier).loadProfile();
+      await context.pushReplacementTo(const NotesListScreen());
 
     case AuthFailedState(:final message):
       context.showSnakbar(message);

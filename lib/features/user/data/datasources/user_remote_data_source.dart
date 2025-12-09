@@ -73,13 +73,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       if (imagePath == null) return profileEntity;
 
-      final avatarUrl = _remoteStorage.getUrlFrom(
+      final avatarUrl = await _remoteStorage.getUrlFrom(
         path: imagePath,
         storageBucket: ExternalConsts.imagesBucket,
       );
       return profileEntity.copyWith(avatarUrl: avatarUrl);
     } catch (e) {
       debugPrint(e.toString());
+
       rethrow;
     }
   }
@@ -99,7 +100,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     final updatedModel = model.copyWith(avatarPath: newAvatarPath);
 
-    return _remoteDatabase.update(
+    await _remoteDatabase.update(
       updated: updatedModel.toMap(),
       id: profile.userId,
       column: 'id',
@@ -112,6 +113,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     ProfileEntity profile,
     String filePath,
   ) async {
+  
     final resultPath = await _remoteStorage.uploadFile(
       filePath: filePath,
       storageBucket: ExternalConsts.imagesBucket,
@@ -119,7 +121,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     await updateProfile(profile, resultPath);
 
-    final avatarUrl = _remoteStorage.getUrlFrom(
+    final avatarUrl = await _remoteStorage.getUrlFrom(
       path: resultPath,
       storageBucket: ExternalConsts.imagesBucket,
     );
