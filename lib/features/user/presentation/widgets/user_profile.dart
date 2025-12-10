@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/assets/app_images.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../controllers/user_controller.dart';
 import '../controllers/user_state.dart';
+import 'user_avatar.dart';
 
-class UserProfile extends ConsumerWidget {
-  const UserProfile({super.key});
+class UserProfileWidget extends ConsumerWidget {
+  const UserProfileWidget({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -34,12 +34,8 @@ class UserProfile extends ConsumerWidget {
             onTap: userController.pickAndUploadAvatar,
             child: Stack(
               children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundImage: profile.avatarUrl != null
-                      ? NetworkImage(profile.avatarUrl!)
-                      : const AssetImage(Assets.imagesBlankProfile),
-                ),
+                AvatarWidget(profile),
+
                 const Positioned(
                   bottom: 0,
                   right: 0,
@@ -52,7 +48,7 @@ class UserProfile extends ConsumerWidget {
               ],
             ),
           ),
-    
+
           const SizedBox(height: 20),
           Text(profile.username),
           const SizedBox(height: 5),
@@ -62,3 +58,4 @@ class UserProfile extends ConsumerWidget {
     );
   }
 }
+

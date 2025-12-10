@@ -32,7 +32,7 @@ class CustomDrawer extends ConsumerWidget {
           ),
           children: [
             if (isUserLogin) ...[
-              const UserProfile(),
+              const UserProfileWidget(),
               const Divider(),
             ] else ...[
               const SignInTile(),
