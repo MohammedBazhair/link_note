@@ -14,7 +14,18 @@ class AuthController extends StateNotifier<AuthState> {
   AuthController(this._auth) : super(AuthInitialState());
   final AuthRepository _auth;
 
-  Future<void> login({required String email, required String password}) async {
+  Future<void> loginWithGoogle() async {
+    final error = await _auth.signInWithGoogle();
+
+    error == null
+        ? _handleState('Login With Google Successfully')
+        : _handleState(error, true);
+  }
+
+  Future<void> loginWithEmail({
+    required String email,
+    required String password,
+  }) async {
     final error = await _auth.signIn(email: email, password: password);
 
     error == null

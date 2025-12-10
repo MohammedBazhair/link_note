@@ -9,6 +9,7 @@ import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 import '../widgets/custom_email_field.dart';
 import '../widgets/custom_password_field.dart';
+import '../widgets/sign_google_button.dart';
 import 'sign_up_screen.dart';
 
 final loadingProvider = StateProvider.autoDispose((ref) => false);
@@ -29,8 +30,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   @override
   void initState() {
-    authSubscription = ref.listenManual(authProvider, (previous, next)async {
-     await authListener(context: context, previous: previous, next: next,ref: ref);
+    authSubscription = ref.listenManual(authProvider, (previous, next) async {
+      await authListener(
+        context: context,
+        previous: previous,
+        next: next,
+        ref: ref,
+      );
     });
     super.initState();
   }
@@ -39,20 +45,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final isValid = formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
-    final loadingCtrl= ref.read(loadingProvider.notifier); 
-    
+    final loadingCtrl = ref.read(loadingProvider.notifier);
+
     loadingCtrl.state = true;
 
     final password = passwordController.text;
     final email = emailController.text;
     await ref
         .read(authProvider.notifier)
-        .login(email: email, password: password);
+        .loginWithEmail(email: email, password: password);
 
     loadingCtrl.state = false;
-    
   }
-    
+
   @override
   void dispose() {
     emailController.dispose();
@@ -139,6 +144,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       child: const Text('Login'),
                     ),
                   ),
+
+                  const SizedBox(height: 15),
+
+                  const SignGoogleButton(),
 
                   const SizedBox(height: 15),
 

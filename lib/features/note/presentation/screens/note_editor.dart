@@ -75,46 +75,49 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     );
   }
 
+  Future<void> popInvoke() async {
+    if (!isFormValid || !anyChanges) {
+      context.pop();
+      return;
+    }
+
+    final isWantToSave = await showDialog<bool?>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding: const EdgeInsets.all(30),
+          content: const Row(
+            spacing: 10,
+            children: [
+              Icon(Icons.info_outline_rounded),
+              Text('Do you want to save?'),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => context.pop(true),
+              child: const Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () => context.pop(false),
+              child: const Text('No'),
+            ),
+          ],
+        );
+      },
+    );
+    if (isWantToSave == null) return;
+
+    isWantToSave ? await onSubmit() : context.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-
-        if (!isFormValid || !anyChanges) {
-          context.pop();
-          return;
-        }
-
-        final isWantToSave = await showDialog<bool?>(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              contentPadding: const EdgeInsets.all(30),
-              content: const Row(
-                spacing: 10,
-                children: [
-                  Icon(Icons.info_outline_rounded),
-                  Text('Do you want to save?'),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () => context.pop(true),
-                  child: const Text('Yes'),
-                ),
-                TextButton(
-                  onPressed: () => context.pop(false),
-                  child: const Text('No'),
-                ),
-              ],
-            );
-          },
-        );
-        if (isWantToSave == null) return;
-
-        isWantToSave ? await onSubmit() : context.pop();
+        await popInvoke();
       },
       child: Scaffold(
         body: SafeArea(
@@ -128,16 +131,30 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                     child: Column(
                       spacing: 24,
                       children: [
-                        TextFormField(
-                          controller: noteTitleController,
-                          maxLines: 2,
-                          minLines: 1,
-                          style: TextStyle(color: Colors.white.withAlpha(200)),
-                          cursorColor: const Color(0x809CDEBC),
-                          decoration: const InputDecoration(
-                            hintText: 'Title...',
-                          ),
-                          onChanged: (value) => anyChanges = true,
+                        Row(
+                          spacing: 7,
+                          children: [
+                            IconButton(
+                              iconSize: 32,
+                              onPressed: popInvoke,
+                              icon: const Icon(Icons.arrow_back_rounded),
+                            ),
+                            Expanded(
+                              child: TextFormField(
+                                controller: noteTitleController,
+                                maxLines: 2,
+                                minLines: 1,
+                                style: TextStyle(
+                                  color: Colors.white.withAlpha(200),
+                                ),
+                                cursorColor: const Color(0x809CDEBC),
+                                decoration: const InputDecoration(
+                                  hintText: 'Title...',
+                                ),
+                                onChanged: (value) => anyChanges = true,
+                              ),
+                            ),
+                          ],
                         ),
                         Expanded(
                           child: TextFormField(

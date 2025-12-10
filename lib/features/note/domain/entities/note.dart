@@ -7,7 +7,7 @@ class Note {
   factory Note.fromMap(Map<String, dynamic> map) {
     return Note(
       id: map['id'] as String,
-      uuid: map['uuid'] as String,
+      uuid: map['owner_id'] as String,
       title: map['title'] as String,
       content: map['content'] as String,
     );
@@ -25,7 +25,7 @@ class Note {
       'id': ?id,
       'title': title,
       'content': content,
-      'uuid': ?uuid,
+      'owener_id': ?uuid,
     };
   }
 

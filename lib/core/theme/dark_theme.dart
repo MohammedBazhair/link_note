@@ -13,8 +13,10 @@ ThemeData darkTheme() => ThemeData(
     centerTitle: true,
     titleTextStyle: TextStyle(color: Colors.white),
     backgroundColor: Color(0xFF151825),
+    surfaceTintColor: Colors.transparent,
     iconTheme: IconThemeData(color: Colors.white),
-    actionsPadding: EdgeInsets.symmetric(horizontal: 10),
+
+    actionsPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
     leadingWidth: 100,
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
@@ -62,12 +64,13 @@ ThemeData darkTheme() => ThemeData(
     style: IconButton.styleFrom(
       backgroundColor: Colors.transparent,
       foregroundColor: DarkColors.icon,
-      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
     ),
   ),
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
       foregroundColor: const Color(0xC45890F2),
+      overlayColor: Colors.transparent,
       textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
     ),
   ),

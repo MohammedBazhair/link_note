@@ -9,7 +9,7 @@ final getIt = GetIt.I;
 
 void setupAuthDependincies() {
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(getIt()),
+    () => AuthRemoteDataSourceImpl(getIt(), getIt()),
   );
  
   getIt.registerLazySingleton<AuthRepository>(

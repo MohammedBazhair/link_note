@@ -53,6 +53,22 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOut() {
     return _remote.signOut();
   }
+
+  @override
+  Future<String?> signInWithGoogle() async {
+    try {
+      final response = await _remote.signInWithGoogle();
+      if (response.user == null || response.session == null) {
+        throw AuthApiException('no id found');
+      }
+
+      return null;
+    } on AuthApiException catch (_) {
+      return 'can\'t sign in with google now, please try again later';
+    } catch (_) {
+      return 'Please try again or check your internet connection';
+    }
+  }
 }
 
 String _mapSupabaseSignInError(String message) {

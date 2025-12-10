@@ -8,6 +8,8 @@ class HomeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       iconSize: 30,
+      hoverColor: Colors.transparent,
+
       onPressed: () {
         Navigator.push(
           context,
