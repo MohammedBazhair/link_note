@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'sub/session_member_role.dart';
 
-class SessionMember {
+class SessionMember  {
   SessionMember({
     required this.sessionId,
     required this.memberId,
@@ -32,4 +32,15 @@ class SessionMember {
     };
   }
 
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is SessionMember &&
+        other.sessionId == sessionId &&
+        other.memberId == memberId ;
+  }
+
+  @override
+  int get hashCode => sessionId.hashCode ^ memberId.hashCode;
 }

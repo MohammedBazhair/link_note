@@ -3,6 +3,8 @@ class ExternalConsts {
 
   static const imagesBucket = 'images';
   static const profilesTable = 'profiles';
+  static const sessionsTable = 'sessions';
+  static const sessionMembersTable = 'session_members';
 
   static const maxfileMbSize = 3.0;
 

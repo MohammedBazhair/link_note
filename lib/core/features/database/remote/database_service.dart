@@ -12,9 +12,14 @@ abstract interface class RemoteDatabaseService {
     required String table,
   });
 
+  Future<List<Map<String, dynamic>>> readRowsWhere({
+    required String table,
+    required Map<String, Object> filters,
+  });
+
   Future<List<Map<String, dynamic>>> readRows({required String table});
 
-  Stream  readRowsRealTime({
+  Stream readRowsRealTime({
     required String table,
     required List<String> primaryKey,
   });
@@ -31,10 +36,14 @@ abstract interface class RemoteDatabaseService {
     required String column,
     required String table,
   });
+
+  Future<void> deleteWhere({
+    required String table,
+    required Map<String, Object> filters,
+  });
 }
 
 class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
-
   RemoteDatabaseServiceImpl(this._client);
   final SupabaseClient _client;
 
@@ -80,7 +89,26 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
   }
 
   @override
-  Stream  readRowsRealTime({required String table, required List<String> primaryKey}) {
+  Stream readRowsRealTime({
+    required String table,
+    required List<String> primaryKey,
+  }) {
     return _client.from(table).stream(primaryKey: primaryKey);
+  }
+
+  @override
+  Future<void> deleteWhere({
+    required String table,
+    required Map<String, Object> filters,
+  }) async {
+    await _client.from(table).delete().match(filters);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>>  readRowsWhere({
+    required String table,
+    required Map<String, Object> filters,
+  }) {
+    return _client.from(table).select().match(filters);
   }
 }

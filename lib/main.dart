@@ -2,20 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'core/features/injection.dart';
+import 'core/features/common_injections.dart';
 import 'core/presentation/screens/auth_gate.dart';
 import 'core/theme/dark_theme.dart';
 import 'features/auth/injection.dart';
 import 'features/note/injection.dart';
+import 'features/session/injection.dart';
 import 'features/user/injection.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await initSupabase();
   await setupLocators();
-
 
   runApp(const ProviderScope(child: MainApp()));
 }
@@ -47,4 +46,5 @@ Future<void> setupLocators() async {
   setupAuthDependincies();
   setupNotesDependincies();
   setupUserDependincies();
+  setupSessionsDependincies();
 }
