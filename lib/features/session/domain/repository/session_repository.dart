@@ -2,7 +2,7 @@ import '../entities/session.dart';
 import '../entities/session_member.dart';
 
 abstract interface class SessionRepository {
-  Future<String?> createSession(Session session);
+  Future<Session?> createSession(Session session);
 
   Future<String?> deleteSession(Session? session);
 

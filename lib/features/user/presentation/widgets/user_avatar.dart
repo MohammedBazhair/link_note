@@ -35,6 +35,8 @@ class NetworkAvatar extends StatelessWidget {
         width: 80,
         height: 80,
         fit: BoxFit.cover,
+        fadeInDuration: const Duration(milliseconds: 150),
+        fadeOutDuration: const Duration(milliseconds: 150),
         placeholder: (context, url) => const PlaceholderAvatar(),
         errorWidget: (context, url, error) => const PlaceholderAvatar(),
       ),

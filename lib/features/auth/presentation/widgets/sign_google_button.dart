@@ -8,14 +8,14 @@ class SignGoogleButton extends ConsumerWidget {
   const SignGoogleButton({super.key});
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xEADAFFFC),
         foregroundColor: Colors.black,
       ),
-      onPressed: ()async {
-       await ref.read(authProvider.notifier).loginWithGoogle();
+      onPressed: () async {
+        await ref.read(authProvider.notifier).loginWithGoogle();
       },
       label: const Text('Continue with Google'),
       icon: Image.asset(Assets.imagesGoogle, height: 24),

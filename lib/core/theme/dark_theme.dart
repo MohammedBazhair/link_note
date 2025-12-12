@@ -107,4 +107,5 @@ ThemeData darkTheme() => ThemeData(
     barrierColor: Color(0x66292727),
   ),
   dividerTheme: const DividerThemeData(color: DarkColors.icon, thickness: 0.2),
+
 );

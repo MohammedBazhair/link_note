@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../auth/data/model/app_user.dart';
+import '../../../auth/domain/entities/sub/auth_provider.dart';
+import '../../domain/entities/get_profile_params.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../datasources/user_remote_data_source.dart';
@@ -27,9 +30,26 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<ProfileEntity> getProfile(String userId) async {
+  Future<ProfileEntity> getProfile(GetProfileParams params) async {
     try {
-      return await _remoteDataSource.readProfile(userId);
+      final appUser = AppUserModel.fromSupabase(
+        userMetadata: params.userMetadata,
+        appMetadata: params.appMetadata,
+      );
+
+      switch (appUser.provider) {
+        case AuthProvider.email:
+          return await _remoteDataSource.readProfile(params.userId);
+        case AuthProvider.google:
+          return ProfileEntity(
+            userId: params.userId,
+            username: appUser.name,
+            avatarUrl: appUser.avatarUrl,
+          );
+
+        case AuthProvider.unknown:
+          throw Exception('unKnown provider, try again');
+      }
     } catch (e) {
       throw Exception('Failed to read profile');
     }

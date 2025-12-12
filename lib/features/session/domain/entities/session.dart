@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:math';
 
 import 'sub/session_status.dart';
@@ -49,6 +50,11 @@ String? noteId
       'status': status.name,
       'session_code': sessionCode,
     };
+  }
+
+  @override
+  String toString() {
+    return 'Session(id: $id, noteId: $noteId, hostId: $hostId, status: $status, sessionCode: $sessionCode)';
   }
 }
 

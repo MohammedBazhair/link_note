@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../user/presentation/controllers/user_controller.dart';
+import '../../../../core/extensions/extensions.dart';
 import '../../../user/presentation/widgets/user_avatar.dart';
 import '../controllers/session_controller.dart';
 
 enum SessionPopupOption { end }
 
-class SessionPage extends ConsumerWidget {
-  const SessionPage({super.key});
+class SessionScreen extends ConsumerWidget {
+  const SessionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionControllerProvider).session;
-    final profile = ref.read(userControllerProvider).profile;
 
     return Scaffold(
       appBar: AppBar(
@@ -25,6 +24,7 @@ class SessionPage extends ConsumerWidget {
               switch (option) {
                 case SessionPopupOption.end:
                   await controller.endSession();
+                  context.pop();
               }
             },
             itemBuilder: (_) => [
@@ -36,23 +36,53 @@ class SessionPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(24),
         children: [
-          ListTile(
-            leading: AvatarWidget(profile),
-            title: Text('Code: ${session?.sessionCode ?? ''}'),
-            trailing: ElevatedButton.icon(
-              icon: const Icon(Icons.copy),
-              label: const Text('Copy'),
-              onPressed: () {
-                // TODO: implement copy to clipboard
-              },
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade800,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    text: 'Code:',
+                    style: const TextStyle(
+                      color: Color(0xE2FFFFFF),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    children: [
+                      const TextSpan(text: '    '),
+                      TextSpan(
+                        text: session?.sessionCode ?? '',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  color: Colors.white,
+                  icon: const Icon(Icons.copy),
+                  onPressed: () {
+                    // TODO: implement copy to clipboard
+                  },
+                ),
+              ],
             ),
           ),
-          const Divider(),
-
+          const SizedBox(height: 24),
           SizedBox(
-            height: 100,
+            height: 150,
             child: Consumer(
               builder: (_, ref, __) {
                 final members = ref.watch(sessionControllerProvider).members;
@@ -65,6 +95,7 @@ class SessionPage extends ConsumerWidget {
 
                     return Column(
                       mainAxisSize: MainAxisSize.min,
+                      spacing: 10,
                       children: [
                         const PlaceholderAvatar(),
                         Text(member.role.name),

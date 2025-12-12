@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class RemoteDatabaseService {
-  Future<dynamic> insertRow({
+  Future<Map<String, dynamic>> insertRow({
     required Map<String, dynamic> map,
     required String table,
   });
@@ -48,11 +48,11 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
   final SupabaseClient _client;
 
   @override
-  Future<dynamic> insertRow({
+  Future<Map<String, dynamic>> insertRow({
     required Map<String, dynamic> map,
     required String table,
   }) {
-    return _client.from(table).insert(map);
+    return _client.from(table).insert(map).select().single();
   }
 
   @override

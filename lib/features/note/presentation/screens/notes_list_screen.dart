@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/custom_drawer.dart';
+import '../../../../core/presentation/widgets/floating_actions_buttons.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/note_controller.dart';
 import '../widgets/note_tile.dart';
 import '../widgets/nothing_note.dart';
-import 'note_editor.dart';
 
 class NotesListScreen extends ConsumerWidget {
   const NotesListScreen({super.key});
@@ -19,14 +18,7 @@ class NotesListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Notes')),
       drawer: const CustomDrawer(),
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 30),
-        child: FloatingActionButton(
-          shape: const CircleBorder(),
-          onPressed: () => context.pushTo(const NoteEditor()),
-          child: const Icon(Icons.add_rounded),
-        ),
-      ),
+      floatingActionButton: const FloatingActionsButtons(),
       floatingActionButtonLocation:
           FloatingActionButtonLocation.miniCenterDocked,
 
@@ -70,3 +62,4 @@ class NotesListScreen extends ConsumerWidget {
     );
   }
 }
+

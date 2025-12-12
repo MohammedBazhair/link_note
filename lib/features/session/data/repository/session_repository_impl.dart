@@ -10,15 +10,22 @@ class SessionRepositoryImpl implements SessionRepository {
   final RemoteDatabaseService _remoteDatabase;
 
   @override
-  Future<String?> createSession(Session session) async {
+  Future<Session?> createSession(Session session) async {
     try {
-      await _remoteDatabase.insertRow(
+      await _remoteDatabase.deleteWhere(
+        filters: {'host_id': session.hostId},
+        table: ExternalConsts.sessionsTable,
+      );
+
+      final rawSession = await _remoteDatabase.insertRow(
         map: session.toMap(),
         table: ExternalConsts.sessionsTable,
       );
-      return null;
+
+      return Session.fromMap(rawSession);
     } catch (e) {
-      return 'Failed to create session. Please try again, or check your internet connection.';
+      print(e);
+      return null;
     }
   }
 

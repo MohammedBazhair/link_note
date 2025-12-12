@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../upload_file/helpers/helpers.dart';
+import '../../domain/entities/get_profile_params.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/user_repository.dart';
@@ -43,7 +44,13 @@ class UserController extends StateNotifier<UserState> {
     try {
       if (currentUser?.id == null) return;
 
-      final newProfile = await _userRepository.getProfile(currentUser!.id);
+      final profileParams = GetProfileParams(
+        userId: currentUser!.id,
+        appMetadata: currentUser!.appMetadata,
+        userMetadata: currentUser?.userMetadata,
+      );
+
+      final newProfile = await _userRepository.getProfile(profileParams);
 
       state = UserLoadProfileState(newProfile);
     } catch (e, _) {

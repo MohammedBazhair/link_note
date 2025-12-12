@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 
 extension ShowSnackbar on BuildContext {
   void showSnakbar(String msg) {
-    ScaffoldMessenger.of(this).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
+      snackBarAnimationStyle: const AnimationStyle(
+        duration: Duration(milliseconds: 400),
+        curve: Curves.easeInCirc,
+      ),
+    );
   }
 }
 
@@ -10,9 +16,7 @@ extension RoutesNavigators on BuildContext {
   Future<T?> pushTo<T extends Object?>(Widget screen) {
     return Navigator.push(
       this,
-      MaterialPageRoute(
-        builder: (context) => screen,
-      ),
+      MaterialPageRoute(builder: (context) => screen),
     );
   }
 
@@ -21,9 +25,7 @@ extension RoutesNavigators on BuildContext {
   ) {
     return Navigator.pushReplacement(
       this,
-      MaterialPageRoute(
-        builder: (context) => screen,
-      ),
+      MaterialPageRoute(builder: (context) => screen),
     );
   }
 

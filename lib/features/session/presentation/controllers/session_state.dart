@@ -16,6 +16,10 @@ class CreateSessionState extends SessionState {
   CreateSessionState({ super.session, super.members});
 }
 
+class AddMemberState extends SessionState {
+  AddMemberState({ super.session, super.members});
+}
+
 class JoinSessionState extends SessionState {
   JoinSessionState({ super.session, super.members});
 }
@@ -23,6 +27,8 @@ class JoinSessionState extends SessionState {
 class EndedSessionState extends SessionState {
   EndedSessionState() : super(session: null, members: {});
 }
+
+
 
 class ErrorSessionState extends SessionState {
   ErrorSessionState({ super.session, super.members, required this.message});

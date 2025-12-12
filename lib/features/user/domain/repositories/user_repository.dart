@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../entities/get_profile_params.dart';
 import '../entities/profile.dart';
 
 abstract interface class UserRepository {
@@ -8,7 +9,7 @@ abstract interface class UserRepository {
 
   Future<void> createProfile(ProfileEntity profile);
 
-  Future<ProfileEntity> getProfile(String userId);
+  Future<ProfileEntity> getProfile(GetProfileParams params);
 
   Future<void> updateProfile(ProfileEntity profile);
 
