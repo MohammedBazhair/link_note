@@ -5,7 +5,6 @@ import '../../domain/repositories/notes_repository.dart';
 import '../datasources/notes_remote_data_source.dart';
 
 class NotesRepositoryImpl implements NotesRepository {
-
   NotesRepositoryImpl(this._remote, this._localCache, this._network);
   final NotesRemoteDataSource _remote;
   final LocalCacheService _localCache;
@@ -22,8 +21,15 @@ class NotesRepositoryImpl implements NotesRepository {
 
   @override
   Future<void> delete(String id) => _remote.deleteNote(id);
-  
+
   @override
-  Stream  fetchNotesRealTime() =>_remote.fetchNotesRealTime();
-  
+  Stream fetchNotesRealTime(String userId) =>
+      _remote.fetchNotesRealTime(userId);
+
+  @override
+  Stream<Note?> fetchNoteStream(String noteId) {
+    return _remote.fetchNoteStream(noteId).map((m) {
+      return m != null ? Note.fromMap(m) : null;
+    });
+  }
 }

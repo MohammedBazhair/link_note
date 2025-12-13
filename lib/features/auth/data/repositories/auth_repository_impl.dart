@@ -1,3 +1,4 @@
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/features/network/network_service.dart';
@@ -59,46 +60,51 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final response = await _remote.signInWithGoogle();
       if (response.user == null || response.session == null) {
-        throw AuthApiException('no id found');
+        return 'Unable to complete Google sign in. Please try again.';
       }
 
       return null;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        return 'Google sign-in was canceled by the user.';
+      }
+      return 'Google sign-in failed. Please try again later.';
     } on AuthApiException catch (_) {
-      return 'can\'t sign in with google now, please try again later';
-    } catch (_) {
-      return 'Please try again or check your internet connection';
+      return 'Unable to sign in with Google right now. Please try again later.';
+    } catch (e) {
+      return 'Something went wrong. Check your internet connection and try again.';
     }
   }
-}
 
-String _mapSupabaseSignInError(String message) {
-  if (message.contains('Invalid login credentials')) {
-    return 'Email or password is incorrect';
+  String _mapSupabaseSignInError(String message) {
+    if (message.contains('Invalid login credentials')) {
+      return 'Email or password is incorrect';
+    }
+
+    if (message.contains('Email not confirmed')) {
+      return 'Please verify your email before logging in';
+    }
+
+    if (message.contains('User not found')) {
+      return 'This email is not registered';
+    }
+
+    return 'Login failed, please try again';
   }
 
-  if (message.contains('Email not confirmed')) {
-    return 'Please verify your email before logging in';
+  String _mapSupabaseSignUpError(String message) {
+    if (message.contains('User already registered')) {
+      return 'This email is already in use';
+    }
+
+    if (message.contains('password')) {
+      return 'Password must be stronger';
+    }
+
+    if (message.contains('email')) {
+      return 'Please enter a valid email address';
+    }
+
+    return 'Registration failed, please try again';
   }
-
-  if (message.contains('User not found')) {
-    return 'This email is not registered';
-  }
-
-  return 'Login failed, please try again';
-}
-
-String _mapSupabaseSignUpError(String message) {
-  if (message.contains('User already registered')) {
-    return 'This email is already in use';
-  }
-
-  if (message.contains('password')) {
-    return 'Password must be stronger';
-  }
-
-  if (message.contains('email')) {
-    return 'Please enter a valid email address';
-  }
-
-  return 'Registration failed, please try again';
 }

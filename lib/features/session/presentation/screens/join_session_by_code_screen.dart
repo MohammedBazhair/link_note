@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
-import '../../../auth/presentation/screens/sign_in_screen.dart';
+import '../../../../core/presentation/widgets/loading_button.dart';
+import '../../../user/presentation/controllers/user_controller.dart';
 import '../controllers/session_controller.dart';
+import '../controllers/session_state.dart';
+import 'session_screen.dart';
 
-class JoinSessionByCodePage extends ConsumerStatefulWidget {
-  const JoinSessionByCodePage({super.key});
+class JoinSessionByCodeScreen extends ConsumerStatefulWidget {
+  const JoinSessionByCodeScreen({super.key});
   @override
-  ConsumerState<JoinSessionByCodePage> createState() =>
+  ConsumerState<JoinSessionByCodeScreen> createState() =>
       _JoinSessionByCodePageState();
 }
 
-class _JoinSessionByCodePageState extends ConsumerState<JoinSessionByCodePage> {
+class _JoinSessionByCodePageState
+    extends ConsumerState<JoinSessionByCodeScreen> {
   final _codeController = TextEditingController();
 
   Future<void> _join() async {
@@ -24,10 +28,10 @@ class _JoinSessionByCodePageState extends ConsumerState<JoinSessionByCodePage> {
     }
 
     final loading = ref.read(loadingProvider.notifier);
-    final controller = ref.read(sessionControllerProvider.notifier);
     loading.state = true;
-
-    await controller.joinSessionByCode(sessionCode);
+    final controller = ref.read(sessionControllerProvider.notifier);
+    final userId = ref.read(userControllerProvider).profile.userId;
+    await controller.joinSessionByCode(memberId: userId,sessionCode:sessionCode);
     loading.state = false;
   }
 
@@ -39,29 +43,35 @@ class _JoinSessionByCodePageState extends ConsumerState<JoinSessionByCodePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(sessionControllerProvider, (_, next) {
+      if (next is JoinSessionState) {
+        context.showSnakbar('Joined to the session successfully');
+        context.pushTo(const SessionScreen());
+      } else if (next case ErrorSessionState(:final message)) {
+        context.showSnakbar(message);
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(title: const Text('Join Session')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            TextField(
-              controller: _codeController,
-              decoration: const InputDecoration(labelText: 'Session code'),
-            ),
-            const SizedBox(height: 12),
-            Consumer(
-              builder: (_, ref, __) {
-                final _isLoading = ref.watch(loadingProvider);
-                return ElevatedButton(
-                  onPressed: _isLoading ? null : _join,
-                  child: _isLoading
-                      ? const LinearProgressIndicator()
-                      : const Text('Join'),
-                );
-              },
-            ),
-          ],
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('Session Code:'),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _codeController,
+                textCapitalization: TextCapitalization.characters,
+
+                decoration: const InputDecoration(hintText: 'DH5T8'),
+              ),
+              const SizedBox(height: 24),
+              LoadingButton(onPressed: _join, text: 'Join'),
+            ],
+          ),
         ),
       ),
     );

@@ -1,11 +1,9 @@
 import '../../domain/entities/session.dart';
-import '../../domain/entities/session_member.dart';
 
 sealed class SessionState {
-  SessionState({this.session, this.members = const {}});
+  SessionState({this.session, });
 
   final Session? session;
-  final Set<SessionMember> members;
 }
 
 class InitialSessionState extends SessionState {
@@ -13,25 +11,25 @@ class InitialSessionState extends SessionState {
 }
 
 class CreateSessionState extends SessionState {
-  CreateSessionState({ super.session, super.members});
+  CreateSessionState({ super.session,});
 }
 
 class AddMemberState extends SessionState {
-  AddMemberState({ super.session, super.members});
+  AddMemberState({ super.session,});
 }
 
 class JoinSessionState extends SessionState {
-  JoinSessionState({ super.session, super.members});
+  JoinSessionState({ super.session,});
 }
 
 class EndedSessionState extends SessionState {
-  EndedSessionState() : super(session: null, members: {});
+  EndedSessionState() : super(session: null, );
 }
 
 
 
 class ErrorSessionState extends SessionState {
-  ErrorSessionState({ super.session, super.members, required this.message});
+  ErrorSessionState({ super.session,  required this.message});
 
   final String message;
 }

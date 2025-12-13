@@ -78,13 +78,19 @@ ThemeData darkTheme() => ThemeData(
     backgroundColor: Color(0xDF08284A),
     contentTextStyle: TextStyle(color: Color(0xD581E1E6)),
   ),
-  progressIndicatorTheme: const ProgressIndicatorThemeData(
-    circularTrackColor: Color(0xFF227FAA),
-    color: Colors.white,
-    refreshBackgroundColor: Color(0xFF043F52),
-    linearTrackColor: Color(0xFF227FAA),
+  progressIndicatorTheme: ProgressIndicatorThemeData(
+    color: DarkColors.primary,
+    linearTrackColor: DarkColors.primary,
+    circularTrackColor: Colors.transparent,
+
+    borderRadius: BorderRadius.circular(18),
+    strokeWidth: 2,
+    linearMinHeight: 6,
   ),
+
   listTileTheme: ListTileThemeData(
+    selectedTileColor: const Color(0xFF0C7395),
+    selectedColor: Colors.grey.shade100,
     tileColor: const Color(0xFF043F52),
     iconColor: DarkColors.icon,
     titleTextStyle: const TextStyle(
@@ -107,5 +113,4 @@ ThemeData darkTheme() => ThemeData(
     barrierColor: Color(0x66292727),
   ),
   dividerTheme: const DividerThemeData(color: DarkColors.icon, thickness: 0.2),
-
 );

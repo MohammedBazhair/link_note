@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'sub/session_member_role.dart';
 
@@ -17,8 +16,7 @@ class SessionMember  {
     );
   }
 
-  factory SessionMember.fromJson(String source) =>
-      SessionMember.fromMap(json.decode(source) as Map<String, dynamic>);
+  
 
   final String sessionId;
   final String memberId;

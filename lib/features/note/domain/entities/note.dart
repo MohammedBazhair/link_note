@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class Note {
 
@@ -12,9 +11,6 @@ class Note {
       content: map['content'] as String,
     );
   }
-
-  factory Note.fromJson(String source) =>
-      Note.fromMap(json.decode(source) as Map<String, dynamic>);
   final String? id;
   final String? uuid; // user id
   final String title;
@@ -25,11 +21,9 @@ class Note {
       'id': ?id,
       'title': title,
       'content': content,
-      'owener_id': ?uuid,
+      'owner_id': ?uuid,
     };
   }
-
-  String toJson() => json.encode(toMap());
 
   @override
   String toString() {

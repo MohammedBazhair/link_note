@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
 
@@ -17,68 +18,74 @@ class SessionController extends StateNotifier<SessionState> {
   final SessionRepository _sessionRepository;
 
   Future<void> createSession(Session session) async {
-    final createdSession = await _sessionRepository.createSession(session);
-
-    if (createdSession?.id == null) {
-      state = ErrorSessionState(
-        message: 'Faild to create session, try again, or check your connection',
-      );
-
-      return;
-    }
-
-    final member = SessionMember(
-      sessionId: createdSession!.id!,
-      memberId: createdSession.hostId,
-      role: SessionMemberRole.host,
-    );
-
-    state = CreateSessionState(session: createdSession);
-    await addMemberToSession(member);
-  }
-
-  Future<void> addMemberToSession(SessionMember member) async {
     try {
-      if (state.session == null) throw ArgumentError.value('No active session');
+      final createdSession = await _sessionRepository.createSession(session);
 
-      await _sessionRepository.addMemberToSession(
-        member: member,
-        session: state.session!,
+      if (createdSession?.id == null) throw ArgumentError.notNull();
+
+      final member = SessionMember(
+        sessionId: createdSession!.id!,
+        memberId: createdSession.hostId,
+        role: SessionMemberRole.host,
       );
 
-      final updatedMembers = {...state.members, member};
-
-      state = AddMemberState(members: updatedMembers,session: state.session);
-    } on ArgumentError catch (e) {
-      state = ErrorSessionState(message: e.toString(), session: state.session,members: state.members);
+      await _addMemberToSession(member, createdSession);
+      state = CreateSessionState(session: createdSession);
     } catch (e) {
       state = ErrorSessionState(
-        session: state.session,
-        members: state.members,
-        message:
-            'Failed to add member, please try again or check your connection.',
+        message: 'Failed to create session, please try again.',
       );
     }
   }
 
-  Future<void> joinSessionByCode(String sessionCode) async {
-    final session = await _sessionRepository.getSessionByCode(
-      sessionCode: sessionCode,
+  Future<void> _addMemberToSession(
+    SessionMember member,
+    Session session,
+  ) async {
+    await _sessionRepository.addMemberToSession(
+      member: member,
+      session: session,
     );
+  }
 
-    state = (session != null)
-        ? JoinSessionState(session: session,members: state.members)
-        : ErrorSessionState(message: 'Session not found',members: state.members,session: state.session);
+  Stream fetchMembersOfSession() {
+    final sessionId = state.session?.id;
+    if (sessionId == null) return const Stream.empty();
+
+    return _sessionRepository.getMembersStream(sessionId);
+  }
+
+  Future<void> joinSessionByCode({
+    required String sessionCode,
+    required String memberId,
+  }) async {
+    try {
+      final session = await _sessionRepository.getSessionByCode(
+        sessionCode: sessionCode,
+      );
+
+      if (session?.id == null) throw ArgumentError.notNull();
+ 
+      final member = SessionMember(
+        sessionId: session!.id!,
+        memberId: memberId,
+        role: SessionMemberRole.member,
+      );
+
+      await _addMemberToSession(member, session);
+      state = JoinSessionState(session: session);
+    }  catch (e) {
+      state = ErrorSessionState(message: 'Failed to join session');
+      debugPrint(e.toString());
+    }
   }
 
   Future<void> endSession() async {
-    print('session');
-    print(state.session);
     if (state.session == null) return;
     final error = await _sessionRepository.deleteSession(state.session);
 
     state = (error == null)
         ? EndedSessionState()
-        : ErrorSessionState(message: error);
+        : ErrorSessionState(message: error,session: state.session);
   }
 }

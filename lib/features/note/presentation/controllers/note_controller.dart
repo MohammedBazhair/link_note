@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
+import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
 
@@ -13,6 +14,10 @@ final noteControllerProvider = StateNotifierProvider<NoteController, Set<Note>>(
 class NoteController extends StateNotifier<Set<Note>> {
   NoteController(this._notesRepository) : super({});
   final NotesRepository _notesRepository;
+
+  void setNotes(Set<Note> notes) {
+    state = notes;
+  }
 
   Future<void> addNote(Note note) async {
     try {
@@ -34,8 +39,31 @@ class NoteController extends StateNotifier<Set<Note>> {
     }
   }
 
-  Stream fetchNotesRealTime()  {
-      return _notesRepository.fetchNotesRealTime();
+  Note? getNoteById(String? id) {
+    try {
+      return state.firstWhere((n) => n.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Stream fetchNotesRealTime(String userId) {
+    try {
+      (_notesRepository.fetchNotesRealTime(userId) as Stream<RowList>).listen((
+        notes,
+      ) {
+        state = notes.map(Note.fromMap).toSet();
+      });
+
+      return _notesRepository.fetchNotesRealTime(userId);
+    } catch (e) {
+      debugPrint(e.toString());
+      return const Stream.empty();
+    }
+  }
+
+  Stream<Note?> fetchNoteStream(String noteId) {
+    return _notesRepository.fetchNoteStream(noteId);
   }
 
   Future<void> updateNote(Note note) async {

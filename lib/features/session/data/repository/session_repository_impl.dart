@@ -100,16 +100,15 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<List<SessionMember>> getMembers(String sessionId) async {
-    try {
-      final maps = await _remoteDatabase.readRowsWhere(
-        table: ExternalConsts.sessionMembersTable,
-        filters: {'session_id': sessionId},
-      );
-
-      return maps.map(SessionMember.fromMap).toList();
-    } catch (e) {
-      return [];
-    }
+  Stream getMembersStream(String sessionId) {
+    return _remoteDatabase.readRowsRealTime(
+      table: ExternalConsts.sessionMembersTable,
+      primaryKey: ['session_id', 'member_id'],
+      column: 'session_id',
+      value: sessionId,
+    );
   }
+
+
+
 }

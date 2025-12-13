@@ -6,6 +6,7 @@ import '../../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../../features/note/presentation/screens/notes_list_screen.dart';
 import '../../../features/session/presentation/controllers/session_controller.dart';
 import '../../../features/session/presentation/screens/create_session_screen.dart';
+import '../../../features/session/presentation/screens/join_session_by_code_screen.dart';
 import '../../../features/session/presentation/screens/session_screen.dart';
 import '../../../features/user/presentation/controllers/user_controller.dart';
 import '../../../features/user/presentation/widgets/user_profile.dart';
@@ -47,7 +48,10 @@ class CustomDrawer extends ConsumerWidget {
                       const SignUpTile(),
                     ],
                     const NotesTile(),
-                    if (isUserLogin) const SessionTile(),
+                    if (isUserLogin) ...[
+                      const CreateSessionTile(),
+                      const JoinSessionTile(),
+                    ],
                   ],
                 ),
               ),
@@ -143,8 +147,8 @@ class NotesTile extends StatelessWidget {
   }
 }
 
-class SessionTile extends ConsumerWidget {
-  const SessionTile({super.key});
+class CreateSessionTile extends ConsumerWidget {
+  const CreateSessionTile({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -157,6 +161,21 @@ class SessionTile extends ConsumerWidget {
         context.pushTo(
           hasSession ? const SessionScreen() : const CreateSessionScreen(),
         );
+      },
+    );
+  }
+}
+
+class JoinSessionTile extends StatelessWidget {
+  const JoinSessionTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DrawerTile(
+      icon: Icons.group_add_rounded,
+      title: 'Join Session',
+      onTap: () {
+        context.pushTo(const JoinSessionByCodeScreen());
       },
     );
   }

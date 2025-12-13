@@ -33,7 +33,7 @@ class FloatingActionsButtons extends ConsumerWidget {
               curve: Curves.bounceInOut,
 
               child: FloatingActionButton(
-                heroTag: 'create_session_fab',
+                heroTag: null,
                 backgroundColor: Colors.blue.shade500,
                 shape: const CircleBorder(),
                 onPressed: () {
@@ -55,11 +55,11 @@ class FloatingActionsButtons extends ConsumerWidget {
               offset: Offset(0, isClicked ? 0 : 1),
               curve: Curves.easeInOut,
               child: FloatingActionButton(
-                heroTag: 'create_note_fab',
+                heroTag: null,
                 shape: const CircleBorder(),
                 onPressed: () {
                   ref.read(_isClicked.notifier).state = false;
-
+              
                   context.pushTo(const NoteEditor());
                 },
                 tooltip: 'Create Note',
@@ -69,12 +69,12 @@ class FloatingActionsButtons extends ConsumerWidget {
           ),
 
           FloatingActionButton(
-            heroTag: 'main_fab',
+            heroTag: null,
             backgroundColor: isClicked ? Colors.red.shade300 : null,
             shape: const CircleBorder(),
             onPressed: () =>
                 ref.read(_isClicked.notifier).update((state) => !state),
-
+          
             child: isClicked
                 ? const Icon(Icons.close_rounded)
                 : const Icon(Icons.add_rounded),

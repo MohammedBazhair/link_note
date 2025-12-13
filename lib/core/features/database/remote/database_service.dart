@@ -22,6 +22,8 @@ abstract interface class RemoteDatabaseService {
   Stream readRowsRealTime({
     required String table,
     required List<String> primaryKey,
+    required String column,
+    required String value,
   });
 
   Future<dynamic> update({
@@ -92,8 +94,10 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
   Stream readRowsRealTime({
     required String table,
     required List<String> primaryKey,
+    required String column,
+    required String value,
   }) {
-    return _client.from(table).stream(primaryKey: primaryKey);
+    return _client.from(table).stream(primaryKey: primaryKey).eq(column, value);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/presentation/widgets/home_button.dart';
+import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../../user/presentation/controllers/user_controller.dart';
 import '../../listeners.dart';
@@ -21,7 +22,6 @@ class SignUpScreen extends ConsumerStatefulWidget {
 }
 
 class _SignUpScreenState extends ConsumerState<SignUpScreen> {
-  bool isLoading = false;
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -151,17 +151,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   const SizedBox(height: 35),
 
                   // زر إنشاء الحساب
-                  Consumer(
-                    builder: (_, ref, __) {
-                      final isLoading = ref.watch(loadingProvider);
-                      return ElevatedButton(
-                        onPressed: isLoading ? null : onSubmit,
-                        child: isLoading
-                            ? const LinearProgressIndicator()
-                            : const Text('Sign Up'),
-                      );
-                    },
-                  ),
+                 LoadingButton(onPressed: onSubmit, text: 'Sign Up'),
+               
 
                   const SizedBox(height: 15),
 

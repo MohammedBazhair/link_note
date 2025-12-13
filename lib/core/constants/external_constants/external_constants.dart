@@ -2,6 +2,7 @@ class ExternalConsts {
   ExternalConsts._();
 
   static const imagesBucket = 'images';
+  static const notesTable = 'notes';
   static const profilesTable = 'profiles';
   static const sessionsTable = 'sessions';
   static const sessionMembersTable = 'session_members';

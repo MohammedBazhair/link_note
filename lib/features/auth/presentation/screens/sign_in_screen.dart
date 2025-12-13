@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
-
 import '../../../../core/presentation/widgets/home_button.dart';
+import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
@@ -11,8 +10,6 @@ import '../widgets/custom_email_field.dart';
 import '../widgets/custom_password_field.dart';
 import '../widgets/sign_google_button.dart';
 import 'sign_up_screen.dart';
-
-final loadingProvider = StateProvider.autoDispose((ref) => false);
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -22,7 +19,6 @@ class SignInScreen extends ConsumerStatefulWidget {
 }
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
-  bool isLoading = false;
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
@@ -132,18 +128,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   const SizedBox(height: 25),
 
                   // زر تسجيل الدخول
-                  Consumer(
-                    builder: (_, ref, button) {
-                      final isLoading = ref.watch(loadingProvider);
-                      return isLoading
-                          ? const LinearProgressIndicator()
-                          : button!;
-                    },
-                    child: ElevatedButton(
-                      onPressed: onSubmit,
-                      child: const Text('Login'),
-                    ),
-                  ),
+                  LoadingButton(onPressed: onSubmit, text: 'Login'),
 
                   const SizedBox(height: 15),
 
