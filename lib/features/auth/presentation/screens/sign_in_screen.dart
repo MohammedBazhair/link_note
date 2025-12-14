@@ -19,14 +19,14 @@ class SignInScreen extends ConsumerStatefulWidget {
 }
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-  late final ProviderSubscription<AuthState> authSubscription;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  late final ProviderSubscription<AuthState> _authSubscription;
 
   @override
   void initState() {
-    authSubscription = ref.listenManual(authProvider, (previous, next) async {
+    _authSubscription = ref.listenManual(authProvider, (previous, next) async {
       await authListener(
         context: context,
         previous: previous,
@@ -38,27 +38,24 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   void onSubmit() async {
-    final isValid = formKey.currentState?.validate() ?? false;
+    final isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
-    final loadingCtrl = ref.read(loadingProvider.notifier);
+    ref.read(loadingProvider.notifier).state = true;
 
-    loadingCtrl.state = true;
-
-    final password = passwordController.text;
-    final email = emailController.text;
+    final password = _passwordController.text;
+    final email = _emailController.text;
     await ref
         .read(authProvider.notifier)
         .loginWithEmail(email: email, password: password);
 
-    loadingCtrl.state = false;
   }
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    authSubscription.close();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _authSubscription.close();
     super.dispose();
   }
 
@@ -69,7 +66,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       body: SafeArea(
         child: Center(
           child: Form(
-            key: formKey,
+            key: _formKey,
             child: AutofillGroup(
               child: ListView(
                 padding: const EdgeInsets.all(24),
@@ -97,7 +94,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                   const SizedBox(height: 8),
 
-                  CustomEmailField(emailController),
+                  CustomEmailField(_emailController),
 
                   const SizedBox(height: 25),
 
@@ -109,7 +106,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   const SizedBox(height: 8),
 
                   CustomPasswordField(
-                    controller: passwordController,
+                    controller: _passwordController,
                     hintText: 'Enter your password',
                     onSubmit: onSubmit,
                     textInputAction: TextInputAction.done,

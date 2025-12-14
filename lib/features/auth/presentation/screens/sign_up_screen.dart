@@ -41,10 +41,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final isValid = formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
-    final loadingCtrl = ref.read(loadingProvider.notifier);
     final userCtrl = ref.read(userControllerProvider.notifier);
 
-    loadingCtrl.state = true;
+    ref.read(loadingProvider.notifier).state = true;
 
     final user = UserEntity(
       username: nameController.text,
@@ -55,9 +54,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     await ref.read(authProvider.notifier).signUp(user);
     await userCtrl.createProfile(user);
     
-    loadingCtrl.state = false;
     
-    await userCtrl.loadProfile();
 
   }
 

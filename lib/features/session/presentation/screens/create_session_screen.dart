@@ -64,7 +64,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 15,
+            spacing: 30,
             children: [
               ElevatedButton(
                 onPressed: () async {

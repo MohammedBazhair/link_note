@@ -16,11 +16,10 @@ class NotesListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final userId = ref.read(userControllerProvider).profile.userId;
     final isSelectable = ref.watch(
       selectableNoteProvider.select((s) => s.isSelectable),
     );
-    final notesAsync = ref.watch(notesStreamProvider(userId));
+
     return Scaffold(
       appBar: AppBar(
         title: isSelectable ? const Text('Select a Note') : const Text('Notes'),
@@ -39,28 +38,43 @@ class NotesListScreen extends ConsumerWidget {
       floatingActionButtonLocation:
           FloatingActionButtonLocation.miniCenterDocked,
 
-      body: notesAsync.when(
-        data: (notes) {
-          return ConditionalBuilder(
-            condition: notes.isNotEmpty,
-            builder: (_) => NotesListView(notes: notes),
-            fallback: (_) => const NothingNoteWidget(),
-          );
-        },
-        loading: () {
-          final fakeNotes = List.generate(
-            8,
-            (_) => Note(
-              title: 'Title Testing',
-              content: 'Content content content content content.',
-            ),
-          );
-
-          return NotesListView(notes: fakeNotes,  isShimmerEnabled: true);
-        },
-        error: (_, __) => const NothingNoteWidget(),
-      ),
+      body: const NotesStreamBuilder(),
     );
   }
 }
 
+class NotesStreamBuilder extends ConsumerWidget {
+  const NotesStreamBuilder({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final controller = ref.read(noteControllerProvider.notifier);
+    final userId = ref.read(
+      userControllerProvider.select((s) => s.profile.userId),
+    );
+    ref.read(noteControllerProvider.notifier).fetchNotesRealTime(userId);
+
+
+    return StreamBuilder<List<Note>>(
+      stream: controller.notesStream,
+      builder: (context, snapshot) {
+        final notes = snapshot.data ?? [];
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return NotesListView(
+            notes: List.generate(
+              8,
+              (_) => Note(title: 'Title Testing', content: 'Content' * 6),
+            ),
+            isShimmerEnabled: true,
+          );
+        }
+
+        return ConditionalBuilder(
+          condition: notes.isNotEmpty,
+          builder: (_) => NotesListView(notes: notes),
+          fallback: (_) => const NothingNoteWidget(),
+        );
+      },
+    );
+  }
+}

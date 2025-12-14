@@ -14,7 +14,8 @@ final sessionControllerProvider =
     );
 
 class SessionController extends StateNotifier<SessionState> {
-  SessionController(this._sessionRepository) : super(InitialSessionState());
+  SessionController(this._sessionRepository)
+    : super(const InitialSessionState());
   final SessionRepository _sessionRepository;
 
   Future<void> createSession(Session session) async {
@@ -30,7 +31,7 @@ class SessionController extends StateNotifier<SessionState> {
       );
 
       await _addMemberToSession(member, createdSession);
-      state = CreateSessionState(session: createdSession);
+      state = CreateSessionState(session: createdSession,currentMember: member);
     } catch (e) {
       state = ErrorSessionState(
         message: 'Failed to create session, please try again.',
@@ -50,7 +51,7 @@ class SessionController extends StateNotifier<SessionState> {
 
   Stream<Set<SessionMember>> fetchMembersOfSession() {
     final sessionId = state.session?.id;
-    if (sessionId == null) return  Stream.value({});
+    if (sessionId == null) return Stream.value({});
 
     return _sessionRepository.getMembersStream(sessionId);
   }
@@ -65,7 +66,7 @@ class SessionController extends StateNotifier<SessionState> {
       );
 
       if (session?.id == null) throw ArgumentError.notNull();
- 
+
       final member = SessionMember(
         sessionId: session!.id!,
         memberId: memberId,
@@ -73,8 +74,8 @@ class SessionController extends StateNotifier<SessionState> {
       );
 
       await _addMemberToSession(member, session);
-      state = JoinSessionState(session: session);
-    }  catch (e) {
+      state = JoinSessionState(session: session,currentMember: member);
+    } catch (e) {
       state = ErrorSessionState(message: 'Failed to join session');
       debugPrint(e.toString());
     }
@@ -85,7 +86,7 @@ class SessionController extends StateNotifier<SessionState> {
     final error = await _sessionRepository.deleteSession(state.session);
 
     state = (error == null)
-        ? EndedSessionState()
-        : ErrorSessionState(message: error,session: state.session);
+        ? const EndedSessionState()
+        : ErrorSessionState(message: error);
   }
 }

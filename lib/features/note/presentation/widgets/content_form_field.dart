@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 class ContentFormField extends StatelessWidget {
-  const ContentFormField({super.key, required this.controller, this.onChanged});
+  const ContentFormField({
+    super.key,
+    required this.controller,
+    this.onChanged,
+    this.readOnly = false,
+  });
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +17,7 @@ class ContentFormField extends StatelessWidget {
       controller: controller,
       maxLines: null,
       expands: true,
+readOnly: readOnly,
       textAlignVertical: TextAlignVertical.top,
       style: TextStyle(color: Colors.white.withAlpha(200)),
       cursorColor: const Color(0x809CDEBC),

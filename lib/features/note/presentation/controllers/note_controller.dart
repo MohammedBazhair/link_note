@@ -1,69 +1,68 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
 
-final noteControllerProvider = StateNotifierProvider<NoteController, Set<Note>>(
-  (ref) {
-    return GetIt.I<NoteController>();
-  },
-);
-
-final notesStreamProvider = StreamProvider.autoDispose
-    .family<List<Note>, String>((ref, userId) {
-      final controller = ref.read(noteControllerProvider.notifier);
-
-      return controller.fetchNotesRealTime(userId);
+final noteControllerProvider =
+    StateNotifierProvider<NoteController, Map<String, Note>>((ref) {
+      return GetIt.I<NoteController>();
     });
 
-class NoteController extends StateNotifier<Set<Note>> {
+class NoteController extends StateNotifier<Map<String, Note>> {
   NoteController(this._notesRepository) : super({});
   final NotesRepository _notesRepository;
+  final _notesStreamController = StreamController<List<Note>>.broadcast();
 
-  void setNotes(Set<Note> notes) {
-    state = notes;
-  }
+  Stream<List<Note>> get notesStream => _notesStreamController.stream;
+
+  StreamSubscription<List<Note>>? _subscription;
 
   Future<void> addNote(Note note) async {
     try {
-      await _notesRepository.create(note);
-      state = {...state, note};
+      final createdNote = await _notesRepository.create(note);
+      if (createdNote?.id == null) throw ArgumentError.notNull();
+
+      final copiedMap = {...state};
+      copiedMap[createdNote!.id!] = createdNote;
+      state = copiedMap;
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-  Future<Set<Note>> fetchNotes() async {
+  Future<List<Note>> fetchNotes(String userId) async {
     try {
-      final notes = await _notesRepository.getAll();
-      state = notes;
+      final notes = await _notesRepository.getAll(userId);
+      _notesStreamController.add(notes);
+
+      state = Map.fromEntries(notes.map((n) => MapEntry(n.id!, n)));
       return notes;
     } catch (e) {
       debugPrint(e.toString());
-      return {};
+      return [];
     }
   }
 
-  Note? getNoteById(String? id) {
-    try {
-      return state.firstWhere((n) => n.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
+  Note? getNoteById(String id) => state[id];
 
-  Stream<List<Note>> fetchNotesRealTime(String userId) {
+  void fetchNotesRealTime(String userId) {
     try {
-      return _notesRepository.fetchNotesRealTime(userId);
+      _subscription?.cancel();
+      _subscription = _notesRepository.fetchNotesRealTime(userId).listen((
+        notes,
+      ) {
+        state = Map.fromEntries(notes.map((n) => MapEntry(n.id!, n)));
+        _notesStreamController.add(notes);
+      });
     } catch (e) {
       debugPrint(e.toString());
-      return Stream.value([]);
     }
   }
 
-  Stream<Note?> fetchNoteStream(String? noteId) {
+  Stream<Note?> fetchSingleNoteStream(String? noteId) {
     if (noteId == null) return Stream.value(null);
     return _notesRepository.fetchNoteStream(noteId);
   }
@@ -71,10 +70,10 @@ class NoteController extends StateNotifier<Set<Note>> {
   Future<void> updateNote(Note note) async {
     try {
       await _notesRepository.update(note);
-      final copiedNotes = Set<Note>.from(state);
-      copiedNotes.remove(note);
-      copiedNotes.add(note);
-      state = copiedNotes;
+      final copiedMap = {...state};
+      if (note.id == null) throw ArgumentError.notNull();
+      copiedMap[note.id!] = note;
+      state = copiedMap;
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -85,12 +84,19 @@ class NoteController extends StateNotifier<Set<Note>> {
       if (note.id == null) return;
       await _notesRepository.delete(note.id!);
 
-      final updated = Set<Note>.from(state);
-      updated.remove(note);
+      final updated = {...state};
+      updated.remove(note.id);
 
       state = updated;
     } catch (e) {
       debugPrint(e.toString());
     }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    _notesStreamController.close();
+    super.dispose();
   }
 }

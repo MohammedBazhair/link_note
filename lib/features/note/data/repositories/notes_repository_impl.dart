@@ -11,10 +11,18 @@ class NotesRepositoryImpl implements NotesRepository {
   final NetworkService _network;
 
   @override
-  Future<void> create(Note note) => _remote.createNote(note);
+  Future<Note?> create(Note note) async {
+    try {
+      final result = await _remote.createNote(note);
+
+      return Note.fromMap(result);
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
-  Future<Set<Note>> getAll() => _remote.readNotes();
+  Future<List<Note>> getAll(String userId) => _remote.readNotes(userId);
 
   @override
   Future<void> update(Note note) => _remote.updateNote(note);
@@ -24,8 +32,8 @@ class NotesRepositoryImpl implements NotesRepository {
 
   @override
   Stream<List<Note>> fetchNotesRealTime(String userId) {
-    final stream=  _remote.fetchNotesRealTime(userId);
-return stream.map((raws)=>  List.from(raws.map(Note.fromMap)));
+    final stream = _remote.fetchNotesRealTime(userId);
+    return stream.map((raws) => List.from(raws.map(Note.fromMap)));
   }
 
   @override

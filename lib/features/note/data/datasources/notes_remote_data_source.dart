@@ -3,8 +3,8 @@ import '../../../../core/features/database/remote/database_service.dart';
 import '../../domain/entities/note.dart';
 
 abstract interface class NotesRemoteDataSource {
-  Future<void> createNote(Note note);
-  Future<Set<Note>> readNotes();
+  Future<Map<String, dynamic>> createNote(Note note);
+  Future<List<Note>> readNotes(String ownerId);
   Stream fetchNotesRealTime(String ownerId);
   Stream<Map<String, dynamic>?> fetchNoteStream(String noteId);
   Future<void> updateNote(Note note);
@@ -20,14 +20,17 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   final _ownerColumn = 'owner_id';
 
   @override
-  Future<void> createNote(Note note) {
+  Future<Map<String, dynamic>> createNote(Note note) {
     return _database.insertRow(map: note.toMap(), table: _notesTable);
   }
 
   @override
-  Future<Set<Note>> readNotes() async {
-    final mapList = await _database.readRows(table: _notesTable);
-    return mapList.map(Note.fromMap).toSet();
+  Future<List<Note>> readNotes(String ownerId) async {
+    final mapList = await _database.readRowsWhere(
+      filters: {'id': ownerId},
+      table: _notesTable,
+    );
+    return mapList.map(Note.fromMap).toList();
   }
 
   @override
