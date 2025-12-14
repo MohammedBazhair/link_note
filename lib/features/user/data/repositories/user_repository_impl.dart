@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -77,8 +78,9 @@ class UserRepositoryImpl implements UserRepository {
       await file.rename(newFilePath);
       return await _remoteDataSource.uploadAvatarImage(profile, newFilePath);
     } catch (e, stack) {
-      print(e);
-      print(stack);
+      debugPrint(e.toString());
+      debugPrint(stack.toString());
+
       throw Exception('Failed to upload avatar');
     }
   }

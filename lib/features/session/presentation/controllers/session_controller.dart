@@ -31,7 +31,10 @@ class SessionController extends StateNotifier<SessionState> {
       );
 
       await _addMemberToSession(member, createdSession);
-      state = CreateSessionState(session: createdSession,currentMember: member);
+      state = CreateSessionState(
+        session: createdSession,
+        currentMember: member,
+      );
     } catch (e) {
       state = ErrorSessionState(
         message: 'Failed to create session, please try again.',
@@ -74,10 +77,35 @@ class SessionController extends StateNotifier<SessionState> {
       );
 
       await _addMemberToSession(member, session);
-      state = JoinSessionState(session: session,currentMember: member);
+      state = JoinSessionState(session: session, currentMember: member);
     } catch (e) {
       state = ErrorSessionState(message: 'Failed to join session');
       debugPrint(e.toString());
+    }
+  }
+
+  Future<void> leaveSession() async {
+    try {
+      if (state.currentMember == null || state.session == null) {
+        throw ArgumentError.notNull();
+      }
+
+      if (state.currentMember!.isHost) {
+        await endSession();
+        return;
+      }
+
+      final error = await _sessionRepository.removeMember(
+        member: state.currentMember!,
+        session: state.session!,
+      );
+      if (error != null) throw Exception();
+      state = const MemberLeavedSessionState();
+    } catch (e) {
+      debugPrint(e.toString());
+      state = ErrorSessionState(
+        message: 'Failed to leave the session, please try again.',
+      );
     }
   }
 

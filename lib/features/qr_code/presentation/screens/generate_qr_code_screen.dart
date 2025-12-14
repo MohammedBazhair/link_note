@@ -9,11 +9,7 @@ class GenerateQrCodeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF101818),
-        title: const Text('Generate QR Code'),
-        titleTextStyle: const TextStyle(color: Colors.white),
-      ),
+      appBar: AppBar(title: const Text('Generate QR Code')),
       body: Center(
         child: Container(
           width: screenWidth * 0.5,
@@ -22,7 +18,7 @@ class GenerateQrCodeScreen extends StatelessWidget {
 
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(width: 2, ),
+            border: Border.all(width: 2),
           ),
           child: PrettyQrView.data(
             data: data,

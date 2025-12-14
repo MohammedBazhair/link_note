@@ -113,4 +113,12 @@ ThemeData darkTheme() => ThemeData(
     barrierColor: Color(0x66292727),
   ),
   dividerTheme: const DividerThemeData(color: DarkColors.icon, thickness: 0.2),
+  popupMenuTheme: PopupMenuThemeData(
+    position: PopupMenuPosition.under,
+    color: const Color(0xBD1F91A5),
+    elevation: 3,
+    shadowColor: const Color(0xB8010101),
+    menuPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  ),
 );

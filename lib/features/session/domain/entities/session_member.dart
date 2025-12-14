@@ -16,12 +16,18 @@ class SessionMember {
   }
 
   factory SessionMember.empty() {
-    return SessionMember(sessionId:'', memberId:'', role:SessionMemberRole.member);
+    return SessionMember(
+      sessionId: '',
+      memberId: '',
+      role: SessionMemberRole.member,
+    );
   }
 
   final String sessionId;
   final String memberId;
   final SessionMemberRole role;
+
+  bool get isHost => role == SessionMemberRole.host;
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{

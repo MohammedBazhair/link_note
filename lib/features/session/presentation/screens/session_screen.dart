@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_controller.dart';
 import '../../../note/presentation/widgets/content_form_field.dart';
@@ -12,7 +13,7 @@ import '../widgets/session_code_card.dart';
 import '../widgets/session_members_list.dart';
 import '../widgets/session_popup_menu.dart';
 
-enum SessionPopupOption { end }
+final noteSessionProvider = StateProvider<Note?>((ref) => null);
 
 class SessionScreen extends ConsumerStatefulWidget {
   const SessionScreen({super.key});
@@ -25,7 +26,6 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   late final StreamSubscription _noteSubscription;
   final _noteTitleController = TextEditingController();
   final _noteContentController = TextEditingController();
-  Note? _note;
 
   @override
   void initState() {
@@ -36,7 +36,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         .read(noteControllerProvider.notifier)
         .fetchSingleNoteStream(noteId)
         .listen((note) {
-          _note = note;
+          ref.read(noteSessionProvider.notifier).state = note;
           _noteTitleController.text = note?.title ?? _noteTitleController.text;
           _noteContentController.text =
               note?.content ?? _noteContentController.text;
@@ -50,6 +50,8 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
     _noteContentController.dispose();
     super.dispose();
   }
+
+  Note? get currentNote => ref.read(noteSessionProvider);
 
   NoteController get noteController =>
       ref.read(noteControllerProvider.notifier);
@@ -91,9 +93,9 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                       controller: _noteTitleController,
                       readOnly: canEdit,
                       onChanged: (title) {
-                        if (_note == null) return;
+                        if (currentNote == null) return;
                         noteController.updateNote(
-                          _note!.copyWith(title: title),
+                          currentNote!.copyWith(title: title),
                         );
                       },
                     ),
@@ -109,9 +111,9 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                         controller: _noteContentController,
                         readOnly: canEdit,
                         onChanged: (content) {
-                          if (_note == null) return;
+                          if (currentNote == null) return;
                           noteController.updateNote(
-                            _note!.copyWith(content: content),
+                            currentNote!.copyWith(content: content),
                           );
                         },
                       ),

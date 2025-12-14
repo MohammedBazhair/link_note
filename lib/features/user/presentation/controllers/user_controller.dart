@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -91,8 +92,8 @@ class UserController extends StateNotifier<UserState> {
 
       state = UserUpdateProfileState(newProfile);
     } catch (e, stack) {
-      print(e);
-      print(stack);
+      debugPrint(e.toString());
+      debugPrint(stack.toString());
       state = UserErrorState(state.profile, "Can't upload avatar");
     }
   }

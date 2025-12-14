@@ -28,6 +28,10 @@ class EndedSessionState extends SessionState {
  const EndedSessionState() : super();
 }
 
+class MemberLeavedSessionState extends SessionState {
+ const MemberLeavedSessionState() : super();
+}
+
 class ErrorSessionState extends SessionState {
   ErrorSessionState({required this.message}) : super();
 
