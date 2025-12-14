@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
+import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../../user/presentation/controllers/user_controller.dart';
 import '../controllers/session_controller.dart';
 import '../controllers/session_state.dart';
@@ -31,7 +34,10 @@ class _JoinSessionByCodePageState
     loading.state = true;
     final controller = ref.read(sessionControllerProvider.notifier);
     final userId = ref.read(userControllerProvider).profile.userId;
-    await controller.joinSessionByCode(memberId: userId,sessionCode:sessionCode);
+    await controller.joinSessionByCode(
+      memberId: userId,
+      sessionCode: sessionCode,
+    );
     loading.state = false;
   }
 
@@ -66,7 +72,24 @@ class _JoinSessionByCodePageState
                 controller: _codeController,
                 textCapitalization: TextCapitalization.characters,
 
-                decoration: const InputDecoration(hintText: 'DH5T8'),
+                decoration: InputDecoration(
+                  hintText: 'DH5T8',
+                  suffixIcon: Platform.isWindows
+                      ? null
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: IconButton(
+                            onPressed: () async {
+                              final data = await context.pushTo<String?>(
+                                const ScannerQrCodeScreen(),
+                              );
+                              _codeController.text =
+                                  data ?? _codeController.text;
+                            },
+                            icon: const Icon(Icons.qr_code_scanner_rounded),
+                          ),
+                        ),
+                ),
               ),
               const SizedBox(height: 24),
               LoadingButton(onPressed: _join, text: 'Join'),

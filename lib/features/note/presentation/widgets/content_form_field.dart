@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ContentFormField extends StatelessWidget {
+class ContentFormField extends ConsumerWidget {
   const ContentFormField({
     super.key,
     required this.controller,
@@ -12,7 +13,7 @@ class ContentFormField extends StatelessWidget {
   final bool readOnly;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,ref) {
     return TextFormField(
       controller: controller,
       maxLines: null,
@@ -23,7 +24,6 @@ readOnly: readOnly,
       cursorColor: const Color(0x809CDEBC),
       decoration: const InputDecoration(hintText: 'Enter Text Here...'),
       onChanged: onChanged,
-
       validator: (value) {
         if (value?.isEmpty ?? true) {
           return "Field Can't be Empty";

@@ -1,25 +1,41 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/note.dart';
 
 class EditorFormState {
-  EditorFormState({this.anyChanges = false})
+  EditorFormState()
     : formKey = GlobalKey<FormState>(),
       titleController = TextEditingController(),
       contentController = TextEditingController();
 
-  final bool anyChanges;
   final GlobalKey<FormState> formKey;
   final TextEditingController titleController;
   final TextEditingController contentController;
 
-  Note get note =>
-      Note(title: titleController.text, content: contentController.text);
+  Note? _note;
+  bool _hasChanges = false;
 
-  EditorFormState copyWith({bool? anyChanges}) {
-    return EditorFormState(anyChanges: anyChanges ?? this.anyChanges);
+  bool get hasChanges => _hasChanges;
+
+  void markedChanges() => _hasChanges = true;
+
+  void initForm(Note? note) {
+    _hasChanges = false;
+    if (note == null) return;
+    _note = _note!.copyWith(
+      id: note.id,
+      uuid: note.uuid,
+       title: note.title,
+      content: note.content,
+    );
+    titleController.text = note.title;
+    contentController.text = note.content;
   }
+
+  Note? get note => _note?.copyWith(
+    title: titleController.text,
+    content: contentController.text,
+  );
 
   void dispose() {
     titleController.dispose();

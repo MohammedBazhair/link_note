@@ -1,1 +1,1 @@
-enum SessionMenuAction { end, leave, qrGenearator }
+enum SessionMenuAction { end, leave, qrGenearator, qrScanner }

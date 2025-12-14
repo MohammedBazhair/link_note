@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -38,7 +40,10 @@ class EditorForm extends ConsumerWidget {
         children: [
           NoteFormHeader(onBack: onPopInvoke),
           Expanded(
-            child: ContentFormField(controller: formState.contentController),
+            child: ContentFormField(
+              controller: formState.contentController,
+              onChanged: (value) => formState.markedChanges(),
+            ),
           ),
         ],
       ),
@@ -53,7 +58,7 @@ class NoteFormHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final formState = ref.watch(editorFormProvider);
+    final formState = ref.read(editorFormProvider);
 
     return Row(
       children: [
@@ -63,12 +68,17 @@ class NoteFormHeader extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         const SizedBox(width: 5),
-        Expanded(child: TitleFormField(controller: formState.titleController)),
+        Expanded(
+          child: TitleFormField(
+            controller: formState.titleController,
+            onChanged: (value) => formState.markedChanges(),
+          ),
+        ),
         PopupMenuButton(
           onSelected: (action) async {
             switch (action) {
               case NotePopupAction.qrGenerator:
-                final noteJson = formState.note.toJson();
+                final noteJson = formState.note?.toJson() ?? '';
                 await context.pushTo(GenerateQrCodeScreen(data: noteJson));
 
               case NotePopupAction.qrScanner:
@@ -77,8 +87,8 @@ class NoteFormHeader extends ConsumerWidget {
                 );
                 if (data == null) return;
                 final note = Note.fromJson(data);
-                formState.titleController.text = note.title;
-                formState.contentController.text = note.content;
+                formState.initForm(note);
+                formState.markedChanges();
             }
           },
           itemBuilder: (context) => [
@@ -86,10 +96,11 @@ class NoteFormHeader extends ConsumerWidget {
               value: NotePopupAction.qrGenerator,
               child: Text('Genereate Qr Code'),
             ),
-            const PopupMenuItem(
-              value: NotePopupAction.qrScanner,
-              child: Text('Scanner Qr Code'),
-            ),
+            if (!Platform.isWindows)
+              const PopupMenuItem(
+                value: NotePopupAction.qrScanner,
+                child: Text('Scanner Qr Code'),
+              ),
           ],
         ),
       ],

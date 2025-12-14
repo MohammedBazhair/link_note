@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TitleFormField extends StatelessWidget {
+
+class TitleFormField extends ConsumerWidget {
   const TitleFormField({
     super.key,
     required this.controller,
@@ -12,7 +14,7 @@ class TitleFormField extends StatelessWidget {
   final bool readOnly;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,

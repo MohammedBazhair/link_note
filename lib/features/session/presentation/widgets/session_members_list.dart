@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/theme/styles_consts.dart';
 import '../../../user/presentation/widgets/user_avatar.dart';
 import '../../domain/entities/session_member.dart';
+import '../controllers/session_controller.dart';
 
-class SessionMembersList extends StatelessWidget {
-  const SessionMembersList({super.key, required this.membersStream});
-
-  final Stream<Set<SessionMember>> membersStream;
+class SessionMembersList extends ConsumerWidget {
+  const SessionMembersList({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     return StreamBuilder(
-      stream: membersStream,
+      stream: ref
+          .read(sessionControllerProvider.notifier)
+          .fetchMembersOfSession(),
       builder: (context, snapshot) {
-        final members = snapshot.data ??{};
+        final members = snapshot.data ?? {};
         final fakeMembers = List.generate(8, (_) => SessionMember.empty());
         final enabledFake = snapshot.connectionState == ConnectionState.waiting;
 

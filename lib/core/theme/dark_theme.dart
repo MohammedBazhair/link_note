@@ -115,7 +115,7 @@ ThemeData darkTheme() => ThemeData(
   dividerTheme: const DividerThemeData(color: DarkColors.icon, thickness: 0.2),
   popupMenuTheme: PopupMenuThemeData(
     position: PopupMenuPosition.under,
-    color: const Color(0xBD1F91A5),
+    color: const Color(0xF022273C),
     elevation: 3,
     shadowColor: const Color(0xB8010101),
     menuPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),

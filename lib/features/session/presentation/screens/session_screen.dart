@@ -2,18 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_controller.dart';
+import '../../../note/presentation/controllers/note_form_state.dart';
 import '../../../note/presentation/widgets/content_form_field.dart';
+import '../../../note/presentation/widgets/editor_form.dart';
 import '../../../note/presentation/widgets/title_form_field.dart';
-import '../../domain/entities/sub/session_member_role.dart';
 import '../controllers/session_controller.dart';
 import '../widgets/session_code_card.dart';
 import '../widgets/session_members_list.dart';
 import '../widgets/session_popup_menu.dart';
-
-final noteSessionProvider = StateProvider<Note?>((ref) => null);
 
 class SessionScreen extends ConsumerStatefulWidget {
   const SessionScreen({super.key});
@@ -23,46 +21,45 @@ class SessionScreen extends ConsumerStatefulWidget {
 }
 
 class _SessionScreenState extends ConsumerState<SessionScreen> {
-  late final StreamSubscription _noteSubscription;
-  final _noteTitleController = TextEditingController();
-  final _noteContentController = TextEditingController();
+  StreamSubscription? _noteSubscription;
 
   @override
   void initState() {
     super.initState();
     final noteId = ref.read(sessionControllerProvider).session?.noteId ?? '';
+    final note = ref.read(noteControllerProvider.notifier).getNoteById(noteId);
+    ref.read(editorFormProvider).initForm(note);
+
+    if (isHost) return;
 
     _noteSubscription = ref
         .read(noteControllerProvider.notifier)
         .fetchSingleNoteStream(noteId)
-        .listen((note) {
-          ref.read(noteSessionProvider.notifier).state = note;
-          _noteTitleController.text = note?.title ?? _noteTitleController.text;
-          _noteContentController.text =
-              note?.content ?? _noteContentController.text;
-        });
+        .listen(ref.read(editorFormProvider).initForm);
   }
 
   @override
   void dispose() {
-    _noteSubscription.cancel();
-    _noteTitleController.dispose();
-    _noteContentController.dispose();
+    _noteSubscription?.cancel();
     super.dispose();
   }
 
-  Note? get currentNote => ref.read(noteSessionProvider);
+  Note? get currentNote => ref.read(editorFormProvider).note;
 
   NoteController get noteController =>
       ref.read(noteControllerProvider.notifier);
 
-  bool get canEdit =>
-      ref.read(sessionControllerProvider).currentMember?.role ==
-      SessionMemberRole.host;
+  EditorFormState get formState => ref.read(editorFormProvider);
+
+  bool get isHost => ref.read(
+    sessionControllerProvider.select((s) => s.currentMember?.isHost ?? false),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final session = ref.watch(sessionControllerProvider).session;
+    final sessionCode = ref.read(
+      sessionControllerProvider.select((s) => s.session?.sessionCode),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -73,15 +70,11 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            SessionCodeCard(session?.sessionCode),
+            SessionCodeCard(sessionCode),
 
             const SizedBox(height: 30),
 
-            SessionMembersList(
-              membersStream: ref
-                  .read(sessionControllerProvider.notifier)
-                  .fetchMembersOfSession(),
-            ),
+            const SessionMembersList(),
 
             const SizedBox(height: 24),
 
@@ -90,13 +83,12 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                 child: Column(
                   children: [
                     TitleFormField(
-                      controller: _noteTitleController,
-                      readOnly: canEdit,
+                      controller: formState.titleController,
+                      readOnly: !isHost,
                       onChanged: (title) {
-                        if (currentNote == null) return;
-                        noteController.updateNote(
-                          currentNote!.copyWith(title: title),
-                        );
+                        if (formState.note == null) return;
+                        noteController.updateNote(formState.note!);
+                        print(formState.note);
                       },
                     ),
 
@@ -108,13 +100,13 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                         maxHeight: MediaQuery.of(context).size.height * 0.4,
                       ),
                       child: ContentFormField(
-                        controller: _noteContentController,
-                        readOnly: canEdit,
+                        controller: formState.contentController,
+                        readOnly: !isHost,
                         onChanged: (content) {
-                          if (currentNote == null) return;
-                          noteController.updateNote(
-                            currentNote!.copyWith(content: content),
-                          );
+                          if (formState.note == null) return;
+
+                          noteController.updateNote(formState.note!);
+                          print(formState.note);
                         },
                       ),
                     ),
