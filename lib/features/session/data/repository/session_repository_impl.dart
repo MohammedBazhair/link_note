@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/features/database/remote/database_service.dart';
 import '../../domain/entities/session.dart';
@@ -24,7 +26,7 @@ class SessionRepositoryImpl implements SessionRepository {
 
       return Session.fromMap(rawSession);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       return null;
     }
   }
@@ -100,15 +102,14 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Stream getMembersStream(String sessionId) {
-    return _remoteDatabase.readRowsRealTime(
+  Stream<Set<SessionMember>> getMembersStream(String sessionId) {
+    final stream = _remoteDatabase.readRowsRealTime(
       table: ExternalConsts.sessionMembersTable,
       primaryKey: ['session_id', 'member_id'],
       column: 'session_id',
       value: sessionId,
     );
+
+    return stream.map((raw) => Set.from(raw.map(SessionMember.fromMap)));
   }
-
-
-
 }

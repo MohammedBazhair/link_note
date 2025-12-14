@@ -5,7 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/selectable_note.dart';
-import '../screens/note_editor.dart';
+import '../screens/note_editor_screen.dart';
 
 final selectableNoteProvider = StateProvider.autoDispose(
   (_) => SelectableNote(),
@@ -22,7 +22,6 @@ class NoteTile extends ConsumerWidget {
         ref.watch(selectableNoteProvider.select((s) => s.noteId)) == note.id;
 
     return ListTile(
-      
       title: Text(note.title.isEmpty ? 'No Title' : note.title, maxLines: 1),
       subtitle: Text(note.content, maxLines: 1),
       trailing: Skeleton.ignore(
@@ -39,7 +38,7 @@ class NoteTile extends ConsumerWidget {
           return;
         }
 
-        context.pushTo(NoteEditor(note: note));
+        context.pushTo(NoteEditorScreen(note: note));
       },
     );
   }

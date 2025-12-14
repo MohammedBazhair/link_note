@@ -48,9 +48,9 @@ class SessionController extends StateNotifier<SessionState> {
     );
   }
 
-  Stream fetchMembersOfSession() {
+  Stream<Set<SessionMember>> fetchMembersOfSession() {
     final sessionId = state.session?.id;
-    if (sessionId == null) return const Stream.empty();
+    if (sessionId == null) return  Stream.value({});
 
     return _sessionRepository.getMembersStream(sessionId);
   }

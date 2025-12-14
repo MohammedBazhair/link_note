@@ -23,8 +23,10 @@ class NotesRepositoryImpl implements NotesRepository {
   Future<void> delete(String id) => _remote.deleteNote(id);
 
   @override
-  Stream fetchNotesRealTime(String userId) =>
-      _remote.fetchNotesRealTime(userId);
+  Stream<List<Note>> fetchNotesRealTime(String userId) {
+    final stream=  _remote.fetchNotesRealTime(userId);
+return stream.map((raws)=>  List.from(raws.map(Note.fromMap)));
+  }
 
   @override
   Stream<Note?> fetchNoteStream(String noteId) {

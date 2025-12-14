@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
-import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
 
@@ -10,6 +10,13 @@ final noteControllerProvider = StateNotifierProvider<NoteController, Set<Note>>(
     return GetIt.I<NoteController>();
   },
 );
+
+final notesStreamProvider = StreamProvider.autoDispose
+    .family<List<Note>, String>((ref, userId) {
+      final controller = ref.read(noteControllerProvider.notifier);
+
+      return controller.fetchNotesRealTime(userId);
+    });
 
 class NoteController extends StateNotifier<Set<Note>> {
   NoteController(this._notesRepository) : super({});
@@ -47,22 +54,17 @@ class NoteController extends StateNotifier<Set<Note>> {
     }
   }
 
-  Stream fetchNotesRealTime(String userId) {
+  Stream<List<Note>> fetchNotesRealTime(String userId) {
     try {
-      (_notesRepository.fetchNotesRealTime(userId) as Stream<RowList>).listen((
-        notes,
-      ) {
-        state = notes.map(Note.fromMap).toSet();
-      });
-
       return _notesRepository.fetchNotesRealTime(userId);
     } catch (e) {
       debugPrint(e.toString());
-      return const Stream.empty();
+      return Stream.value([]);
     }
   }
 
-  Stream<Note?> fetchNoteStream(String noteId) {
+  Stream<Note?> fetchNoteStream(String? noteId) {
+    if (noteId == null) return Stream.value(null);
     return _notesRepository.fetchNoteStream(noteId);
   }
 

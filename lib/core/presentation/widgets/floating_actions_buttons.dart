@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-import '../../../features/note/presentation/screens/note_editor.dart';
+import '../../../features/note/presentation/screens/note_editor_screen.dart';
 import '../../../features/session/presentation/screens/create_session_screen.dart';
 import '../../extensions/extensions.dart';
 
@@ -59,8 +59,8 @@ class FloatingActionsButtons extends ConsumerWidget {
                 shape: const CircleBorder(),
                 onPressed: () {
                   ref.read(_isClicked.notifier).state = false;
-              
-                  context.pushTo(const NoteEditor());
+
+                  context.pushTo(const NoteEditorScreen());
                 },
                 tooltip: 'Create Note',
                 child: const Icon(Icons.add_rounded),
@@ -74,7 +74,7 @@ class FloatingActionsButtons extends ConsumerWidget {
             shape: const CircleBorder(),
             onPressed: () =>
                 ref.read(_isClicked.notifier).update((state) => !state),
-          
+
             child: isClicked
                 ? const Icon(Icons.close_rounded)
                 : const Icon(Icons.add_rounded),

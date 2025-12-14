@@ -18,6 +18,6 @@ abstract interface class SessionRepository {
 
   Future<Session?> getSessionByCode({required String sessionCode});
 
-  Stream getMembersStream(String sessionId);
+  Stream<Set<SessionMember>> getMembersStream(String sessionId);
 
 }

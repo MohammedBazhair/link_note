@@ -1,7 +1,6 @@
-
 import 'sub/session_member_role.dart';
 
-class SessionMember  {
+class SessionMember {
   SessionMember({
     required this.sessionId,
     required this.memberId,
@@ -16,7 +15,9 @@ class SessionMember  {
     );
   }
 
-  
+  factory SessionMember.empty() {
+    return SessionMember(sessionId:'', memberId:'', role:SessionMemberRole.member);
+  }
 
   final String sessionId;
   final String memberId;
@@ -36,7 +37,7 @@ class SessionMember  {
 
     return other is SessionMember &&
         other.sessionId == sessionId &&
-        other.memberId == memberId ;
+        other.memberId == memberId;
   }
 
   @override

@@ -1,7 +1,16 @@
+import 'dart:convert';
 
 class Note {
-
   Note({this.id, this.uuid, required this.title, required this.content});
+
+  factory Note.fromJson(String json) {
+    try {
+      final map = jsonDecode(json);
+      return Note.fromMap(map);
+    } catch (e) {
+      return Note(title: '', content: '');
+    }
+  }
 
   factory Note.fromMap(Map<String, dynamic> map) {
     return Note(
@@ -25,17 +34,16 @@ class Note {
     };
   }
 
+  String toJson() {
+    return jsonEncode(toMap());
+  }
+
   @override
   String toString() {
     return 'Note{id: $id, uuid: $uuid, title: $title, content: $content}.\n';
   }
 
-  Note copyWith({
-    String? id,
-    String? uuid,
-    String? title,
-    String? content,
-  }) {
+  Note copyWith({String? id, String? uuid, String? title, String? content}) {
     return Note(
       id: id ?? this.id,
       uuid: uuid ?? this.uuid,

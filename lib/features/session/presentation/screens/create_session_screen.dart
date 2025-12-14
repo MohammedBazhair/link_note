@@ -5,13 +5,13 @@ import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../note/domain/entities/selectable_note.dart';
-import '../../../note/presentation/controllers/note_controller.dart';
 import '../../../note/presentation/screens/notes_list_screen.dart';
 import '../../../note/presentation/widgets/note_tile.dart';
 import '../../../user/presentation/controllers/user_controller.dart';
 import '../../domain/entities/session.dart';
+import '../../helpers.dart';
 import '../controllers/session_controller.dart';
-import '../controllers/session_state.dart';
+import '../widgets/selected_note.dart';
 import 'session_screen.dart';
 
 class CreateSessionScreen extends ConsumerStatefulWidget {
@@ -50,20 +50,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(sessionControllerProvider, (_, next) {
-      switch (next) {
-        case InitialSessionState():
-          break;
-        case CreateSessionState():
-          context.showSnakbar('Session created successfully');
-        case JoinSessionState():
-          context.showSnakbar('Joined session successfully');
-        case EndedSessionState():
-          context.showSnakbar('Ended session successfully');
-        case ErrorSessionState(:final message):
-          context.showSnakbar(message);
-        case AddMemberState():
-          context.showSnakbar('Member added successfully');
-      }
+      handleSessionStates(context, next);
     });
 
     return PopScope(
@@ -89,19 +76,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
                 child: const Text('Choose a Note'),
               ),
 
-              Consumer(
-                builder: (_, ref, __) {
-                  final noteId = ref.watch(selectableNoteProvider).noteId;
-
-                  final note = ref
-                      .read(noteControllerProvider.notifier)
-                      .getNoteById(noteId);
-
-                  return (note != null)
-                      ? NoteTile(note)
-                      : const SizedBox.shrink();
-                },
-              ),
+              const SelectedNote(),
               LoadingButton(onPressed: _createSession, text: 'Create Session'),
             ],
           ),
