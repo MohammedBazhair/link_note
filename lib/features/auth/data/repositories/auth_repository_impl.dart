@@ -72,6 +72,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthApiException catch (_) {
       return 'Unable to sign in with Google right now. Please try again later.';
     } catch (e) {
+      print(e);
       return 'Something went wrong. Check your internet connection and try again.';
     }
   }
