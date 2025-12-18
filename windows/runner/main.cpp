@@ -3,6 +3,8 @@
 #include <windows.h>
 
 #include "flutter_window.h"
+#include <protocol_handler_windows/protocol_handler_windows_plugin_c_api.h>
+
 #include "utils.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
@@ -23,6 +25,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
       GetCommandLineArguments();
 
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
+
+  // تحقق إن كان التطبيق مفتوح بالفعل
+  HWND hwnd = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"link_note");
+  if (hwnd != NULL)
+  {
+    // أرسل الرابط للتطبيق المفتوح
+    DispatchToProtocolHandler(hwnd);
+
+    // أعرض النافذة واجعلها في المقدمة
+    ::ShowWindow(hwnd, SW_NORMAL);
+    ::SetForegroundWindow(hwnd);
+
+    // أغلق هذا المثال لأن التطبيق يعمل بالفعل
+    return EXIT_FAILURE;
+  }
 
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);

@@ -1,4 +1,3 @@
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/features/network/network_service.dart';
@@ -56,24 +55,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<String?> signInWithGoogle() async {
+  Future<void> signInWithGoogle() async {
     try {
-      final response = await _remote.signInWithGoogle();
-      if (response.user == null || response.session == null) {
-        return 'Unable to complete Google sign in. Please try again.';
-      }
-
-      return null;
-    } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        return 'Google sign-in was canceled by the user.';
-      }
-      return 'Google sign-in failed. Please try again later.';
-    } on AuthApiException catch (_) {
-      return 'Unable to sign in with Google right now. Please try again later.';
+      await _remote.signInWithGoogle();
     } catch (e) {
       print(e);
-      return 'Something went wrong. Check your internet connection and try again.';
     }
   }
 
@@ -107,5 +93,13 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     return 'Registration failed, please try again';
+  }
+
+  @override
+  Future<AuthResponse> signInWithUrl(Uri uri) async {
+    final session = await _remote.getSessionFromUrl(uri);
+    final authResponse = AuthResponse(session: session, user: session.user);
+
+    return authResponse;
   }
 }
