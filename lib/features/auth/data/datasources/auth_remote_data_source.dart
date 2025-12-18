@@ -1,8 +1,6 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../user/domain/entities/user.dart';
 
@@ -16,7 +14,9 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> signOut();
 
-  Future<AuthResponse> signInWithGoogle();
+  Future<void> signInWithGoogle();
+
+  Future<Session> getSessionFromUrl(Uri originUrl);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -43,32 +43,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<AuthResponse> signInWithGoogle() async {
-    final clientId = Platform.isAndroid
-        ? ExternalConsts.androidClient
-        : ExternalConsts.desktopClient;
+  Future<void> signInWithGoogle() async {
+    try {
+      await _auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: ExternalConsts.authRedirectUrl,
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 
-    await _googleSignIn.initialize(
-      serverClientId: ExternalConsts.webClient,
-      clientId: clientId,
-    );
-
-    final account = await _googleSignIn.authenticate();
-
-    final idToken = account.authentication.idToken ?? '';
-    final authorizeScopes = await account.authorizationClient.authorizeScopes([
-      'email',
-      'profile',
-    ]);
-    final authorization = await account.authorizationClient
-        .authorizationForScopes(['email', 'profile']);
-
-    final result = await _auth.signInWithIdToken(
-      provider: OAuthProvider.google,
-      idToken: idToken,
-      accessToken: authorization?.accessToken ?? authorizeScopes.accessToken,
-    );
-
-    return result;
+  @override
+  Future<Session> getSessionFromUrl(Uri originUrl) async {
+    final response = await _auth.getSessionFromUrl(originUrl);
+    
+    return response.session;
   }
 }

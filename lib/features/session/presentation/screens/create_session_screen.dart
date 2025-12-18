@@ -29,13 +29,9 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
       return context.showSnakbar('must choose a note first');
     }
 
-    final loading = ref.read(loadingProvider.notifier);
-    loading.state = true;
-
     final hostId = ref.read(userControllerProvider.notifier).currentUser?.id;
 
     if (hostId == null) {
-      loading.state = false;
       await context.pushTo(const SignInScreen());
       return;
     }
@@ -43,7 +39,6 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
 
     await ref.read(sessionControllerProvider.notifier).createSession(session);
 
-    loading.state = false;
     await context.pushTo(const SessionScreen());
   }
 
@@ -77,7 +72,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
               ),
 
               const SelectedNote(),
-              LoadingButton(onPressed: _createSession, text: 'Create Session'),
+              MainButton(onPressed: _createSession, text: 'Create Session'),
             ],
           ),
         ),

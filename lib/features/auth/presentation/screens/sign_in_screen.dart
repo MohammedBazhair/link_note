@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,9 +26,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late final ProviderSubscription<AuthState> _authSubscription;
+  late final StreamSubscription<Uri> _subscribtionsLinks;
 
   @override
   void initState() {
+    super.initState();
+    listenAuthStates();
+    initDeepLink();
+  }
+
+  void listenAuthStates() {
     _authSubscription = ref.listenManual(authProvider, (previous, next) async {
       await authListener(
         context: context,
@@ -34,21 +44,26 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         ref: ref,
       );
     });
-    super.initState();
+  }
+
+  void initDeepLink() {
+    final _appLinks = AppLinks();
+
+    _subscribtionsLinks = _appLinks.uriLinkStream.listen((uri) async {
+      await ref.read(authProvider.notifier).loginWithUri(uri);
+    });
   }
 
   void onSubmit() async {
     final isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
-    ref.read(loadingProvider.notifier).state = true;
 
     final password = _passwordController.text;
     final email = _emailController.text;
     await ref
         .read(authProvider.notifier)
         .loginWithEmail(email: email, password: password);
-
   }
 
   @override
@@ -56,6 +71,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _authSubscription.close();
+    _subscribtionsLinks.cancel();
     super.dispose();
   }
 
@@ -125,7 +141,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   const SizedBox(height: 25),
 
                   // زر تسجيل الدخول
-                  LoadingButton(onPressed: onSubmit, text: 'Login'),
+                  MainButton(onPressed: onSubmit, text: 'Login'),
 
                   const SizedBox(height: 15),
 

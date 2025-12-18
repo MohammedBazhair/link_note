@@ -1,3 +1,5 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../user/domain/entities/user.dart';
 
 abstract interface class AuthRepository {
@@ -7,7 +9,8 @@ abstract interface class AuthRepository {
 
   Future<void> signOut();
 
-  Future<String?> signInWithGoogle();
+  Future<void> signInWithGoogle();
     
+  Future<AuthResponse> signInWithUrl(Uri uri);
 }
 

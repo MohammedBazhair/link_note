@@ -31,8 +31,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   void initState() {
-    authSubscription = ref.listenManual(authProvider, (previous, next)async {
-     await  authListener(context: context, previous: previous, next: next,ref: ref);
+    authSubscription = ref.listenManual(authProvider, (previous, next) async {
+      await authListener(
+        context: context,
+        previous: previous,
+        next: next,
+        ref: ref,
+      );
     });
     super.initState();
   }
@@ -43,8 +48,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     if (!isValid) return;
     final userCtrl = ref.read(userControllerProvider.notifier);
 
-    ref.read(loadingProvider.notifier).state = true;
-
     final user = UserEntity(
       username: nameController.text,
       email: emailController.text,
@@ -53,9 +56,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     await ref.read(authProvider.notifier).signUp(user);
     await userCtrl.createProfile(user);
-    
-    
-
   }
 
   @override
@@ -148,8 +148,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   const SizedBox(height: 35),
 
                   // زر إنشاء الحساب
-                 LoadingButton(onPressed: onSubmit, text: 'Sign Up'),
-               
+                  MainButton(onPressed: onSubmit, text: 'Sign Up'),
 
                   const SizedBox(height: 15),
 

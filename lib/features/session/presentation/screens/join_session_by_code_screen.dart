@@ -30,15 +30,12 @@ class _JoinSessionByCodePageState
       return;
     }
 
-    final loading = ref.read(loadingProvider.notifier);
-    loading.state = true;
     final controller = ref.read(sessionControllerProvider.notifier);
     final userId = ref.read(userControllerProvider).profile.userId;
     await controller.joinSessionByCode(
       memberId: userId,
       sessionCode: sessionCode,
     );
-    loading.state = false;
   }
 
   @override
@@ -92,7 +89,7 @@ class _JoinSessionByCodePageState
                 ),
               ),
               const SizedBox(height: 24),
-              LoadingButton(onPressed: _join, text: 'Join'),
+              MainButton(onPressed: _join, text: 'Join'),
             ],
           ),
         ),
