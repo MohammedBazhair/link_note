@@ -30,22 +30,30 @@ class UserProfileWidget extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
-            onTap: userController.pickAndUploadAvatar,
-            child: Stack(
-              children: [
-                AvatarWidget(profile),
-
-                const Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: CircleAvatar(
-                    radius: 15,
-                    backgroundColor: DarkColors.primary,
-                    child: Icon(Icons.edit_rounded, size: 20),
-                  ),
-                ),
-              ],
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              
+              onTap: profile.isEmailLogin
+                  ? userController.pickAndUploadAvatar
+                  : null,
+            
+              child: Stack(
+                children: [
+                  AvatarWidget(profile),
+            
+                  if (profile.isEmailLogin)
+                    const Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 15,
+                        backgroundColor: DarkColors.primary,
+                        child: Icon(Icons.edit_rounded, size: 20),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
 
@@ -58,4 +66,3 @@ class UserProfileWidget extends ConsumerWidget {
     );
   }
 }
-

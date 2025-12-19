@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
+import '../controllers/note_controller.dart';
 import 'note_tile.dart';
 
-class NotesListView extends StatelessWidget {
+class NotesListView extends ConsumerWidget {
   const NotesListView({
     super.key,
     required this.notes,
@@ -15,19 +18,26 @@ class NotesListView extends StatelessWidget {
   final bool isShimmerEnabled;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     return Skeletonizer(
       enabled: isShimmerEnabled,
       effect: StylesConsts.shimmerEffect,
-      child: ListView.separated(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(24),
-        itemCount: notes.length,
-        itemBuilder: (context, index) {
-          final note = notes[index];
-          return NoteTile(note);
-        },
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
+      child: RefreshIndicator(
+        color: DarkColors.primary,
+        onRefresh: ref.read(noteControllerProvider.notifier).fetchNotes,
+        child: ListView.separated(
+          physics: const BouncingScrollPhysics(
+            decelerationRate: ScrollDecelerationRate.fast,
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          padding: const EdgeInsets.all(24),
+          itemCount: notes.length,
+          itemBuilder: (context, index) {
+            final note = notes[index];
+            return NoteTile(note);
+          },
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+        ),
       ),
     );
   }

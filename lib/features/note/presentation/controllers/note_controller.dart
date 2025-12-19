@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
+import '../../../user/domain/repositories/user_repository.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
 
@@ -12,9 +13,12 @@ final noteControllerProvider =
     });
 
 class NoteController extends StateNotifier<Map<String, Note>> {
-  NoteController(this._notesRepository) : super({});
+  NoteController(this._notesRepository, this._userRepository) : super({});
   final NotesRepository _notesRepository;
+  final UserRepository _userRepository;
   final _notesStreamController = StreamController<List<Note>>.broadcast();
+
+  String? get _userId => _userRepository.currentUser?.id;
 
   Stream<List<Note>> get notesStream => _notesStreamController.stream;
 
@@ -22,7 +26,10 @@ class NoteController extends StateNotifier<Map<String, Note>> {
 
   Future<void> addNote(Note note) async {
     try {
-      final createdNote = await _notesRepository.create(note);
+      final userNote = note.copyWith(uuid: _userId);
+
+      final createdNote = await _notesRepository.create(userNote);
+
       if (createdNote?.id == null) throw ArgumentError.notNull();
 
       final copiedMap = {...state};
@@ -33,12 +40,21 @@ class NoteController extends StateNotifier<Map<String, Note>> {
     }
   }
 
-  Future<List<Note>> fetchNotes(String userId) async {
-    try {
-      final notes = await _notesRepository.getAll(userId);
-      _notesStreamController.add(notes);
+  void _setNotes(List<Note> notes) async {
+    state = Map.fromEntries(notes.map((n) => MapEntry(n.id!, n)));
+    await _subscription?.cancel();
 
-      state = Map.fromEntries(notes.map((n) => MapEntry(n.id!, n)));
+    _notesStreamController.add(notes);
+    await _notesRepository.insertNotes(notes);
+  }
+
+  Future<List<Note>> fetchNotes() async {
+    try {
+      final userId = _userRepository.currentUser?.id;
+
+      final notes = await _notesRepository.getAll(userId);
+
+      _setNotes(notes);
       return notes;
     } catch (e) {
       debugPrint(e.toString());
@@ -48,15 +64,18 @@ class NoteController extends StateNotifier<Map<String, Note>> {
 
   Note? getNoteById(String id) => state[id];
 
-  void fetchNotesRealTime(String userId) {
+  void fetchNotesRealTime() {
     try {
+      if (_userId == null) throw ArgumentError.notNull();
       _subscription?.cancel();
-      _subscription = _notesRepository.fetchNotesRealTime(userId).listen((
-        notes,
-      ) {
-        state = Map.fromEntries(notes.map((n) => MapEntry(n.id!, n)));
-        _notesStreamController.add(notes);
-      });
+      _subscription = _notesRepository
+          .fetchNotesRealTime(_userId!)
+          .listen(
+            _setNotes,
+            onError: (e, stack) async {
+              await fetchNotes();
+            },
+          );
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -69,6 +88,8 @@ class NoteController extends StateNotifier<Map<String, Note>> {
 
   Future<void> updateNote(Note note) async {
     try {
+      print('updateNote');
+      print(note);
       await _notesRepository.update(note);
       final copiedMap = {...state};
       if (note.id == null) throw ArgumentError.notNull();

@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/network/network_service.dart';
 import '../../../user/domain/entities/profile.dart';
 import '../../../user/domain/entities/user.dart';
@@ -8,10 +11,16 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._remote, this._networkService, this._userRepository);
+  AuthRepositoryImpl(
+    this._remote,
+    this._networkService,
+    this._userRepository,
+    this._cache,
+  );
   final UserRepository _userRepository;
   final AuthRemoteDataSource _remote;
   final NetworkService _networkService;
+  final LocalCacheService _cache;
 
   @override
   Future<String?> signUp(UserEntity user) async {
@@ -26,6 +35,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await _userRepository.createProfile(profile);
 
+      await _cache.setString(
+        key: ExternalConsts.lastUserIdKey,
+        value: profile.userId,
+      );
       return null; // تم التسجيل بنجاح
     } on AuthException catch (e) {
       return _mapSupabaseSignUpError(e.message);
@@ -40,7 +53,15 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      await _remote.signIn(email: email, password: password);
+      final response = await _remote.signIn(email: email, password: password);
+      final userId = response.user?.id;
+
+      if (userId != null) {
+        await _cache.setString(
+          key: ExternalConsts.lastUserIdKey,
+          value: userId,
+        );
+      }
       return null;
     } on AuthApiException catch (e) {
       return _mapSupabaseSignInError(e.message);
@@ -59,7 +80,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _remote.signInWithGoogle();
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -99,6 +120,12 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<AuthResponse> signInWithUrl(Uri uri) async {
     final session = await _remote.getSessionFromUrl(uri);
     final authResponse = AuthResponse(session: session, user: session.user);
+
+    final userId = authResponse.user?.id;
+
+    if (userId != null) {
+      await _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
+    }
 
     return authResponse;
   }

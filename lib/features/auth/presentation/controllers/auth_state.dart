@@ -1,12 +1,17 @@
-sealed class AuthState {}
+sealed class AuthState {
+  const AuthState();
+}
 
-class AuthInitialState extends AuthState {}
+class AuthInitialState extends AuthState {
+  const AuthInitialState();
+}
 
-class AuthLoadingState extends AuthState {}
+class AuthLoadingState extends AuthState {
+  const AuthLoadingState();
+}
 
 class AuthSuccessfullState extends AuthState {
-  AuthSuccessfullState(this.message);
-  final String message;
+  const AuthSuccessfullState();
 }
 
 class AuthFailedState extends AuthState {

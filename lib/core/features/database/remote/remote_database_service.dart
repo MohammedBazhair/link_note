@@ -1,9 +1,18 @@
+import 'package:flutter/cupertino.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../constants/internal_constants/typedef.dart';
 
 abstract interface class RemoteDatabaseService {
   Future<Map<String, dynamic>> insertRow({
     required Map<String, dynamic> map,
     required String table,
+  });
+
+  Future<void> insertRows({
+    required RowList rows,
+    required String table,
+    required String primaryKey,
   });
 
   Future<Map<String, dynamic>> readRow({
@@ -78,7 +87,12 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     required String column,
     required String table,
   }) {
-    return _client.from(table).update(updated).eq(column, id);
+    try {
+      return _client.from(table).update(updated).eq(column, id);
+    } catch (e) {
+      debugPrint(e.toString());
+      return Future.value();
+    }
   }
 
   @override
@@ -87,7 +101,12 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     required String column,
     required String table,
   }) {
-    return _client.from(table).delete().eq(column, id);
+    try {
+      return _client.from(table).delete().eq(column, id);
+    } catch (e) {
+      debugPrint(e.toString());
+      return Future.value();
+    }
   }
 
   @override
@@ -105,14 +124,36 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     required String table,
     required Map<String, Object> filters,
   }) async {
-    await _client.from(table).delete().match(filters);
+    try {
+      await _client.from(table).delete().match(filters);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
-  Future<List<Map<String, dynamic>>>  readRowsWhere({
+  Future<List<Map<String, dynamic>>> readRowsWhere({
     required String table,
     required Map<String, Object> filters,
   }) {
-    return _client.from(table).select().match(filters);
+    try {
+      return _client.from(table).select().match(filters);
+    } catch (e) {
+      debugPrint(e.toString());
+      return Future.value(<Map<String, dynamic>>[]);
+    }
+  }
+
+  @override
+  Future<void> insertRows({
+    required RowList rows,
+    required String table,
+    required String primaryKey,
+  }) async {
+    try {
+      return await _client.from(table).upsert(rows, onConflict: primaryKey);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 }

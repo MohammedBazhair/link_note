@@ -26,6 +26,7 @@ extension RoutesNavigators on BuildContext {
     return Navigator.pushReplacement(
       this,
       MaterialPageRoute(builder: (context) => screen),
+      
     );
   }
 

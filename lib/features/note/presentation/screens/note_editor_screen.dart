@@ -20,6 +20,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
+
     ref.read(editorFormProvider).initForm(widget.note);
   }
 
@@ -37,6 +38,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
       uuid: widget.note?.uuid,
       title: editorState.titleController.text,
       content: editorState.contentController.text,
+      updatedAt: DateTime.now()
     );
 
     if (isEditing) {

@@ -12,6 +12,10 @@ class InitialSessionState extends SessionState {
  const InitialSessionState();
 }
 
+class LoadingSessionState extends SessionState {
+ const LoadingSessionState({super.session, super.currentMember});
+}
+
 class CreateSessionState extends SessionState {
   CreateSessionState({super.session, super.currentMember});
 }

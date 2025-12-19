@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../user/domain/entities/user.dart';
@@ -20,9 +19,8 @@ abstract interface class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  AuthRemoteDataSourceImpl(this._auth, this._googleSignIn);
+  AuthRemoteDataSourceImpl(this._auth);
   final GoTrueClient _auth;
-  final GoogleSignIn _googleSignIn;
 
   @override
   Future<AuthResponse> signUp(UserEntity user) {
@@ -57,7 +55,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<Session> getSessionFromUrl(Uri originUrl) async {
     final response = await _auth.getSessionFromUrl(originUrl);
-    
+
     return response.session;
   }
 }

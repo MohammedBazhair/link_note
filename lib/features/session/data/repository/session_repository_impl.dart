@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
-import '../../../../core/features/database/remote/database_service.dart';
+import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/entities/session_member.dart';
 import '../../domain/repository/session_repository.dart';

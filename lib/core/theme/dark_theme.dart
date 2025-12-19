@@ -82,7 +82,6 @@ ThemeData darkTheme() => ThemeData(
     color: DarkColors.primary,
     linearTrackColor: DarkColors.primary,
     circularTrackColor: Colors.transparent,
-
     borderRadius: BorderRadius.circular(18),
     strokeWidth: 2,
     linearMinHeight: 6,

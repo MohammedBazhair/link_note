@@ -11,11 +11,11 @@ final authProvider = StateNotifierProvider<AuthController, AuthState>(
 );
 
 class AuthController extends StateNotifier<AuthState> {
-  AuthController(this._auth) : super(AuthInitialState());
+  AuthController(this._auth) : super(const AuthInitialState());
   final AuthRepository _auth;
 
   Future<void> loginWithGoogle() async {
-    state = AuthLoadingState();
+    state = const AuthLoadingState();
 
     await _auth.signInWithGoogle();
   }
@@ -28,9 +28,9 @@ class AuthController extends StateNotifier<AuthState> {
       final response = await _auth.signInWithUrl(uri);
       if (response.user?.id == null) throw ArgumentError.notNull();
 
-      state = AuthSuccessfullState('Sign in with google Successfully');
+      state = const AuthSuccessfullState();
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       state = AuthFailedState(
         'Failed to login by google, try again or check your connection!',
       );
@@ -41,34 +41,30 @@ class AuthController extends StateNotifier<AuthState> {
     required String email,
     required String password,
   }) async {
-    state = AuthLoadingState();
+    state = const AuthLoadingState();
     final error = await _auth.signIn(email: email, password: password);
 
-    error == null
-        ? _handleState('Login In Successfully')
-        : _handleState(error, true);
+    _handleState(error);
   }
 
   Future<void> signUp(UserEntity user) async {
     final error = await _auth.signUp(user);
 
-    error == null
-        ? _handleState('Sign up Successfully')
-        : _handleState(error, true);
+    _handleState(error);
   }
 
   Future<void> signOut() async {
     try {
       await _auth.signOut();
-
-      _handleState('Sign out Successfully');
     } catch (e) {
       debugPrint(e.toString());
-      _handleState('An error occurred while signing out.', true);
+      _handleState(e.toString());
     }
   }
 
-  void _handleState(String message, [bool hasError = false]) {
-    state = hasError ? AuthFailedState(message) : AuthSuccessfullState(message);
+  void _handleState(String? error) {
+    state = error == null
+        ? const AuthSuccessfullState()
+        : AuthFailedState(error);
   }
 }

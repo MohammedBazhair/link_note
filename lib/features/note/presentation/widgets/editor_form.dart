@@ -15,12 +15,7 @@ import 'title_form_field.dart';
 final editorFormProvider = StateProvider((ref) {
   final state = EditorFormState();
 
-  ref.onDispose(() {
-    state.dispose();
-    print('-------------------------');
-    print('dispose form state');
-    print('-------------------------');
-  });
+  ref.onDispose(state.dispose);
 
   return state;
 });

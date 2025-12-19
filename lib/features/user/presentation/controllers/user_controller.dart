@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
@@ -71,7 +73,7 @@ class UserController extends StateNotifier<UserState> {
 
   Future<void> pickAndUploadAvatar() async {
     try {
-      await Permission.camera.request();
+   if(!Platform.isWindows)   await Permission.camera.request();
 
       final file = await uploadImage();
 

@@ -1,5 +1,6 @@
 import '../auth/injection.dart';
 
+import 'data/datasources/notes_local_data_source.dart';
 import 'data/datasources/notes_remote_data_source.dart';
 import 'data/repositories/notes_repository_impl.dart';
 import 'domain/repositories/notes_repository.dart';
@@ -10,11 +11,15 @@ void setupNotesDependincies() {
     () => NotesRemoteDataSourceImpl(getIt()),
   );
 
+  getIt.registerLazySingleton<NotesLocalDataSource>(
+    () => NotesLocalDataSourceImpl(getIt(),getIt()),
+  );
+
   getIt.registerLazySingleton<NotesRepository>(
-    () => NotesRepositoryImpl(getIt(), getIt(), getIt()),
+    () => NotesRepositoryImpl(getIt(), getIt(), getIt(),getIt()),
   );
 
   getIt.registerLazySingleton<NoteController>(
-    () => NoteController(getIt()),
+    () => NoteController(getIt(),getIt()),
   );
 }

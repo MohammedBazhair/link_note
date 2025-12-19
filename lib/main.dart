@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:protocol_handler/protocol_handler.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/features/common_injections.dart';
@@ -13,9 +16,12 @@ import 'features/user/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  initLocalDatabase();
   await registerMyAppProtocol();
+
   await initSupabase();
+
   await setupLocators();
 
   runApp(const ProviderScope(child: MainApp()));
@@ -35,13 +41,17 @@ class MainApp extends StatelessWidget {
   }
 }
 
+void initLocalDatabase() {
+  if (!Platform.isWindows) return;
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+}
+
 Future<void> registerMyAppProtocol() async {
-  
-  await protocolHandler.register('linknote');
+  if (Platform.isWindows) await protocolHandler.register('linknote');
 }
 
 Future<void> initSupabase() async {
-
   await Supabase.initialize(
     url: 'https://fyfutnuahjknmvdorkwa.supabase.co',
     anonKey:

@@ -71,7 +71,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: const [HomeButton()]),
+      appBar: AppBar(
+        actions: const [HomeButton()],
+        automaticallyImplyLeading: false,
+      ),
 
       body: SafeArea(
         child: Center(

@@ -2,8 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
-import '../../../../core/features/database/remote/database_service.dart';
-import '../../../../core/features/database/remote/storage_service.dart';
+import '../../../../core/features/database/remote/remote_database_service.dart';
+import '../../../../core/features/database/remote/remote_storage_service.dart';
 import '../../domain/entities/profile.dart';
 import '../models/profile.dart';
 

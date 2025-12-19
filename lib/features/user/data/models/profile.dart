@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import '../../../auth/domain/entities/sub/auth_provider.dart';
 import '../../domain/entities/profile.dart';
 
 class ProfileModel extends ProfileEntity {
@@ -9,6 +10,7 @@ class ProfileModel extends ProfileEntity {
     required super.username,
      this.avatarPath,
     super.avatarUrl,
+    super.authProviders
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +35,8 @@ class ProfileModel extends ProfileEntity {
     String? username,
     String? avatarPath,
     String? avatarUrl,
+        Set<AuthProvider>? authProviders
+
   }) {
     return ProfileModel(
       userId: userId ?? this.userId,

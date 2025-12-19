@@ -37,22 +37,25 @@ class UserRepositoryImpl implements UserRepository {
         userMetadata: params.userMetadata,
         appMetadata: params.appMetadata,
       );
+      final providers = appUser.providers.toSet();
 
       switch (appUser.provider) {
         case AuthProvider.email:
-          return await _remoteDataSource.readProfile(params.userId);
+          final profile = await _remoteDataSource.readProfile(params.userId);
+          return profile.copyWith(authProviders: providers);
         case AuthProvider.google:
           return ProfileEntity(
             userId: params.userId,
             username: appUser.name,
             avatarUrl: appUser.avatarUrl,
+            authProviders: providers,
           );
 
         case AuthProvider.unknown:
           throw Exception('unKnown provider, try again');
       }
     } catch (e) {
-      throw Exception('Failed to read profile');
+      return ProfileEntity.guest();
     }
   }
 

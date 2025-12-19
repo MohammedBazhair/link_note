@@ -17,9 +17,8 @@ Future<void> authListener({
     case AuthInitialState():
       break;
 
-    case AuthSuccessfullState(:final message):
+    case AuthSuccessfullState():
       await ref.read(userControllerProvider.notifier).loadProfile();
-      context.showSnakbar(message);
 
       await context.pushReplacementTo(const NotesListScreen());
 

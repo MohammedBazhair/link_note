@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../features/note/presentation/screens/note_editor_screen.dart';
+import '../../../features/note/presentation/widgets/note_tile.dart';
 import '../../../features/session/presentation/screens/create_session_screen.dart';
 import '../../extensions/extensions.dart';
 
@@ -14,6 +15,11 @@ class FloatingActionsButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isClicked = ref.watch(_isClicked);
+    final isSelectable = ref.watch(
+      selectableNoteProvider.select((s) => s.isSelectable),
+    );
+
+    if (isSelectable) return const SizedBox.shrink();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 30),
@@ -59,7 +65,9 @@ class FloatingActionsButtons extends ConsumerWidget {
                 shape: const CircleBorder(),
                 onPressed: () {
                   ref.read(_isClicked.notifier).state = false;
-
+                  ref
+                      .read(selectableNoteProvider.notifier)
+                      .update((s) => s.copyWith(noteId: ''));
                   context.pushTo(const NoteEditorScreen());
                 },
                 tooltip: 'Create Note',

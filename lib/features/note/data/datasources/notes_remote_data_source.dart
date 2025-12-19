@@ -1,11 +1,13 @@
 import '../../../../core/constants/external_constants/external_constants.dart';
-import '../../../../core/features/database/remote/database_service.dart';
+import '../../../../core/constants/internal_constants/typedef.dart';
+import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../domain/entities/note.dart';
 
 abstract interface class NotesRemoteDataSource {
   Future<Map<String, dynamic>> createNote(Note note);
+  Future<void> insertNotes(Iterable<Note> notes);
   Future<List<Note>> readNotes(String ownerId);
-  Stream fetchNotesRealTime(String ownerId);
+  Stream<RowList> fetchNotesRealTime(String ownerId);
   Stream<Map<String, dynamic>?> fetchNoteStream(String noteId);
   Future<void> updateNote(Note note);
   Future<void> deleteNote(String id);
@@ -27,10 +29,11 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   @override
   Future<List<Note>> readNotes(String ownerId) async {
     final mapList = await _database.readRowsWhere(
-      filters: {'id': ownerId},
+      filters: {'owner_id': ownerId},
       table: _notesTable,
     );
-    return mapList.map(Note.fromMap).toList();
+    final notes = mapList.map(Note.fromMap).toList();
+    return notes;
   }
 
   @override
@@ -50,13 +53,14 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Stream fetchNotesRealTime(String ownerId) {
+  Stream<RowList> fetchNotesRealTime(String ownerId) {
     return _database.readRowsRealTime(
-      table: _notesTable,
-      primaryKey: [_idColumn],
-      column: _ownerColumn,
-      value: ownerId,
-    );
+          table: _notesTable,
+          primaryKey: [_idColumn],
+          column: _ownerColumn,
+          value: ownerId,
+        )
+        as Stream<RowList>;
   }
 
   @override
@@ -72,5 +76,15 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
           if (rows == null || rows.isEmpty) return null;
           return rows.first;
         });
+  }
+
+  @override
+  Future<void> insertNotes(Iterable<Note> notes) {
+    final rows = notes.map((n) => n.toMap()).toList();
+    return _database.insertRows(
+      rows: rows,
+      table: _notesTable,
+      primaryKey: _idColumn,
+    );
   }
 }

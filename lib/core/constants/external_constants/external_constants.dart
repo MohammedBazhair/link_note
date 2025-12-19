@@ -12,4 +12,17 @@ class ExternalConsts {
   static const supabaseUrl = 'profiles';
   static const supabaseAnonKey = 'profiles';
   static const authRedirectUrl = 'https://bhf-s.github.io/auth/';
+
+  static const createTableNotesQuery = 
+  '''
+  CREATE TABLE IF NOT EXISTS $notesTable (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    owner_id TEXT NULL,
+    updated_at TEXT NOT NULL
+  );
+  ''';
+
+  static const lastUserIdKey = 'user_id';
 }

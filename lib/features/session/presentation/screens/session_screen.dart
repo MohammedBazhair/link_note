@@ -22,6 +22,7 @@ class SessionScreen extends ConsumerStatefulWidget {
 
 class _SessionScreenState extends ConsumerState<SessionScreen> {
   StreamSubscription? _noteSubscription;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -38,9 +39,20 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         .listen(ref.read(editorFormProvider).initForm);
   }
 
+  void _updateNote() {
+    if (formState.note == null) return;
+
+    _debounceTimer?.cancel();
+
+    _debounceTimer = Timer(const Duration(seconds: 2), () {
+      noteController.updateNote(formState.note!);
+    });
+  }
+
   @override
   void dispose() {
     _noteSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -49,7 +61,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
   NoteController get noteController =>
       ref.read(noteControllerProvider.notifier);
 
-  EditorFormState get formState => ref.read(editorFormProvider);
+  EditorFormState get formState => ref.watch(editorFormProvider);
 
   bool get isHost => ref.read(
     sessionControllerProvider.select((s) => s.currentMember?.isHost ?? false),
@@ -85,11 +97,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                     TitleFormField(
                       controller: formState.titleController,
                       readOnly: !isHost,
-                      onChanged: (title) {
-                        if (formState.note == null) return;
-                        noteController.updateNote(formState.note!);
-                        print(formState.note);
-                      },
+                      onChanged: (title) => _updateNote(),
                     ),
 
                     const SizedBox(height: 24),
@@ -102,12 +110,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                       child: ContentFormField(
                         controller: formState.contentController,
                         readOnly: !isHost,
-                        onChanged: (content) {
-                          if (formState.note == null) return;
-
-                          noteController.updateNote(formState.note!);
-                          print(formState.note);
-                        },
+                        onChanged: (content) => _updateNote(),
                       ),
                     ),
                   ],

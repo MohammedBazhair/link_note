@@ -4,12 +4,14 @@ import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../../features/note/presentation/screens/notes_list_screen.dart';
+import '../../../features/note/presentation/widgets/note_tile.dart';
 import '../../../features/session/presentation/controllers/session_controller.dart';
 import '../../../features/session/presentation/screens/create_session_screen.dart';
 import '../../../features/session/presentation/screens/join_session_by_code_screen.dart';
 import '../../../features/session/presentation/screens/session_screen.dart';
 import '../../../features/user/presentation/controllers/user_controller.dart';
 import '../../../features/user/presentation/widgets/user_profile.dart';
+import '../../constants/colors/colors.dart';
 import '../../extensions/extensions.dart';
 
 class CustomDrawer extends ConsumerWidget {
@@ -21,7 +23,11 @@ class CustomDrawer extends ConsumerWidget {
         .watch(userControllerProvider.notifier)
         .isUserLoggedIn;
     final userController = ref.read(userControllerProvider.notifier);
+    final isSelectable = ref.watch(
+      selectableNoteProvider.select((s) => s.isSelectable),
+    );
 
+    if (isSelectable) return const SizedBox.shrink();
     return Drawer(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -34,26 +40,42 @@ class CustomDrawer extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  await userController.loadProfile();
-                },
-                child: ListView(
-                  children: [
-                    if (isUserLogin) ...[
-                      const UserProfileWidget(),
-                      const Divider(),
-                    ] else ...[
-                      const SignInTile(),
-                      const SignUpTile(),
-                    ],
-                    const NotesTile(),
-                    if (isUserLogin) ...[
-                      const CreateSessionTile(),
-                      const JoinSessionTile(),
-                    ],
-                  ],
-                ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  RefreshIndicator(
+                    color: DarkColors.primary,
+                    onRefresh: userController.loadProfile,
+                    child: ListView(
+                      children: [
+                        if (isUserLogin) ...[
+                          const UserProfileWidget(),
+                          const Divider(),
+                        ] else ...[
+                          const SizedBox(height: 35),
+                          const SignInTile(),
+                          const SignUpTile(),
+                        ],
+                        const NotesTile(),
+                        if (isUserLogin) ...[
+                          const CreateSessionTile(),
+                          const JoinSessionTile(),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  PositionedDirectional(
+                    top: 0,
+                    end: 10,
+
+                    child: IconButton(
+                      iconSize: 27,
+                      onPressed: Scaffold.of(context).closeDrawer,
+                      icon: const Icon(Icons.arrow_forward_ios),
+                    ),
+                  ),
+                ],
               ),
             ),
             if (isUserLogin) const SignOutTile(),

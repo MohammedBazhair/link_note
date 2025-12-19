@@ -19,17 +19,20 @@ class EditorFormState {
 
   void markedChanges() => _hasChanges = true;
 
-  void initForm(Note? note) {
+  void initForm([Note? note]) {
     _hasChanges = false;
-    if (note == null) return;
-    _note = _note!.copyWith(
-      id: note.id,
-      uuid: note.uuid,
-       title: note.title,
-      content: note.content,
-    );
-    titleController.text = note.title;
-    contentController.text = note.content;
+    _note =
+        _note?.copyWith(
+          id: note?.id,
+          uuid: note?.uuid,
+          title: note?.title,
+          content: note?.content,
+        ) ??
+        note;
+
+    titleController.text = _note?.title ?? '';
+    contentController.text = _note?.content ?? '';
+
   }
 
   Note? get note => _note?.copyWith(

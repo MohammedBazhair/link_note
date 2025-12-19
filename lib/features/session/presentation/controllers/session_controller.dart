@@ -20,6 +20,14 @@ class SessionController extends StateNotifier<SessionState> {
 
   Future<void> createSession(Session session) async {
     try {
+      state = const LoadingSessionState();
+      if (state.session != null) {
+        state = ErrorSessionState(
+          message: 'Cannot start a new session. End the current session first.',
+        );
+        return;
+      }
+      
       final createdSession = await _sessionRepository.createSession(session);
 
       if (createdSession?.id == null) throw ArgumentError.notNull();
