@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/features/database/local/cache_service.dart';
-import '../../../../core/features/network/network_service.dart';
+import '../../../../core/features/network/connectivity_service.dart';
 import '../../../user/domain/entities/profile.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../../user/domain/repositories/user_repository.dart';
@@ -19,7 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
   );
   final UserRepository _userRepository;
   final AuthRemoteDataSource _remote;
-  final NetworkService _networkService;
+  final ConnectivityService _networkService;
   final LocalCacheService _cache;
 
   @override

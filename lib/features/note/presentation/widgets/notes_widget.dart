@@ -5,7 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
-import '../controllers/note_controller.dart';
+import '../controllers/note_controller/note_controller.dart';
 import 'note_tile.dart';
 
 class NotesListView extends ConsumerWidget {

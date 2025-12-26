@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +13,8 @@ import 'database/local/cache_service.dart';
 import 'database/local/local_database_service.dart';
 import 'database/remote/remote_database_service.dart';
 import 'database/remote/remote_storage_service.dart';
-import 'network/network_service.dart';
+import 'network/connectivity_service.dart';
+import 'network/network_clinet.dart';
 
 Future<void> setupCommonDependincies() async {
   final prefs = await SharedPreferences.getInstance();
@@ -45,9 +47,13 @@ Future<void> setupCommonDependincies() async {
     () => RemoteStorageServiceImpl(getIt()),
   );
 
-  getIt.registerLazySingleton<NetworkService>(
-    () => NetworkServiceImpl(InternetConnection.createInstance()),
+  getIt.registerLazySingleton<ConnectivityService>(
+    () => ConnectivityServiceImpl(InternetConnection.createInstance()),
   );
+
+  getIt.registerLazySingleton<http.Client>(http.Client.new);
+
+  getIt.registerLazySingleton<NetworkClient>(() => NetworkClientImpl(getIt()));
 }
 
 Future<Database> _initDatabase() async {

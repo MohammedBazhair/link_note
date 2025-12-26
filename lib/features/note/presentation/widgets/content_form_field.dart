@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ContentFormField extends ConsumerWidget {
+class ContentFormField extends StatelessWidget {
   const ContentFormField({
     super.key,
     required this.controller,
@@ -13,12 +12,12 @@ class ContentFormField extends ConsumerWidget {
   final bool readOnly;
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
       maxLines: null,
       expands: true,
-readOnly: readOnly,
+      readOnly: readOnly,
       textAlignVertical: TextAlignVertical.top,
       style: TextStyle(color: Colors.white.withAlpha(200)),
       cursorColor: const Color(0x809CDEBC),

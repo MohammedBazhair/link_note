@@ -9,4 +9,5 @@ abstract interface class NotesRepository {
 
   Future<void> update(Note note);
   Future<void> delete(String id);
+
 }

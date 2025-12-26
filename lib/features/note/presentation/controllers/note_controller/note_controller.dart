@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
-import '../../../user/domain/repositories/user_repository.dart';
-import '../../domain/entities/note.dart';
-import '../../domain/repositories/notes_repository.dart';
+import '../../../../user/domain/repositories/user_repository.dart';
+import '../../../domain/entities/note.dart';
+import '../../../domain/repositories/notes_repository.dart';
 
 final noteControllerProvider =
     StateNotifierProvider<NoteController, Map<String, Note>>((ref) {

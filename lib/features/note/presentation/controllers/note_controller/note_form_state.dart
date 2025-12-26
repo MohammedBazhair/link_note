@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/note.dart';
+import '../../../domain/entities/note.dart';
 
 class EditorFormState {
   EditorFormState()
@@ -20,19 +20,20 @@ class EditorFormState {
   void markedChanges() => _hasChanges = true;
 
   void initForm([Note? note]) {
+    if (note == null) return _clearForm();
     _hasChanges = false;
-    _note =
-        _note?.copyWith(
-          id: note?.id,
-          uuid: note?.uuid,
-          title: note?.title,
-          content: note?.content,
-        ) ??
-        note;
+    _note = note;
 
     titleController.text = _note?.title ?? '';
     contentController.text = _note?.content ?? '';
+  }
 
+  void _clearForm() {
+    _note = null;
+    _hasChanges = false;
+
+    titleController.clear();
+    contentController.clear();
   }
 
   Note? get note => _note?.copyWith(

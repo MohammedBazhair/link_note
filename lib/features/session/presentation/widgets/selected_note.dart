@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/presentation/widgets/conditional_builder.dart';
-import '../../../note/presentation/controllers/note_controller.dart';
+import '../../../note/presentation/controllers/note_controller/note_controller.dart';
 import '../../../note/presentation/widgets/note_tile.dart';
 
 class SelectedNote extends ConsumerWidget {

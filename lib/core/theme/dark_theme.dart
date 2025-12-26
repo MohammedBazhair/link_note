@@ -80,11 +80,12 @@ ThemeData darkTheme() => ThemeData(
   ),
   progressIndicatorTheme: ProgressIndicatorThemeData(
     color: DarkColors.primary,
-    linearTrackColor: DarkColors.primary,
+    linearTrackColor: Colors.transparent,
     circularTrackColor: Colors.transparent,
+
     borderRadius: BorderRadius.circular(18),
     strokeWidth: 2,
-    linearMinHeight: 6,
+    linearMinHeight: 1,
   ),
 
   listTileTheme: ListTileThemeData(

@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../../../core/features/database/local/cache_service.dart';
-import '../../../../core/features/network/network_service.dart';
+import '../../../../core/features/network/connectivity_service.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
 import '../datasources/notes_local_data_source.dart';
@@ -16,7 +16,7 @@ class NotesRepositoryImpl implements NotesRepository {
   NotesRepositoryImpl(this._remote, this._local, this._network, this._cache);
   final NotesRemoteDataSource _remote;
   final NotesLocalDataSource _local;
-  final NetworkService _network;
+  final ConnectivityService _network;
   final LocalCacheService _cache;
 
   @override
@@ -27,7 +27,7 @@ class NotesRepositoryImpl implements NotesRepository {
 
       await _local.createNote(newNote);
 
-      if (await _network.isConnected()) await _remote.createNote(newNote);
+      if (await _network.hasConnection()) await _remote.createNote(newNote);
 
       return newNote;
     } catch (e) {
@@ -39,7 +39,7 @@ class NotesRepositoryImpl implements NotesRepository {
   Future<List<Note>> getAll(String? userId) async {
     final id =
         await _cache.getString(key: ExternalConsts.lastUserIdKey) ?? userId;
-    final isOnline = await _network.isConnected();
+    final isOnline = await _network.hasConnection();
     final isFromRemote = id != null && isOnline;
 
     final localNotes = await _local.readNotes();
@@ -66,13 +66,13 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Future<void> update(Note note) async {
     final updatedNote = note.copyWith(updatedAt: DateTime.now());
-    if (await _network.isConnected()) await _remote.updateNote(updatedNote);
+    if (await _network.hasConnection()) await _remote.updateNote(updatedNote);
     await _local.updateNote(updatedNote);
   }
 
   @override
   Future<void> delete(String id) async {
-    if (await _network.isConnected()) await _remote.deleteNote(id);
+    if (await _network.hasConnection()) await _remote.deleteNote(id);
 
     await _local.deleteNote(id);
   }
@@ -99,7 +99,7 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Future<void> insertNotes(Iterable<Note> notes) async {
     try {
-      if (!await _network.isConnected()) throw const SocketException.closed();
+      if (!await _network.hasConnection()) throw const SocketException.closed();
 
       if (notes.elementAtOrNull(0)?.uuid != null) {
         return _remote.insertNotes(notes);

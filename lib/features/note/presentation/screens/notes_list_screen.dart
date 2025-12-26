@@ -7,7 +7,7 @@ import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../../core/presentation/widgets/custom_drawer.dart';
 import '../../../../core/presentation/widgets/floating_actions_buttons.dart';
 import '../../domain/entities/note.dart';
-import '../controllers/note_controller.dart';
+import '../controllers/note_controller/note_controller.dart';
 import '../widgets/note_tile.dart';
 import '../widgets/notes_widget.dart';
 import '../widgets/nothing_note.dart';
