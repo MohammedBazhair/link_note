@@ -1,8 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
-import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../domain/entities/profile.dart';
 
@@ -31,16 +30,24 @@ class NetworkAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipOval(
-      child: CachedNetworkImage(
-        imageUrl: avatarUrl,
-        width: 80,
-        height: 80,
-        fit: BoxFit.cover,
-        cacheManager: appImagesCacheManager,
-        fadeInDuration: const Duration(milliseconds: 150),
-        fadeOutDuration: const Duration(milliseconds: 150),
-        placeholder: (context, url) => const PlaceholderAvatar(),
-        errorWidget: (context, url, error) => const PlaceholderAvatar(),
+      child: FutureBuilder(
+        future: DefaultCacheManager().getSingleFile(avatarUrl),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const PlaceholderAvatar();
+          }
+
+          if (!snapshot.hasData || snapshot.hasError) {
+            return const PlaceholderAvatar();
+          }
+
+          return Image.file(
+            snapshot.data!,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+          );
+        },
       ),
     );
   }

@@ -2,19 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
+import '../../domain/entities/profile.dart';
 import '../controllers/user_controller.dart';
 import '../controllers/user_state.dart';
 import 'user_avatar.dart';
 
-class UserProfileWidget extends ConsumerWidget {
+class UserProfileWidget extends ConsumerStatefulWidget {
   const UserProfileWidget({super.key});
 
   @override
-  Widget build(BuildContext context, ref) {
-    final profile = ref.watch(userControllerProvider).profile;
-    final userController = ref.read(userControllerProvider.notifier);
+  ConsumerState<UserProfileWidget> createState() => _UserProfileWidgetState();
+}
 
-    ref.listen(userControllerProvider, (previous, next) {
+class _UserProfileWidgetState extends ConsumerState<UserProfileWidget> {
+  @override
+  void initState() {
+    super.initState();
+    userController.loadProfile();
+    ref.listenManual(userControllerProvider, (previous, next) {
       switch (next) {
         case UserInitialState():
         case UserUpdateProfileState():
@@ -25,6 +30,14 @@ class UserProfileWidget extends ConsumerWidget {
           context.showSnakbar(message);
       }
     });
+  }
+
+  ProfileEntity get profile => ref.watch(userControllerProvider).profile;
+  UserController get userController =>
+      ref.read(userControllerProvider.notifier);
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -33,15 +46,14 @@ class UserProfileWidget extends ConsumerWidget {
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              
               onTap: profile.isEmailLogin
                   ? userController.pickAndUploadAvatar
                   : null,
-            
+
               child: Stack(
                 children: [
                   AvatarWidget(profile),
-            
+
                   if (profile.isEmailLogin)
                     const Positioned(
                       bottom: 0,

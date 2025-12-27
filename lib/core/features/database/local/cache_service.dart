@@ -1,4 +1,3 @@
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class LocalCacheService {
@@ -27,52 +26,36 @@ abstract interface class LocalCacheService {
 }
 
 class LocalCacheServiceImpl implements LocalCacheService {
-
   LocalCacheServiceImpl(this._prefs);
   final SharedPreferences _prefs;
 
   @override
-  Future<bool> setString({
-    required String key,
-    required String value,
-  })  {
-   return _prefs.setString(key, value);
+  Future<bool> setString({required String key, required String value}) {
+    return _prefs.setString(key, value);
   }
 
   @override
-  Future<String?> getString({
-    required String key,
-  }) async {
+  Future<String?> getString({required String key}) async {
     return _prefs.getString(key);
   }
 
   @override
-  Future<bool> setBool({
-    required String key,
-    required bool value,
-  })  {
-   return _prefs.setBool(key, value);
+  Future<bool> setBool({required String key, required bool value}) {
+    return _prefs.setBool(key, value);
   }
 
   @override
-  Future<bool?> getBool({
-    required String key,
-  }) async {
+  Future<bool?> getBool({required String key}) async {
     return _prefs.getBool(key);
   }
 
   @override
-  Future<bool> setInt({
-    required String key,
-    required int value,
-  })  {
-   return _prefs.setInt(key, value);
+  Future<bool> setInt({required String key, required int value}) {
+    return _prefs.setInt(key, value);
   }
 
   @override
-  Future<int?> getInt({
-    required String key,
-  }) async {
+  Future<int?> getInt({required String key}) async {
     return _prefs.getInt(key);
   }
 
@@ -80,36 +63,22 @@ class LocalCacheServiceImpl implements LocalCacheService {
   Future<bool> setStringList({
     required String key,
     required List<String> value,
-  })  {
- return   _prefs.setStringList(key, value);
+  }) {
+    return _prefs.setStringList(key, value);
   }
 
   @override
-  Future<List<String>?> getStringList({
-    required String key,
-  }) async {
+  Future<List<String>?> getStringList({required String key}) async {
     return _prefs.getStringList(key);
   }
 
   @override
-  Future<bool> remove({
-    required String key,
-  })  {
-   return _prefs.remove(key);
+  Future<bool> remove({required String key}) {
+    return _prefs.remove(key);
   }
 
   @override
-  Future<bool> clear()  {
-   return _prefs.clear();
+  Future<bool> clear() {
+    return _prefs.clear();
   }
 }
-
-
-
-final appImagesCacheManager = CacheManager(
-  Config(
-    'supabaseImageCache',
-    stalePeriod: const Duration(days: 30), // مدة الحفظ
-    maxNrOfCacheObjects: 300,              // عدد الصور
-  ),
-);

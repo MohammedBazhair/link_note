@@ -4,7 +4,6 @@ import '../../core/extensions/extensions.dart';
 import '../../core/presentation/widgets/custom_progress_widget.dart';
 import '../note/presentation/screens/notes_list_screen.dart';
 
-import '../user/presentation/controllers/user_controller.dart';
 import 'presentation/controllers/auth_state.dart';
 
 Future<void> authListener({
@@ -18,8 +17,6 @@ Future<void> authListener({
       break;
 
     case AuthSuccessfullState():
-      await ref.read(userControllerProvider.notifier).loadProfile();
-
       await context.pushReplacementTo(const NotesListScreen());
 
     case AuthFailedState(:final message):
