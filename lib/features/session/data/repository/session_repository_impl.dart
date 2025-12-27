@@ -1,6 +1,7 @@
-import 'package:flutter/widgets.dart';
+import 'dart:io';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/errors/result.dart';
 import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/entities/session_member.dart';
@@ -12,7 +13,7 @@ class SessionRepositoryImpl implements SessionRepository {
   final RemoteDatabaseService _remoteDatabase;
 
   @override
-  Future<Session?> createSession(Session session) async {
+  Future<Result<Session>> createSession(Session session) async {
     try {
       await _remoteDatabase.deleteWhere(
         filters: {'host_id': session.hostId},
@@ -24,10 +25,13 @@ class SessionRepositoryImpl implements SessionRepository {
         table: ExternalConsts.sessionsTable,
       );
 
-      return Session.fromMap(rawSession);
-    } catch (e) {
-      debugPrint(e.toString());
-      return null;
+      return Result.ok(Session.fromMap(rawSession));
+    } on SocketException catch (_) {
+      return Result.error(
+        'Failed to create session, please check your internet connection.',
+      );
+    } on Exception catch (_) {
+      return Result.error('Failed to create session, please try again.');
     }
   }
 
@@ -88,16 +92,30 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Future<Session?> getSessionByCode({required String sessionCode}) async {
+  Future<Result<Session>> getSessionByCode({
+    required String sessionCode,
+  }) async {
     try {
       final map = await _remoteDatabase.readRowsWhere(
         table: ExternalConsts.sessionsTable,
         filters: {'session_code': sessionCode},
       );
 
-      return Session.fromMap(map.first);
-    } catch (e) {
-      return null;
+      if (map.isEmpty) {
+        return Result.error(
+          'The session is not found, enter another session code.',
+        );
+      }
+      final session = Session.fromMap(map.first);
+      if (session.id == null) {
+        return Result.error('Failed to get the session without id.');
+      }
+
+      return Result.ok(session);
+    } on SocketException catch (_) {
+      return Result.error('Check your connection first to get the session');
+    } on Exception catch (_) {
+      return Result.error('Failed to get the session, try again later');
     }
   }
 

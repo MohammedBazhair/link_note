@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/errors/result.dart';
+import '../../../../core/extensions/extensions.dart';
 import '../../../auth/data/model/app_user.dart';
 import '../../../auth/domain/entities/sub/auth_provider.dart';
 import '../../domain/entities/get_profile_params.dart';
@@ -52,6 +55,7 @@ class UserRepositoryImpl implements UserRepository {
             username: appUser.name,
             avatarUrl: appUser.avatarUrl,
             authProviders: providers,
+            updatedAt: DateTime.now(),
           );
 
         case AuthProvider.unknown:
@@ -76,7 +80,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<ProfileEntity> uploadAvatar(
+  Future<Result<ProfileEntity>> uploadAvatar(
     ProfileEntity profile,
     String filePath,
   ) async {
@@ -86,12 +90,26 @@ class UserRepositoryImpl implements UserRepository {
 
       final newFilePath = '$folderPath/profile.png';
       await file.rename(newFilePath);
-      return await _remoteDataSource.uploadAvatarImage(profile, newFilePath);
-    } catch (e, stack) {
-      debugPrint(e.toString());
-      debugPrint(stack.toString());
 
-      throw Exception('Failed to upload avatar');
+      final bytesSize = await file.length();
+      final megasSize = bytesSize.bytesToMb;
+
+      if (megasSize > ExternalConsts.maxfileMbSize) {
+        return Result.error(
+          "Can't upload avatar, File size must be less than ${ExternalConsts.maxfileMbSize} MB",
+        );
+      }
+
+      final newProfile = await _remoteDataSource.uploadAvatarImage(
+        profile,
+        newFilePath,
+      );
+
+      return Result.ok(newProfile);
+    } on SocketException catch (_) {
+      return Result.error("Can't upload avatar, check your internet first.");
+    } catch (_) {
+      return Result.error("Can't upload avatar, try again.");
     }
   }
 }

@@ -1,35 +1,27 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
-
 import '../../../auth/domain/entities/sub/auth_provider.dart';
 import '../../domain/entities/profile.dart';
 
 class ProfileModel extends ProfileEntity {
-  final String? avatarPath;
-
   ProfileModel({
     required super.userId,
     required super.username,
+    required super.updatedAt,
+
     this.avatarPath,
     super.avatarUrl,
     super.authProviders,
   });
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': userId,
-      'username': username,
-      'avatar_path': ?avatarPath,
-    };
-  }
-
-  String toJson() => jsonEncode(toMap());
 
   factory ProfileModel.fromMap(Map<String, dynamic> map) {
     return ProfileModel(
       userId: map['id'] as String,
       username: map['username'] as String,
       avatarPath: map['avatar_path'] as String?,
+      updatedAt:
+          map['updated_at'] != null
+          ? DateTime.tryParse(map['updated_at']) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 
@@ -44,13 +36,27 @@ class ProfileModel extends ProfileEntity {
       username: profile.username,
       avatarUrl: profile.avatarUrl,
       authProviders: profile.authProviders,
+      updatedAt: profile.updatedAt,
     );
   }
+  final String? avatarPath;
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': userId,
+      'username': username,
+      'updated_at': updatedAt.toIso8601String(),
+      'avatar_path': ?avatarPath,
+    };
+  }
+
+  String toJson() => jsonEncode(toMap());
 
   @override
   ProfileModel copyWith({
     String? userId,
     String? username,
+    DateTime? updatedAt,
     String? avatarPath,
     String? avatarUrl,
     Set<AuthProvider>? authProviders,
@@ -58,8 +64,10 @@ class ProfileModel extends ProfileEntity {
     return ProfileModel(
       userId: userId ?? this.userId,
       username: username ?? this.username,
+      updatedAt: updatedAt ?? this.updatedAt,
       avatarPath: avatarPath ?? this.avatarPath,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      authProviders: authProviders ?? this.authProviders,
     );
   }
 }

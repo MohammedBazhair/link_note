@@ -7,7 +7,7 @@ class ExternalConsts {
   static const sessionsTable = 'sessions';
   static const sessionMembersTable = 'session_members';
 
-  static const maxfileMbSize = 3.0;
+  static const maxfileMbSize = 3; 
 
 
   static const supabaseUrl = 'https://fyfutnuahjknmvdorkwa.supabase.co';
@@ -26,7 +26,7 @@ class ExternalConsts {
   ''';
 
   static const lastUserIdKey = 'user_id';
-  static const profileUserKey = 'user_id';
+  static const profileUserKey = 'user_profile';
   static const aiApiUrl =
       'https://fyfutnuahjknmvdorkwa.supabase.co/functions/v1/generate-ai';
 }

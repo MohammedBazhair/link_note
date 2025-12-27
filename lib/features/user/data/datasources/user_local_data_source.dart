@@ -1,4 +1,3 @@
-
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/features/database/local/cache_service.dart';
 import '../../domain/entities/profile.dart';
@@ -30,9 +29,9 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     );
     if (raw == null) return ProfileEntity.guest();
 
-
     final model = ProfileModel.fromJson(raw);
 
     return model;
   }
+
 }

@@ -27,9 +27,11 @@ class SessionController extends StateNotifier<SessionState> {
         );
         return;
       }
-      
-      final createdSession = await _sessionRepository.createSession(session);
 
+      final result = await _sessionRepository.createSession(session);
+      if (result.hasError) throw Exception(result.errorMessage);
+
+      final createdSession = result.value;
       if (createdSession?.id == null) throw ArgumentError.notNull();
 
       final member = SessionMember(
@@ -44,9 +46,7 @@ class SessionController extends StateNotifier<SessionState> {
         currentMember: member,
       );
     } catch (e) {
-      state = ErrorSessionState(
-        message: 'Failed to create session, please try again.',
-      );
+      state = ErrorSessionState(message: e.toString());
     }
   }
 
@@ -72,11 +72,14 @@ class SessionController extends StateNotifier<SessionState> {
     required String memberId,
   }) async {
     try {
-      final session = await _sessionRepository.getSessionByCode(
+      final result = await _sessionRepository.getSessionByCode(
         sessionCode: sessionCode,
       );
 
-      if (session?.id == null) throw ArgumentError.notNull();
+      if (result.hasError) throw Exception(result.errorMessage);
+
+      final session = result.value;
+      
 
       final member = SessionMember(
         sessionId: session!.id!,

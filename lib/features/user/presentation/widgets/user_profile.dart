@@ -18,7 +18,6 @@ class _UserProfileWidgetState extends ConsumerState<UserProfileWidget> {
   @override
   void initState() {
     super.initState();
-    userController.loadProfile();
     ref.listenManual(userControllerProvider, (previous, next) {
       switch (next) {
         case UserInitialState():

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -15,17 +16,19 @@ import 'features/note/injection.dart';
 import 'features/session/injection.dart';
 import 'features/user/injection.dart';
 
+
 void main() async {
+  await _setupApp();
+  runApp(const ProviderScope(child: MainApp()));
+}
+
+Future<void> _setupApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  initLocalDatabase();
-  await registerMyAppProtocol();
-
-  await initSupabase();
-
-  await setupLocators();
-
-  runApp(const ProviderScope(child: MainApp()));
+  _initLocalDatabase();
+  await _registerMyAppProtocol();
+  await _initSupabase();
+  await _setupLocators();
 }
 
 class MainApp extends StatelessWidget {
@@ -42,24 +45,24 @@ class MainApp extends StatelessWidget {
   }
 }
 
-void initLocalDatabase() {
+void _initLocalDatabase() {
   if (!Platform.isWindows) return;
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
 }
 
-Future<void> registerMyAppProtocol() async {
+Future<void> _registerMyAppProtocol() async {
   if (Platform.isWindows) await protocolHandler.register('linknote');
 }
 
-Future<void> initSupabase() async {
+Future<void> _initSupabase() async {
   await Supabase.initialize(
     url: ExternalConsts.supabaseUrl,
     anonKey: ExternalConsts.supabaseAnonKey,
   );
 }
 
-Future<void> setupLocators() async {
+Future<void> _setupLocators() async {
   await setupCommonDependincies();
   setupAuthDependincies();
   setupNotesDependincies();

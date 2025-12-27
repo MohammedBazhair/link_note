@@ -78,7 +78,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: const [HomeButton()],automaticallyImplyLeading: false,),
+      appBar: AppBar(
+        actions: const [HomeButton()],
+        automaticallyImplyLeading: false,
+      ),
       body: SafeArea(
         child: Center(
           child: Form(

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../../core/presentation/widgets/custom_drawer.dart';
@@ -12,11 +13,26 @@ import '../widgets/note_tile.dart';
 import '../widgets/notes_widget.dart';
 import '../widgets/nothing_note.dart';
 
-class NotesListScreen extends ConsumerWidget {
+final isInNotesListScreen = StateProvider((_) => false);
+
+class NotesListScreen extends ConsumerStatefulWidget {
   const NotesListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<NotesListScreen> createState() => _NotesListScreenState();
+}
+
+class _NotesListScreenState extends ConsumerState<NotesListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(isInNotesListScreen.notifier).update((_) => true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return const Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
@@ -91,7 +107,11 @@ class _NotesStreamBuilderState extends ConsumerState<NotesStreamBuilder> {
           return NotesListView(
             notes: List.generate(
               8,
-              (_) => Note(title: 'Title Testing', content: 'Content' * 6, updatedAt: DateTime.now()),
+              (_) => Note(
+                title: 'Title Testing',
+                content: 'Content' * 6,
+                updatedAt: DateTime.now(),
+              ),
             ),
             isShimmerEnabled: true,
           );

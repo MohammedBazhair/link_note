@@ -31,6 +31,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final profile = ProfileEntity(
         userId: response.user!.id,
         username: user.username,
+        updatedAt: DateTime.now()
       );
 
       await _userRepository.createProfile(profile);

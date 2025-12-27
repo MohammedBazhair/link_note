@@ -44,6 +44,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     final profileModel = ProfileModel(
       userId: profile.userId,
       username: profile.username,
+      updatedAt: profile.updatedAt
     );
 
     return _remoteDatabase.insertRow(
@@ -69,6 +70,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       final profileEntity = ProfileEntity(
         userId: userId,
         username: profileModel.username,
+        updatedAt: profileModel.updatedAt
       );
 
       if (imagePath == null) return profileEntity;
