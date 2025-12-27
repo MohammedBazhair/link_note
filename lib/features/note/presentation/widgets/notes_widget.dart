@@ -26,8 +26,7 @@ class NotesListView extends ConsumerWidget {
         color: DarkColors.primary,
         onRefresh: ref.read(noteControllerProvider.notifier).fetchNotes,
         child: ListView.separated(
-          physics: const BouncingScrollPhysics(
-            decelerationRate: ScrollDecelerationRate.fast,
+          physics: const AlwaysScrollableScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           padding: const EdgeInsets.all(24),

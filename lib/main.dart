@@ -6,6 +6,7 @@ import 'package:protocol_handler/protocol_handler.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/constants/external_constants/external_constants.dart';
 import 'core/features/common_injections.dart';
 import 'core/presentation/screens/auth_gate.dart';
 import 'core/theme/dark_theme.dart';
@@ -53,9 +54,8 @@ Future<void> registerMyAppProtocol() async {
 
 Future<void> initSupabase() async {
   await Supabase.initialize(
-    url: 'https://fyfutnuahjknmvdorkwa.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZnV0bnVhaGprbm12ZG9ya3dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MDY1MDgsImV4cCI6MjA3OTQ4MjUwOH0.QMY5rWu8kzSJdayLsnSiUQnQLkMNyimRImNvrDsBu30',
+    url: ExternalConsts.supabaseUrl,
+    anonKey: ExternalConsts.supabaseAnonKey,
   );
 }
 

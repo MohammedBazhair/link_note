@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/note_ai_controller/note_ai_controller.dart';
 import '../controllers/note_controller/note_controller.dart';
@@ -22,14 +21,20 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
-    final controller = ref.read(editorFormProvider).contentController;
+    final formState = ref.read(editorFormProvider);
 
     ref.read(editorFormProvider).initForm(widget.note);
 
     ref.listenManual(noteAiProvider, (_, state) {
-      if (state.result == null) return;
+      if (state.noteContent == state.noteTitle) return;
 
-      controller.text = state.result?.content ?? controller.text;
+      formState.titleController.text =
+          state.noteTitle?.text ?? formState.titleController.text;
+
+      formState.contentController.text =
+          state.noteContent?.text ?? formState.contentController.text;
+
+      formState.markedChanges();
     });
   }
 
@@ -83,31 +88,8 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Stack(
-              alignment: AlignmentGeometry.topCenter,
-              children: [
-                Column(
-                  children: [
-                    Expanded(child: EditorForm(onPopInvoke: onPopInvoke)),
-                  ],
-                ),
-                Consumer(
-                  builder: (context, ref, child) {
-                    final isLoading = ref.watch(noteAiProvider).isLoading;
-                    final width = MediaQuery.of(context).size.width * 0.5;
-                    return ConditionalBuilder(
-                      condition: isLoading,
-                      builder: (_) => SizedBox(
-                        width: width,
-                        child: const LinearProgressIndicator(
-                          color: Color(0xFF2467A6),
-                        ),
-                      ),
-                      fallback: (_) => const SizedBox.shrink(),
-                    );
-                  },
-                ),
-              ],
+            child: Column(
+              children: [Expanded(child: EditorForm(onPopInvoke: onPopInvoke))],
             ),
           ),
         ),

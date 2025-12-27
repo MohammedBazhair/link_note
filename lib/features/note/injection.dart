@@ -1,6 +1,5 @@
 import '../../core/features/ai/ai_client.dart';
 import '../auth/injection.dart';
-import 'data/datasources/note_ai_remote_datasource.dart';
 import 'data/datasources/notes_local_data_source.dart';
 import 'data/datasources/notes_remote_data_source.dart';
 import 'data/repositories/note_ai_repository_impl.dart';
@@ -29,9 +28,6 @@ void setupNotesDependincies() {
 
   getIt.registerLazySingleton<AiClient>(() => AiClientImpl(getIt()));
 
-  getIt.registerLazySingleton<NoteAiRemoteDataSource>(
-    () => NoteAiRemoteDataSourceImpl(getIt()),
-  );
 
   getIt.registerLazySingleton<NoteAiRepository>(
     () => NoteAiRepositoryImpl(getIt()),

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../controllers/note_ai_controller/note_ai_controller.dart';
+import 'ai_action_button.dart';
 
 class ContentFormField extends StatelessWidget {
   const ContentFormField({
@@ -13,22 +17,53 @@ class ContentFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      maxLines: null,
-      expands: true,
-      readOnly: readOnly,
-      textAlignVertical: TextAlignVertical.top,
-      style: TextStyle(color: Colors.white.withAlpha(200)),
-      cursorColor: const Color(0x809CDEBC),
-      decoration: const InputDecoration(hintText: 'Enter Text Here...'),
-      onChanged: onChanged,
-      validator: (value) {
-        if (value?.isEmpty ?? true) {
-          return "Field Can't be Empty";
-        }
-        return null;
-      },
+    return Stack(
+      children: [
+        TextFormField(
+          controller: controller,
+          maxLines: null,
+          expands: true,
+          readOnly: readOnly,
+          textAlignVertical: TextAlignVertical.top,
+          style: TextStyle(color: Colors.white.withAlpha(200)),
+          cursorColor: const Color(0x809CDEBC),
+          decoration: const InputDecoration(
+            hintText: 'Enter Text Here...',
+            contentPadding: EdgeInsetsDirectional.only(
+              end: 40,
+              start: 15,
+              bottom: 15,
+              top: 15,
+            ),
+          ),
+          onChanged: onChanged,
+          validator: (value) {
+            if (value?.isEmpty ?? true) {
+              return "Field Can't be Empty";
+            }
+            return null;
+          },
+        ),
+
+        PositionedDirectional(
+          end: 5,
+          top: 5,
+          child: Consumer(
+            builder: (_, ref, __) {
+              final aiController = ref.read(noteAiProvider.notifier);
+              final isProcessing = ref.watch(
+                noteAiProvider.select((s) => s.isContentProcessing),
+              );
+
+              return AiActionButton(
+                isProcessing: isProcessing,
+                onPressed: ()  =>
+                    aiController.improveContent(controller.text),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

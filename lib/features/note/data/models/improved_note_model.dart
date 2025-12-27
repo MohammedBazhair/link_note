@@ -1,19 +1,15 @@
 import '../../domain/entities/ai_response.dart';
 
 class AiResponseModel extends AiResponseEntity {
-  const AiResponseModel({required super.content});
+  const AiResponseModel({required super.text});
 
   factory AiResponseModel.empty() {
-    return const AiResponseModel(content: '');
+    return const AiResponseModel(text: '');
   }
 
   factory AiResponseModel.fromJson(Map<String, dynamic> json) {
-    try {
-      return AiResponseModel(
-        content: json['choices'][0]['message']['content'] as String,
-      );
-    } catch (e) {
-      return AiResponseModel.empty();
-    }
+    return AiResponseModel(
+      text: json['choices'][0]['message']['content'] as String,
+    );
   }
 }

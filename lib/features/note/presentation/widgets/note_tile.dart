@@ -37,7 +37,7 @@ class NoteTile extends ConsumerWidget {
               .update((s) => s.copyWith(noteId: note.id));
           return;
         }
-
+    
         context.pushTo(NoteEditorScreen(note: note));
       },
     );

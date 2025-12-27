@@ -1,7 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/assets/app_images.dart';
+import '../../../../core/constants/assets/app_assets.dart';
+import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../domain/entities/profile.dart';
 
@@ -35,6 +36,7 @@ class NetworkAvatar extends StatelessWidget {
         width: 80,
         height: 80,
         fit: BoxFit.cover,
+        cacheManager: appImagesCacheManager,
         fadeInDuration: const Duration(milliseconds: 150),
         fadeOutDuration: const Duration(milliseconds: 150),
         placeholder: (context, url) => const PlaceholderAvatar(),

@@ -9,8 +9,10 @@ class ExternalConsts {
 
   static const maxfileMbSize = 3.0;
 
-  static const supabaseUrl = 'profiles';
-  static const supabaseAnonKey = 'profiles';
+  static const imagesAppCache = 'imagesAppCache';
+
+  static const supabaseUrl = 'https://fyfutnuahjknmvdorkwa.supabase.co';
+  static const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZnV0bnVhaGprbm12ZG9ya3dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MDY1MDgsImV4cCI6MjA3OTQ4MjUwOH0.QMY5rWu8kzSJdayLsnSiUQnQLkMNyimRImNvrDsBu30';
   static const authRedirectUrl = 'https://bhf-s.github.io/auth/';
 
   static const createTableNotesQuery =
@@ -25,7 +27,7 @@ class ExternalConsts {
   ''';
 
   static const lastUserIdKey = 'user_id';
-  static const apiMarketKey = 'cmjkud7vg0010le04gfw0n6lz';
+  static const profileUserKey = 'user_id';
   static const aiApiUrl =
-      'https://prod.api.market/api/v1/swift-api/gpt-4-1-nano/chat/completions';
+      'https://fyfutnuahjknmvdorkwa.supabase.co/functions/v1/generate-ai';
 }

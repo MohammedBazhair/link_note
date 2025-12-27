@@ -1,14 +1,26 @@
 import '../../../domain/entities/ai_response.dart';
 
 class NoteAiState {
-  NoteAiState({this.isLoading = false, this.result});
-  final bool isLoading;
-  final AiResponseEntity? result;
+  NoteAiState({this.isContentProcessing = false,this.isTitleProcessing= false, this.noteContent,this.noteTitle});
+  final bool isTitleProcessing;
+  final bool isContentProcessing;
+  final AiResponseEntity? noteContent;
+  final AiResponseEntity? noteTitle;
 
-  NoteAiState copyWith({bool? isLoading, AiResponseEntity? result}) {
+  
+
+
+  NoteAiState copyWith({
+    bool? isTitleProcessing,
+    bool? isContentProcessing,
+    AiResponseEntity? noteContent,
+    AiResponseEntity? noteTitle,
+  }) {
     return NoteAiState(
-      isLoading: isLoading ?? this.isLoading,
-      result: result ?? this.result,
+      isTitleProcessing: isTitleProcessing ?? this.isTitleProcessing,
+      isContentProcessing: isContentProcessing ?? this.isContentProcessing,
+      noteContent: noteContent ?? this.noteContent,
+      noteTitle: noteTitle ?? this.noteTitle,
     );
   }
 }

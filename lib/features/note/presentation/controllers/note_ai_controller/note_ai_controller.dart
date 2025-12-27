@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
+import '../../../domain/entities/note.dart';
 import '../../../domain/repositories/note_ai_repository.dart';
 import 'note_ai_state.dart';
 
@@ -13,25 +14,39 @@ class NoteAiController extends StateNotifier<NoteAiState> {
   NoteAiController(this._serviceAi) : super(NoteAiState());
   final NoteAiRepository _serviceAi;
 
-  Future<void> improve(String note) async {
-    if (!mounted) return;
-    state = state.copyWith(isLoading: true);
+  Future<void> improveContent(String note) async {
+    state = state.copyWith(isContentProcessing: true);
 
     try {
-      final result = await _serviceAi.improveNote(note);
+      final result = await _serviceAi.improveNoteContent(note);
 
-      if (!mounted) return;
-      state = state.copyWith(result: result);
+      state = state.copyWith(noteContent: result);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      if (mounted) state = state.copyWith(isLoading: false);
+            _resetState();
+
     }
   }
 
-  @override
-  void dispose() {
-    print('dispose called');
-    super.dispose();
+  Future<void> improveTitle(Note note) async {
+    state = state.copyWith(isTitleProcessing: true);
+
+    try {
+      final result = await _serviceAi.improveNoteTitle(note);
+
+      state = state.copyWith(noteTitle: result);
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      _resetState();
+    }
+  }
+
+  void _resetState() {
+    state = state.copyWith(
+      isContentProcessing: false,
+      isTitleProcessing: false,
+    );
   }
 }

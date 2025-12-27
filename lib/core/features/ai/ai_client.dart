@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../constants/external_constants/external_constants.dart';
 import '../network/network_clinet.dart';
 import 'ai_client_params.dart';
 
@@ -17,16 +18,10 @@ class AiClientImpl implements AiClient {
     final response = await _client.post(
       params.apiUrl,
       headers: {
-        'accept': 'application/json',
         'Content-Type': 'application/json',
-        'x-api-market-key': params.apiKey,
+        'Authorization': 'Bearer ${ExternalConsts.supabaseAnonKey}',
       },
-      body: jsonEncode({
-        'model': params.model,
-        'messages': [
-          {'role': 'user', 'content': params.prompt},
-        ],
-      }),
+      body: jsonEncode({'prompt': params.prompt}),
     );
 
     return jsonDecode(response.body);

@@ -1,4 +1,5 @@
 import '../auth/injection.dart';
+import 'data/datasources/user_local_data_source.dart';
 import 'data/datasources/user_remote_data_source.dart';
 import 'data/repositories/user_repository_impl.dart';
 import 'domain/repositories/user_repository.dart';
@@ -9,8 +10,12 @@ void setupUserDependincies() {
     () => UserRemoteDataSourceImpl(getIt(), getIt(), getIt()),
   );
 
+  getIt.registerLazySingleton<UserLocalDataSource>(
+    () => UserLocalDataSourceImpl(getIt()),
+  );
+
   getIt.registerLazySingleton<UserRepository>(
-    () => UserRepositoryImpl(getIt()),
+    () => UserRepositoryImpl(getIt(), getIt()),
   );
 
   getIt.registerLazySingleton<UserController>(() => UserController(getIt()));

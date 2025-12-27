@@ -1,3 +1,4 @@
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract interface class LocalCacheService {
@@ -102,3 +103,13 @@ class LocalCacheServiceImpl implements LocalCacheService {
    return _prefs.clear();
   }
 }
+
+
+
+final appImagesCacheManager = CacheManager(
+  Config(
+    'supabaseImageCache',
+    stalePeriod: const Duration(days: 30), // مدة الحفظ
+    maxNrOfCacheObjects: 300,              // عدد الصور
+  ),
+);

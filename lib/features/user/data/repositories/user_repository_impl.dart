@@ -9,11 +9,13 @@ import '../../../auth/domain/entities/sub/auth_provider.dart';
 import '../../domain/entities/get_profile_params.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../datasources/user_local_data_source.dart';
 import '../datasources/user_remote_data_source.dart';
 
 class UserRepositoryImpl implements UserRepository {
-  UserRepositoryImpl(this._remoteDataSource);
+  UserRepositoryImpl(this._remoteDataSource, this._localDataSource);
   final UserRemoteDataSource _remoteDataSource;
+  final UserLocalDataSource _localDataSource;
 
   @override
   bool get isUserLoggedIn => _remoteDataSource.isUserLogin;
@@ -39,12 +41,13 @@ class UserRepositoryImpl implements UserRepository {
       );
       final providers = appUser.providers.toSet();
 
+      final ProfileEntity profileEntity;
       switch (appUser.provider) {
         case AuthProvider.email:
           final profile = await _remoteDataSource.readProfile(params.userId);
-          return profile.copyWith(authProviders: providers);
+          profileEntity = profile.copyWith(authProviders: providers);
         case AuthProvider.google:
-          return ProfileEntity(
+          profileEntity = ProfileEntity(
             userId: params.userId,
             username: appUser.name,
             avatarUrl: appUser.avatarUrl,
@@ -54,8 +57,12 @@ class UserRepositoryImpl implements UserRepository {
         case AuthProvider.unknown:
           throw Exception('unKnown provider, try again');
       }
+
+      await _localDataSource.saveProfile(profileEntity);
+      return profileEntity;
     } catch (e) {
-      return ProfileEntity.guest();
+      debugPrint(e.toString());
+      return _localDataSource.readProfile();
     }
   }
 

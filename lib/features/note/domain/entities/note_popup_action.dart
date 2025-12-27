@@ -1,7 +1,6 @@
 enum NotePopupAction {
   qrGenerator('Genereate Qr Code'),
-  qrScanner('Scanner Qr Code'),
-  improveNote('Improve Note by AI');
+  qrScanner('Scanner Qr Code');
 
   const NotePopupAction(this.label);
 

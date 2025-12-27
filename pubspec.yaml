@@ -27,6 +27,7 @@ dependencies:
   sqflite_common_ffi: ^2.4.0+1
   uuid: ^4.5.2
   http: ^1.6.0
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -35,6 +36,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.6
   rename: ^3.1.0
+  flutter_cache_manager: ^3.4.1
   # msix: ^2.7.3
 
 flutter:
@@ -42,6 +44,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/icons/
     - shorebird.yaml
 
 # msix_config:
@@ -52,8 +55,8 @@ flutter:
 #   logo_path: E:\Projects\Link Note\link_note\assets\images\app_logo.png
 
 flutter_assets:
-  assets_path: assets/images/
+  assets_path: assets/
   output_path: lib/core/constants/assets/
-  filename: app_images.dart
+  filename: app_assets.dart
   field_prefix:
   ignore_comments: true
