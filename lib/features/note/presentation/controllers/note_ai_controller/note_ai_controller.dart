@@ -24,8 +24,7 @@ class NoteAiController extends StateNotifier<NoteAiState> {
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-            _resetState();
-
+      _resetState();
     }
   }
 

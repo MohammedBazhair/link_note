@@ -52,6 +52,7 @@ class CustomDrawer extends ConsumerWidget {
                         const CreateSessionTile(),
                         const JoinSessionTile(),
                       ],
+                      const AboutAppTile(),
                     ],
                   ),
                 ),

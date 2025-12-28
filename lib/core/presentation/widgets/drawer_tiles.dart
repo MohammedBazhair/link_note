@@ -11,6 +11,7 @@ import '../../../features/session/presentation/screens/join_session_by_code_scre
 import '../../../features/session/presentation/screens/session_screen.dart';
 import '../../constants/colors/colors.dart';
 import '../../extensions/extensions.dart';
+import '../screens/about_app_screen.dart';
 
 class DrawerTile extends StatelessWidget {
   const DrawerTile({
@@ -31,6 +32,7 @@ class DrawerTile extends StatelessWidget {
       tileColor: Colors.transparent,
       leading: CircleAvatar(
         backgroundColor: isSelected ? DarkColors.primary : Colors.transparent,
+        foregroundColor: isSelected ? Colors.white : DarkColors.icon,
         child: Icon(icon),
       ),
       title: Text(title),
@@ -132,6 +134,21 @@ class JoinSessionTile extends StatelessWidget {
       title: 'Join Session',
       onTap: () {
         context.pushTo(const JoinSessionByCodeScreen());
+      },
+    );
+  }
+}
+
+class AboutAppTile extends StatelessWidget {
+  const AboutAppTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DrawerTile(
+      icon: Icons.info,
+      title: 'About',
+      onTap: () {
+        context.pushTo(const AboutAppScreen());
       },
     );
   }

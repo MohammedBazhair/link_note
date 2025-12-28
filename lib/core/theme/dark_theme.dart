@@ -91,19 +91,19 @@ ThemeData darkTheme() => ThemeData(
   listTileTheme: ListTileThemeData(
     selectedTileColor: const Color(0xFF0C7395),
     selectedColor: Colors.grey.shade100,
-    tileColor: const Color(0xFF043F52),
-    iconColor: DarkColors.icon,
+    tileColor: Colors.transparent,
     titleTextStyle: const TextStyle(
+      fontSize: 15,
       color: Color(0xFFCFEBED),
-      fontSize: 16,
       fontWeight: FontWeight.w600,
       overflow: TextOverflow.ellipsis,
     ),
     subtitleTextStyle: const TextStyle(
-      color: Color(0xFF95B5B7),
+      color: DarkColors.secondFont,
       overflow: TextOverflow.ellipsis,
+      fontSize: 13,
     ),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
   ),
   floatingActionButtonTheme: const FloatingActionButtonThemeData(
     backgroundColor: DarkColors.primary,

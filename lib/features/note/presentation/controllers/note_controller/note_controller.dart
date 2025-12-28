@@ -88,8 +88,6 @@ class NoteController extends StateNotifier<Map<String, Note>> {
 
   Future<void> updateNote(Note note) async {
     try {
-      print('updateNote');
-      print(note);
       await _notesRepository.update(note);
       final copiedMap = {...state};
       if (note.id == null) throw ArgumentError.notNull();
