@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../constants/colors/colors.dart';
+import '../constants/external_constants/external_constants.dart';
 
 ThemeData darkTheme() => ThemeData(
   scaffoldBackgroundColor: const Color(0xFF151825),
   brightness: Brightness.dark,
   textTheme: ThemeData.dark().textTheme.apply(
-    bodyColor: const Color(0xFF95B5B7),
+    bodyColor: const Color.fromARGB(255, 163, 235, 243),
   ),
+  fontFamily: ExternalConsts.fontFamily,
 
   drawerTheme: const DrawerThemeData(backgroundColor: Color(0xFF151825)),
   appBarTheme: const AppBarThemeData(
@@ -112,7 +114,10 @@ ThemeData darkTheme() => ThemeData(
     backgroundColor: Color(0xFF151825),
     barrierColor: Color(0x66292727),
   ),
-  dividerTheme: const DividerThemeData(color: DarkColors.icon, thickness: 0.2),
+  dividerTheme: DividerThemeData(
+    color: DarkColors.primary.withOpacity(0.2),
+    thickness: 1,
+  ),
   popupMenuTheme: PopupMenuThemeData(
     position: PopupMenuPosition.under,
     color: const Color(0xF022273C),
@@ -120,5 +125,11 @@ ThemeData darkTheme() => ThemeData(
     shadowColor: const Color(0xB8010101),
     menuPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  ),
+
+  textSelectionTheme: const TextSelectionThemeData(
+    cursorColor: Color(0xC55BD1FF),
+    selectionHandleColor: DarkColors.primary,
+    selectionColor: Color(0x335BD1FF),
   ),
 );

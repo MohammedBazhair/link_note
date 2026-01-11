@@ -26,7 +26,7 @@ class _JoinSessionByCodePageState
     _codeController.text.trim();
     final sessionCode = _codeController.text.trim().toUpperCase();
     if (sessionCode.isEmpty) {
-      context.showSnakbar('Please enter a session code');
+      context.showSnakbar('الرجاء إدخال رمز الجلسة');
       return;
     }
 
@@ -48,7 +48,7 @@ class _JoinSessionByCodePageState
   Widget build(BuildContext context) {
     ref.listen(sessionControllerProvider, (_, next) {
       if (next is JoinSessionState) {
-        context.showSnakbar('Joined to the session successfully');
+        context.showSnakbar('تم الانضمام إلى الجلسة بنجاح');
         context.pushTo(const SessionScreen());
       } else if (next case ErrorSessionState(:final message)) {
         context.showSnakbar(message);
@@ -56,14 +56,14 @@ class _JoinSessionByCodePageState
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Join Session')),
+      appBar: AppBar(title: const Text('الانضمام إلى الجلسة')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Session Code:'),
+              const Text('رمز الجلسة:'),
               const SizedBox(height: 10),
               TextField(
                 controller: _codeController,
@@ -89,7 +89,7 @@ class _JoinSessionByCodePageState
                 ),
               ),
               const SizedBox(height: 24),
-              MainButton(onPressed: _join, text: 'Join'),
+              MainButton(onPressed: _join, text: 'انضم'),
             ],
           ),
         ),

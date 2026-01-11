@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/constants/colors/colors.dart';
 
 class CustomPasswordField extends StatefulWidget {
   const CustomPasswordField({
@@ -32,9 +31,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
     return TextFormField(
       controller: widget.controller,
       autofillHints: const [AutofillHints.password],
-
       obscureText: obscure,
-      cursorColor: DarkColors.cursor,
       cursorRadius: const Radius.circular(20),
       cursorWidth: 1.3,
       textInputAction: widget.textInputAction,
@@ -54,6 +51,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
           child: Icon(Icons.lock_outline),
         ),
         suffixIcon: IconButton(
+          highlightColor: Colors.transparent,
           padding: const EdgeInsetsDirectional.only(end: 15.0),
 
           icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),

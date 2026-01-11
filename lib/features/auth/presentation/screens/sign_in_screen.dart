@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:app_links/app_links.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../listeners.dart';
@@ -80,6 +83,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: const [HomeButton()],
+        actionsPadding: const EdgeInsets.all(0),
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
@@ -93,23 +97,23 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 children: [
                   // عنوان الشاشة
                   const Text(
-                    'Welcome Back ',
+                    'أهلا بعودتك!',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 10),
 
                   const Text(
-                    'Login to your account',
-                    style: TextStyle(fontSize: 14, color: Color(0xB4ACBFB6)),
+                    'سجل دخولك إلى حسابك',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color.fromARGB(196, 255, 255, 255),
+                    ),
                   ),
 
                   const SizedBox(height: 80),
 
-                  const Text(
-                    'Email',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
+                  const FieldLabel(text: 'البريد الإلكتروني'),
 
                   const SizedBox(height: 8),
 
@@ -117,52 +121,61 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
                   const SizedBox(height: 25),
 
-                  const Text(
-                    'Password',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
+                  const FieldLabel(text: 'كلمة المرور'),
 
                   const SizedBox(height: 8),
 
                   CustomPasswordField(
                     controller: _passwordController,
-                    hintText: 'Enter your password',
+                    hintText: 'أدخل كلمة المرور',
                     onSubmit: onSubmit,
                     textInputAction: TextInputAction.done,
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 25),
 
                   // نسيت كلمة المرور
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Forget Password action
-                    },
-                    child: const Text('Forgot Password?'),
-                  ),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: 'هل نسيت كلمة المرور؟',
 
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          // TODO: Forget Password action
+                        },
+                      style: const TextStyle(color: Colors.blue),
+                    ),
+                  ),
                   const SizedBox(height: 25),
 
                   // زر تسجيل الدخول
-                  MainButton(onPressed: onSubmit, text: 'Login'),
+                  MainButton(onPressed: onSubmit, text: 'تسجيل الدخول'),
 
                   const SizedBox(height: 15),
 
                   const SignGoogleButton(),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 25),
 
                   // الانتقال إلى التسجيل
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        CupertinoModalPopupRoute(
-                          builder: (context) => const SignUpScreen(),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: 'ليس لديك حساب؟ ',
+                      children: [
+                        const TextSpan(text: '  '),
+
+                        TextSpan(
+                          text: 'سجل الآن',
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              context.pushReplacementTo(const SignUpScreen());
+                            },
+                          style: const TextStyle(color: Colors.blue),
                         ),
-                      );
-                    },
-                    child: const Text('Don’t have an account? Sign up'),
+                      ],
+                    ),
                   ),
                 ],
               ),

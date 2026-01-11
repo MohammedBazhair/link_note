@@ -11,19 +11,16 @@ class SaveDialog extends StatelessWidget {
       contentPadding: const EdgeInsets.all(30),
       content: const Row(
         spacing: 10,
-        children: [
-          Icon(Icons.info_outline_rounded),
-          Text('Do you want to save?'),
-        ],
+        children: [Icon(Icons.info_outline_rounded), Text('هل تريد الحفظ؟')],
       ),
       actions: [
         ElevatedButton(
           onPressed: () => context.pop(true),
-          child: const Text('Yes'),
+          child: const Text('نعم'),
         ),
         TextButton(
           onPressed: () => context.pop(false),
-          child: const Text('No'),
+          child: const Text('لا'),
         ),
       ],
     );

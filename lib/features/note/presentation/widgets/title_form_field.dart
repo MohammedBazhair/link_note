@@ -25,7 +25,7 @@ class TitleFormField extends StatelessWidget {
       style: TextStyle(color: Colors.white.withAlpha(200)),
       cursorColor: const Color(0x809CDEBC),
       decoration: InputDecoration(
-        hintText: 'Title...',
+        hintText: 'العنوان...',
         suffixIcon: Consumer(
           builder: (_, ref, __) {
             final aiController = ref.read(noteAiProvider.notifier);

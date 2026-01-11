@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 class NothingNoteWidget extends StatelessWidget {
-  const NothingNoteWidget({super.key,});
-
-
+  const NothingNoteWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'No notes available.\nTap the + button to add a new note.',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 18, color: Colors.grey),
+    return const Padding(
+      padding: EdgeInsets.all(24),
+      child: Center(
+        child: Text(
+          'لاتوجد اي ملاحظات. \n قم بإنشاء ملاحظة جديدة بالضغط على زر الإضافة.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18, height: 1.8),
+        ),
       ),
     );
   }

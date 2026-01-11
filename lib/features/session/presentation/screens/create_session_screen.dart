@@ -26,7 +26,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
     final selectableState = ref.read(selectableNoteProvider);
     final noteId = selectableState.noteId;
     if (!selectableState.hasNoteId) {
-      return context.showSnakbar('must choose a note first');
+      return context.showSnakbar('يجب اختيار ملاحظة أولاً');
     }
 
     final hostId = ref.read(userControllerProvider.notifier).currentUser?.id;
@@ -45,7 +45,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
   @override
   Widget build(BuildContext context) {
     ref.listen(sessionControllerProvider, (previous, current) {
-      handleSessionStates(context, current: current,previous: previous);
+      handleSessionStates(context, current: current, previous: previous);
     });
 
     return PopScope(
@@ -53,7 +53,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
           .read(selectableNoteProvider.notifier)
           .update((_) => SelectableNote()),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Create Session')),
+        appBar: AppBar(title: const Text('إنشاء جلسة')),
         body: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -68,11 +68,11 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
                       .update((s) => s.copyWith(isSelectable: true));
                   await context.pushTo(const NotesListScreen());
                 },
-                child: const Text('Choose a Note'),
+                child: const Text('اختر ملاحظة'),
               ),
 
               const SelectedNote(),
-              MainButton(onPressed: _createSession, text: 'Create Session'),
+              MainButton(onPressed: _createSession, text: 'إنشاء جلسة'),
             ],
           ),
         ),

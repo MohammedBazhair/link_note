@@ -91,14 +91,20 @@ class NoteFormHeader extends ConsumerWidget {
                 final note = Note.fromJson(data);
                 formState.initForm(note);
                 formState.markedChanges();
-            
             }
           },
           itemBuilder: (context) => NotePopupAction.values
               .map(
                 (value) => PopupMenuItem<NotePopupAction>(
                   value: value,
-                  child: Text(value.label),
+
+                  child: Row(
+                    children: [
+                      Icon(value.icon),
+                      const SizedBox(width: 10),
+                      Text(value.label),
+                    ],
+                  ),
                 ),
               )
               .toList(),

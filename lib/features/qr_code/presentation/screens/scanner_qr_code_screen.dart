@@ -31,11 +31,14 @@ class _ScannerQrCodeScreenState extends State<ScannerQrCodeScreen> {
 
     final scanArea = cameraArea - 60;
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan QR Code')),
+      appBar: AppBar(title: const Text('مسح رمز QR')),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          const Text('Scan Qr Code to Extract a Note.', textAlign: TextAlign.center),
+          const Text(
+            'امسح رمز QR لاستخراج ملاحظة.',
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 40),
           Stack(
             alignment: Alignment.center,
@@ -54,7 +57,6 @@ class _ScannerQrCodeScreenState extends State<ScannerQrCodeScreen> {
 
                       final rawValue = result.barcodes.first.rawValue;
                       if (rawValue?.isNotEmpty ?? false) {
-                       
                         Navigator.of(context).pop<String>(rawValue);
                       }
 

@@ -75,7 +75,7 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Session Title'),
+        title: const Text('عنوان الجلسة'),
         actions: const [SessionPopupMenu()],
       ),
       body: Padding(

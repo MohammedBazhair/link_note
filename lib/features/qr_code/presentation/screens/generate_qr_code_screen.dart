@@ -9,7 +9,7 @@ class GenerateQrCodeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(title: const Text('Generate QR Code')),
+      appBar: AppBar(title: const Text('توليد رمز QR')),
       body: Center(
         child: Container(
           width: screenWidth * 0.5,

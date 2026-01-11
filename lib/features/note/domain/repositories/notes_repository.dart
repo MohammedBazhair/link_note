@@ -4,7 +4,7 @@ abstract interface class NotesRepository {
   Future<Note?> create(Note note);
   Future<void> insertNotes(Iterable<Note> notes);
   Future<List<Note>> getAll(String? userId);
-   Stream<List<Note>>  fetchNotesRealTime(String userId);
+   Stream<List<Note>>  fetchNotesRealTime(String ?userId);
   Stream<Note?> fetchNoteStream(String noteId);
 
   Future<void> update(Note note);

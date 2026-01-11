@@ -56,10 +56,10 @@ class NotesListAppBar extends ConsumerWidget {
     );
 
     return AppBar(
-      title: isSelectable ? const Text('Select a Note') : const Text('Notes'),
+      title: isSelectable ? const Text('حدد ملاحظة') : const Text('الملاحظات'),
       leading: isSelectable
           ? TextButton.icon(
-              label: const Text('Done'),
+              label: const Text('تم'),
               onPressed: context.pop,
               icon: const Icon(Icons.check),
             )

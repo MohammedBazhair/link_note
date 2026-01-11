@@ -66,10 +66,10 @@ class NoteController extends StateNotifier<Map<String, Note>> {
 
   void fetchNotesRealTime() {
     try {
-      if (_userId == null) throw ArgumentError.notNull();
+     
       _subscription?.cancel();
       _subscription = _notesRepository
-          .fetchNotesRealTime(_userId!)
+          .fetchNotesRealTime(_userId)
           .listen(
             _setNotes,
             onError: (e, stack) async {

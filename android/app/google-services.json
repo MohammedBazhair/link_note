@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "5775524050",
+    "project_id": "link-note-fbf10",
+    "storage_bucket": "link-note-fbf10.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5775524050:android:a87f2fd763dcf856d6ed0b",
+        "android_client_info": {
+          "package_name": "com.example.link_note"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEIZ2GwxRQomiDQnhoVLsNtnG3ibFpk3s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

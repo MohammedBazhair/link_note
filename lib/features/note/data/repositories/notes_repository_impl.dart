@@ -78,10 +78,11 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Stream<List<Note>> fetchNotesRealTime(String userId) {
+  Stream<List<Note>> fetchNotesRealTime(String? userId) {
     Stream<RowList> stream;
     try {
-      stream = _remote.fetchNotesRealTime(userId);
+      if( userId?.isEmpty?? true) throw ArgumentError.notNull();  
+      stream = _remote.fetchNotesRealTime(userId!);
     } catch (e) {
       stream = _local.fetchNotesRealTime();
     }

@@ -5,11 +5,11 @@ class HomeButton extends StatelessWidget {
   const HomeButton({super.key});
 
   @override
-  Widget build(BuildContext context, ) {
+  Widget build(BuildContext context) {
     return IconButton(
       iconSize: 30,
       hoverColor: Colors.transparent,
-
+      highlightColor: Colors.transparent,
       onPressed: () {
         Navigator.push(
           context,

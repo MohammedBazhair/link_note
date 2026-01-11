@@ -22,6 +22,7 @@ class AiActionButton extends StatelessWidget {
         child: const CircularProgressIndicator(strokeWidth: 1.2),
       ),
       secondChild: IconButton(
+        tooltip: 'استعمال AI للتحسين',
         onPressed: onPressed,
         icon: SvgPicture.asset(Assets.iconsWandStars, width: 24),
       ),

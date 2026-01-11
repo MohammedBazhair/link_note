@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../user/domain/entities/user.dart';
@@ -73,6 +76,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: const [HomeButton()],
+        actionsPadding: const EdgeInsets.all(0),
+
         automaticallyImplyLeading: false,
       ),
 
@@ -88,62 +93,51 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 children: [
                   // العنوان
                   const Text(
-                    'Create Account',
+                    'إنشاء حساب',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Sign up to get started',
+                    'سجل للحصول على تجربة أفضل في إدارة ملاحظاتك ومزامنتها عبر أجهزتك.',
                     style: TextStyle(fontSize: 14, color: Color(0xB4ACBFB6)),
                   ),
 
                   const SizedBox(height: 80),
 
                   // الاسم
-                  const Text(
-                    'Full Name',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
+                  const FieldLabel(text: 'الاسم الكامل'),
                   const SizedBox(height: 8),
                   CustomFullNameField(nameController: nameController),
 
                   const SizedBox(height: 25),
 
                   // البريد
-                  const Text(
-                    'Email',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
+                  const FieldLabel(text: 'البريد الإلكتروني'),
+
                   const SizedBox(height: 8),
 
                   CustomEmailField(emailController),
                   const SizedBox(height: 25),
 
                   // كلمة المرور
-                  const Text(
-                    'Password',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
+                  const FieldLabel(text: 'كلمة المرور'),
                   const SizedBox(height: 8),
 
                   CustomPasswordField(
                     controller: passwordController,
-                    hintText: 'Enter your password',
+                    hintText: 'أدخل كلمة المرور',
                   ),
 
                   const SizedBox(height: 25),
 
                   // تأكيد كلمة المرور
-                  const Text(
-                    'Confirm Password',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
+                  const FieldLabel(text: 'تأكيد الباسورد'),
                   const SizedBox(height: 8),
 
                   CustomPasswordField(
                     originalController: passwordController,
                     controller: confirmPasswordController,
-                    hintText: 'Enter your confirm password',
+                    hintText: 'أعد إدخال كلمة المرور',
                     onSubmit: onSubmit,
                     textInputAction: TextInputAction.done,
                   ),
@@ -151,21 +145,30 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   const SizedBox(height: 35),
 
                   // زر إنشاء الحساب
-                  MainButton(onPressed: onSubmit, text: 'Sign Up'),
+                  MainButton(onPressed: onSubmit, text: 'إنشاء حساب'),
 
                   const SizedBox(height: 15),
 
                   // العودة لتسجيل الدخول
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        CupertinoModalPopupRoute(
-                          builder: (context) => const SignInScreen(),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: 'لديك حساب بالفعل؟',
+                      children: [
+                        const TextSpan(text: '  '),
+                        TextSpan(
+                          text: 'سجل الآن',
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              context.pushReplacementTo(const SignInScreen());
+                            },
+                          style: const TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      );
-                    },
-                    child: const Text('Already have an account? Sign in'),
+                      ],
+                    ),
                   ),
                 ],
               ),

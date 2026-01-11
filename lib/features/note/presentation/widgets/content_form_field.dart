@@ -28,7 +28,7 @@ class ContentFormField extends StatelessWidget {
           style: TextStyle(color: Colors.white.withAlpha(200)),
           cursorColor: const Color(0x809CDEBC),
           decoration: const InputDecoration(
-            hintText: 'Enter Text Here...',
+            hintText: 'اكتب ما تريد...',
             contentPadding: EdgeInsetsDirectional.only(
               end: 40,
               start: 15,
@@ -57,8 +57,7 @@ class ContentFormField extends StatelessWidget {
 
               return AiActionButton(
                 isProcessing: isProcessing,
-                onPressed: ()  =>
-                    aiController.improveContent(controller.text),
+                onPressed: () => aiController.improveContent(controller.text),
               );
             },
           ),

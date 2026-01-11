@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/constants/colors/colors.dart';
 
 class CustomFullNameField extends StatelessWidget {
   const CustomFullNameField({super.key, required this.nameController});
@@ -11,13 +10,12 @@ class CustomFullNameField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: nameController,
-      cursorColor: DarkColors.cursor,
       cursorRadius: const Radius.circular(20),
       cursorWidth: 1.3,
       textInputAction: TextInputAction.next,
 
       decoration: const InputDecoration(
-        hintText: 'Enter your name',
+        hintText: 'أدخل اسمك الكامل',
         prefixIcon: Padding(
           padding: EdgeInsetsDirectional.only(start: 15.0),
           child: Icon(Icons.person_outline),
@@ -30,11 +28,11 @@ class CustomFullNameField extends StatelessWidget {
 
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Name is required';
+          return 'الاسم الكامل مطلوب';
         }
 
         if (value.trim().length < 3) {
-          return 'Name must be at least 3 characters';
+          return 'الاسم الكامل يجب أن يكون على الأقل 3 أحرفس';
         }
 
         return null;

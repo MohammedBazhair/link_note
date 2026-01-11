@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
   mobile_scanner: ^7.1.2
   path: ^1.9.1
   pretty_qr_code: ^3.5.0
@@ -28,6 +31,8 @@ dependencies:
   http: ^1.6.0
   flutter_svg: ^2.2.3
   flutter_cache_manager: ^3.4.1
+  onesignal_flutter: ^5.3.5
+  firebase_core: ^4.3.0
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +50,13 @@ flutter:
     - assets/images/
     - assets/icons/
     - shorebird.yaml
+
+  fonts:
+    - family: IBM Plex Sans Arabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
+        - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
+          weight: 700
 
 # msix_config:
 #   display_name: Link Note

@@ -9,100 +9,139 @@ class AboutAppScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('حول التطبيق'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          /// ================= Header =================
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 30),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                colors: [
-                  DarkColors.primary.withOpacity(.5),
-                  DarkColors.primary.withOpacity(.9),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: DarkColors.primary.withOpacity(.35),
-                  blurRadius: 11,
-
-                  offset: const Offset(0, 3),
-                ),
-              ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 27, 29, 43), Color(0xFF151825)],
+          ),
+        ),
+        child: Column(
+          children: [
+            /// ================= Header =================
+            AppBar(
+              backgroundColor: Colors.transparent,
+              title: const Text('حول التطبيق'),
+              centerTitle: true,
+              elevation: 0,
             ),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 45,
-                  backgroundColor: Colors.white,
-                  child: Image.asset(Assets.imagesAppLogo, width: 65),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  'Link Note',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: .4,
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  const Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 45,
+                        backgroundImage: AssetImage(Assets.imagesAppLogo),
+                      ),
+                      SizedBox(height: 18),
+                      Text(
+                        'Link Note',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: .4,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Version 2.0.0',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: DarkColors.secondFont,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Version 2.0.0',
-                  style: TextStyle(fontSize: 13, color: DarkColors.secondFont),
-                ),
-              ],
+                  const SizedBox(height: 40),
+
+                  /// ================= Info =================
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF151825),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: DarkColors.primary.withOpacity(0.2),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: DarkColors.primary.withOpacity(0.2),
+                          blurRadius: 10,
+                          spreadRadius: -15,
+                        ),
+                      ],
+                    ),
+                    child: const Column(
+                      children: [
+                        _InfoCard(
+                          icon: Icons.person_outline,
+                          title: 'المطوّر',
+                          value: 'Mohammed Faisal',
+                        ),
+                        Divider(),
+                        _InfoCard(
+                          icon: Icons.update_rounded,
+                          title: 'آخر تحديث',
+                          value: 'يناير 2026',
+                        ),
+                        Divider(),
+                        _InfoCard(
+                          icon: Icons.phone_rounded,
+                          title: 'الدعم',
+                          value: '776 793 111',
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  /// ================= Footer =================
+                  const Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Column(
+                      children: [
+                        Text(
+                          'BUILT WITH  💙',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: DarkColors.secondFont,
+                            letterSpacing: 2.5,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+
+                        Text(
+                          'by Mo.Bazohair',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 2,
+
+                            color: Color(0xCD01B7C1),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+
+                        Text(
+                          '© 2026 ALL Rigts Reserved',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xDC3E4646),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 30),
-
-          /// ================= Info =================
-          const _InfoCard(
-            icon: Icons.person_outline,
-            title: 'المطوّر',
-            value: 'Mohammed Faisal',
-          ),
-          const _InfoCard(
-            icon: Icons.update_rounded,
-            title: 'آخر تحديث',
-            value: 'ديسمبر 2025',
-          ),
-          const _InfoCard(
-            icon: Icons.phone_rounded,
-            title: 'الدعم',
-            value: '776 793 111',
-          ),
-          const SizedBox(height: 50),
-
-          /// ================= Footer =================
-          const Column(
-            children: [
-              Text(
-                'Built with 💙',
-                style: TextStyle(fontSize: 12, color: DarkColors.icon),
-              ),
-              SizedBox(height: 6),
-              Text(
-                'by Mo.Bazohair',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: DarkColors.primary,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -122,19 +161,19 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TileWrapper(
-      child: ListTile(
-        tileColor: const Color(0xFF0C7395),
-        leading: CircleAvatar(
-          radius: 17,
-          backgroundColor: DarkColors.primary.withOpacity(.15),
-          child: Icon(icon, color: DarkColors.primary, size: 20),
-        ),
-        title: Text(title),
-        subtitle: Text(
-          value,
-        ),
+    return ListTile(
+      leading: CircleAvatar(
+        radius: 17,
+        backgroundColor: DarkColors.primary.withOpacity(.15),
+        child: Icon(icon, color: DarkColors.primary, size: 20),
       ),
+      titleTextStyle: const TextStyle(color: DarkColors.secondFont),
+      subtitleTextStyle: const TextStyle(
+        color: Color.fromARGB(185, 208, 242, 245),
+        fontWeight: FontWeight.w600,
+      ),
+      title: Text(title),
+      subtitle: Text(value),
     );
   }
 }

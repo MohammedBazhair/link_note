@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../core/constants/colors/colors.dart';
 
 class CustomEmailField extends StatelessWidget {
   const CustomEmailField(this.controller, {super.key});
@@ -12,7 +11,6 @@ class CustomEmailField extends StatelessWidget {
       controller: controller,
       autofillHints: const [AutofillHints.email],
       keyboardType: TextInputType.emailAddress,
-      cursorColor: DarkColors.cursor,
       cursorRadius: const Radius.circular(20),
       cursorWidth: 1.3,
       textInputAction: TextInputAction.next,
@@ -21,7 +19,7 @@ class CustomEmailField extends StatelessWidget {
         FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9@._-]')),
       ],
       decoration: const InputDecoration(
-        hintText: 'Enter your email',
+        hintText: 'أدخل بريدك الإلكتروني',
         prefixIcon: Padding(
           padding: EdgeInsetsDirectional.only(start: 15.0),
           child: Icon(Icons.email_outlined),
@@ -30,7 +28,7 @@ class CustomEmailField extends StatelessWidget {
 
     validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Email is required';
+          return 'البريد الإلكتروني مطلوب';
         }
 
         // Regular Email Pattern
@@ -39,7 +37,7 @@ class CustomEmailField extends StatelessWidget {
         );
 
         if (!emailRegExp.hasMatch(value)) {
-          return 'Enter a valid email address';
+          return 'أدخل عنوان بريد إلكتروني صحيح';
         }
 
         return null;

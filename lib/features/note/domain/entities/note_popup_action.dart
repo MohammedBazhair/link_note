@@ -1,8 +1,11 @@
-enum NotePopupAction {
-  qrGenerator('Genereate Qr Code'),
-  qrScanner('Scanner Qr Code');
+import 'package:flutter/material.dart';
 
-  const NotePopupAction(this.label);
+enum NotePopupAction {
+  qrGenerator('توليد رمز QR', Icons.qr_code),
+  qrScanner('مسح رمز QR', Icons.qr_code_scanner);
+
+  const NotePopupAction(this.label,this.icon);
 
   final String label;
+  final IconData icon;
 }

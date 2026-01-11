@@ -18,7 +18,7 @@ class SignGoogleButton extends ConsumerWidget {
       onPressed: () async {
         await ref.read(authProvider.notifier).loginWithGoogle();
       },
-      label: const Text('Continue with Google'),
+      label: const Text('المتابعة عبر Google'),
       icon: SvgPicture.asset(Assets.iconsGoogle, width: 24),
     );
   }

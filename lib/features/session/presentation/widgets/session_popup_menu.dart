@@ -30,7 +30,7 @@ class SessionPopupMenu extends ConsumerWidget {
             await controller.leaveSession();
             context.pop();
 
-            case SessionMenuAction.qrScanner:
+          case SessionMenuAction.qrScanner:
             final data = await context.pushTo<String?>(
               const ScannerQrCodeScreen(),
             );
@@ -38,7 +38,6 @@ class SessionPopupMenu extends ConsumerWidget {
             final note = Note.fromJson(data);
             ref.read(editorFormProvider).initForm(note);
 
-            
           case SessionMenuAction.qrGenearator:
             final note = ref.read(editorFormProvider).note;
             await context.pushTo(
@@ -49,17 +48,17 @@ class SessionPopupMenu extends ConsumerWidget {
       itemBuilder: (_) => [
         const PopupMenuItem(
           value: SessionMenuAction.qrGenearator,
-          child: Text('Generate Qr Code'),
+          child: Text('توليد رمز QR'),
         ),
         if (isHost)
           PopupMenuItem(
             value: SessionMenuAction.end,
             enabled: isHost,
-            child: const Text('End Session'),
+            child: const Text('إنهاء الجلسة'),
           ),
         const PopupMenuItem(
           value: SessionMenuAction.leave,
-          child: Text('Leave Session'),
+          child: Text('مغادرة الجلسة'),
         ),
       ],
     );

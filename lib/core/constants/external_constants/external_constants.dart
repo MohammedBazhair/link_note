@@ -1,6 +1,7 @@
 class ExternalConsts {
   ExternalConsts._();
 
+  static const fontFamily = 'IBM Plex Sans Arabic';
   static const imagesBucket = 'images';
   static const notesTable = 'notes';
   static const profilesTable = 'profiles';

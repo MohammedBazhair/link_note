@@ -48,7 +48,7 @@ class SignInTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return DrawerTile(
       icon: Icons.login,
-      title: 'Login In',
+      title: 'تسجيل الدخول',
       onTap: () {
         context.pushReplacementTo(const SignInScreen());
       },
@@ -63,7 +63,7 @@ class SignUpTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return DrawerTile(
       icon: Icons.login_outlined,
-      title: 'Sign Up',
+      title: 'التسجيل',
       onTap: () {
         context.pushReplacementTo(const SignUpScreen());
       },
@@ -95,7 +95,7 @@ class NotesTile extends ConsumerWidget {
     return DrawerTile(
       isSelected: ref.watch(isInNotesListScreen),
       icon: Icons.sticky_note_2_outlined,
-      title: 'Notes',
+      title: 'الملاحظات',
       onTap: () {
         Scaffold.of(context).closeDrawer();
         final isOpenedNow = ref.read(isInNotesListScreen);
@@ -114,7 +114,7 @@ class CreateSessionTile extends ConsumerWidget {
     final hasSession = session != null;
     return DrawerTile(
       icon: Icons.meeting_room_rounded,
-      title: hasSession ? 'Session' : 'Create Session',
+      title: hasSession ? 'الجلسة' : 'إنشاء جلسة',
       onTap: () {
         context.pushTo(
           hasSession ? const SessionScreen() : const CreateSessionScreen(),
@@ -131,7 +131,7 @@ class JoinSessionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return DrawerTile(
       icon: Icons.group_add_rounded,
-      title: 'Join Session',
+      title: 'الانضمام إلى الجلسة',
       onTap: () {
         context.pushTo(const JoinSessionByCodeScreen());
       },
@@ -146,7 +146,7 @@ class AboutAppTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return DrawerTile(
       icon: Icons.info,
-      title: 'About',
+      title: 'حول التطبيق',
       onTap: () {
         context.pushTo(const AboutAppScreen());
       },
