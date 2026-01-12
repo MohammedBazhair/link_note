@@ -59,6 +59,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
       await noteController.updateNote(note);
     } else {
       await noteController.addNote(note);
+
     }
     context.pop();
   }

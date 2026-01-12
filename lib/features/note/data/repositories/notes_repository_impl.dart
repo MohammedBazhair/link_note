@@ -111,4 +111,9 @@ class NotesRepositoryImpl implements NotesRepository {
       await _local.insertNotes(notes);
     }
   }
+  
+  @override
+  Future<Note?> getNoteById(String noteId) {
+    return _remote.getNoteById(noteId);
+  }
 }

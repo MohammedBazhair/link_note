@@ -45,4 +45,17 @@ class EditorFormState {
     titleController.dispose();
     contentController.dispose();
   }
+
+ void syncWith(Note note) {
+    if (this.note?.id == note.id &&
+        titleController.text == note.title &&
+        contentController.text == note.content) {
+      return;
+    }
+
+    _note = note;
+    titleController.text = note.title;
+    contentController.text = note.content;
+  }
+
 }

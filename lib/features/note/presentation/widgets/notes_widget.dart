@@ -5,7 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
-import '../controllers/note_controller/note_controller.dart';
+import '../controllers/providers.dart';
 import 'note_tile.dart';
 
 class NotesListView extends ConsumerWidget {
@@ -24,7 +24,7 @@ class NotesListView extends ConsumerWidget {
       effect: StylesConsts.shimmerEffect,
       child: RefreshIndicator(
         color: DarkColors.primary,
-        onRefresh: ref.read(noteControllerProvider.notifier).fetchNotes,
+        onRefresh:()async=> ref.invalidate(notesStreamProvider),
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),

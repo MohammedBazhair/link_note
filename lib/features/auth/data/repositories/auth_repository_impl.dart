@@ -45,7 +45,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return _mapSupabaseSignUpError(e.message);
     } catch (e) {
-      return 'Please check your internet connection';
+      return 'من فضلك تحقق من اتصالك بالإنترنت';
     }
   }
 
@@ -68,7 +68,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthApiException catch (e) {
       return _mapSupabaseSignInError(e.message);
     } catch (e) {
-      return 'Please try again or check your internet connection';
+      return 'من فضلك تحقق من اتصالك بالإنترنت';
     }
   }
 
@@ -88,34 +88,34 @@ class AuthRepositoryImpl implements AuthRepository {
 
   String _mapSupabaseSignInError(String message) {
     if (message.contains('Invalid login credentials')) {
-      return 'Email or password is incorrect';
+      return 'البيانات المدخلة غير صحيحة';
     }
 
     if (message.contains('Email not confirmed')) {
-      return 'Please verify your email before logging in';
+      return 'من فضلك قم بتأكيد بريدك الإلكتروني قبل تسجيل الدخول';
     }
 
     if (message.contains('User not found')) {
-      return 'This email is not registered';
+      return 'هذا المستخدم غير موجود';
     }
 
-    return 'Login failed, please try again';
+    return 'تسجيل الدخول فشل، يرجى المحاولة مرة أخرى';
   }
 
   String _mapSupabaseSignUpError(String message) {
     if (message.contains('User already registered')) {
-      return 'This email is already in use';
+      return 'هذا البريد الإلكتروني مسجل بالفعل';
     }
 
     if (message.contains('password')) {
-      return 'Password must be stronger';
+      return 'كلمة المرور ضعيفة جدًا';
     }
 
     if (message.contains('email')) {
-      return 'Please enter a valid email address';
+      return 'من فضلك أدخل بريدًا إلكترونيًا صالحًا';
     }
 
-    return 'Registration failed, please try again';
+    return 'التسجيل فشل، يرجى المحاولة مرة أخرى';
   }
 
   @override
@@ -134,7 +134,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
       return Result.ok(authResponse);
     } catch (e) {
-      return Result.error('Failed to login, please try again.');
+      return Result.error('فشل تسجيل الدخول، يرجى المحاولة مرة أخرى');
     }
   }
 }

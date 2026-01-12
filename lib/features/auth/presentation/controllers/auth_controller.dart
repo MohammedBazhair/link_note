@@ -62,4 +62,8 @@ class AuthController extends StateNotifier<AuthState> {
         ? const AuthSuccessfullState()
         : AuthFailedState(error);
   }
+
+  void reset() {
+    state = const AuthInitialState();
+  }
 }

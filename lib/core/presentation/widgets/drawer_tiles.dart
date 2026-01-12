@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../../features/auth/presentation/screens/sign_up_screen.dart';
+import '../../../features/note/presentation/controllers/providers.dart';
 import '../../../features/note/presentation/screens/notes_list_screen.dart';
 import '../../../features/session/presentation/controllers/session_controller.dart';
 import '../../../features/session/presentation/screens/create_session_screen.dart';

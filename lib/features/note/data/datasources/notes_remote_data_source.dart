@@ -6,7 +6,9 @@ import '../../domain/entities/note.dart';
 abstract interface class NotesRemoteDataSource {
   Future<Map<String, dynamic>> createNote(Note note);
   Future<void> insertNotes(Iterable<Note> notes);
+
   Future<List<Note>> readNotes(String ownerId);
+  Future<Note?> getNoteById(String noteId);
   Stream<RowList> fetchNotesRealTime(String ownerId);
   Stream<Map<String, dynamic>?> fetchNoteStream(String noteId);
   Future<void> updateNote(Note note);
@@ -86,5 +88,14 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
       table: _notesTable,
       primaryKey: _idColumn,
     );
+  }
+  
+  @override
+  Future<Note?> getNoteById(String noteId) async{
+    final map=await _database.readRow(id: noteId, column: _idColumn, table: _notesTable);
+    if(map.isEmpty){
+      return null;
+    }
+  return Note.fromMap(map);
   }
 }

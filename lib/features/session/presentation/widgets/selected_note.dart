@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/presentation/widgets/conditional_builder.dart';
-import '../../../note/presentation/controllers/note_controller/note_controller.dart';
+import '../../../note/domain/entities/note.dart';
+import '../../../note/presentation/controllers/providers.dart';
 import '../../../note/presentation/widgets/note_tile.dart';
 
 class SelectedNote extends ConsumerWidget {
@@ -14,12 +16,22 @@ class SelectedNote extends ConsumerWidget {
     const fallbackChild = Center(child: Text('لم يتم اختيار شيء'));
     if (noteId == null) return fallbackChild;
 
-    final note = ref.read(noteControllerProvider.notifier).getNoteById(noteId);
+    final asyncNote = ref.watch(getNoteByIdProvider(noteId));
 
-    return ConditionalBuilder(
-      condition: note != null,
-      builder: (_) => NoteTile(note!),
-      fallback: (_) => fallbackChild,
+   return asyncNote.when(
+      data: (note) {
+        return ConditionalBuilder(
+          condition: note != null,
+          builder: (_) => NoteTile(note!),
+          fallback: (_) => fallbackChild,
+        );
+      },
+      loading: () {
+        return Skeletonizer(child: NoteTile(Note.fake()));
+      },
+      error: (_, __) {
+        return fallbackChild;
+      },
     );
   }
 }

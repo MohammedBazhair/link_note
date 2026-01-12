@@ -17,6 +17,10 @@ class Note {
       return Note(title: '', content: '', updatedAt: DateTime.now());
     }
   }
+  factory Note.fake() {
+    final now = DateTime.now();
+    return Note(updatedAt: now, title: 'fffafasf', content: 'asfafsfaf',);
+  }
 
   factory Note.fromMap(Map<String, dynamic> map) {
     return Note(
@@ -66,7 +70,7 @@ class Note {
       uuid: uuid ?? this.uuid,
       title: title ?? this.title,
       content: content ?? this.content,
-      updatedAt: updatedAt?? this.updatedAt
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 

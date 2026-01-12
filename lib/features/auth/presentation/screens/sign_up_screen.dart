@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,94 +82,107 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
       body: SafeArea(
         child: Center(
-          child: Form(
-            key: formKey,
-            child: AutofillGroup(
-              child: ListView(
-                padding: const EdgeInsets.all(24),
-                shrinkWrap: true,
+          child: GestureDetector(
+            onTap: FocusScope.of(context).unfocus,
 
-                children: [
-                  // العنوان
-                  const Text(
-                    'إنشاء حساب',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'سجل للحصول على تجربة أفضل في إدارة ملاحظاتك ومزامنتها عبر أجهزتك.',
-                    style: TextStyle(fontSize: 14, color: Color(0xB4ACBFB6)),
-                  ),
+            child: Form(
+              key: formKey,
+              child: AutofillGroup(
+                child: ListView(
+                  padding: const EdgeInsets.all(24),
+                  shrinkWrap: true,
 
-                  const SizedBox(height: 80),
-
-                  // الاسم
-                  const FieldLabel(text: 'الاسم الكامل'),
-                  const SizedBox(height: 8),
-                  CustomFullNameField(nameController: nameController),
-
-                  const SizedBox(height: 25),
-
-                  // البريد
-                  const FieldLabel(text: 'البريد الإلكتروني'),
-
-                  const SizedBox(height: 8),
-
-                  CustomEmailField(emailController),
-                  const SizedBox(height: 25),
-
-                  // كلمة المرور
-                  const FieldLabel(text: 'كلمة المرور'),
-                  const SizedBox(height: 8),
-
-                  CustomPasswordField(
-                    controller: passwordController,
-                    hintText: 'أدخل كلمة المرور',
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  // تأكيد كلمة المرور
-                  const FieldLabel(text: 'تأكيد الباسورد'),
-                  const SizedBox(height: 8),
-
-                  CustomPasswordField(
-                    originalController: passwordController,
-                    controller: confirmPasswordController,
-                    hintText: 'أعد إدخال كلمة المرور',
-                    onSubmit: onSubmit,
-                    textInputAction: TextInputAction.done,
-                  ),
-
-                  const SizedBox(height: 35),
-
-                  // زر إنشاء الحساب
-                  MainButton(onPressed: onSubmit, text: 'إنشاء حساب'),
-
-                  const SizedBox(height: 15),
-
-                  // العودة لتسجيل الدخول
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      text: 'لديك حساب بالفعل؟',
-                      children: [
-                        const TextSpan(text: '  '),
-                        TextSpan(
-                          text: 'سجل الآن',
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              context.pushReplacementTo(const SignInScreen());
-                            },
-                          style: const TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                  children: [
+                    // العنوان
+                    const Text(
+                      'إنشاء حساب',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    const Text(
+                      'سجل للحصول على تجربة أفضل في إدارة ملاحظاتك ومزامنتها عبر أجهزتك.',
+                      style: TextStyle(fontSize: 14, color: Color(0xB4ACBFB6)),
+                    ),
+
+                    const SizedBox(height: 80),
+
+                    // الاسم
+                    const FieldLabel(text: 'الاسم الكامل'),
+                    const SizedBox(height: 8),
+                    CustomFullNameField(nameController: nameController),
+
+                    const SizedBox(height: 25),
+
+                    // البريد
+                    const FieldLabel(text: 'البريد الإلكتروني'),
+
+                    const SizedBox(height: 8),
+
+                    CustomEmailField(emailController),
+                    const SizedBox(height: 25),
+
+                    // كلمة المرور
+                    const FieldLabel(text: 'كلمة المرور'),
+                    const SizedBox(height: 8),
+
+                    CustomPasswordField(
+                      controller: passwordController,
+                      hintText: 'أدخل كلمة المرور',
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // تأكيد كلمة المرور
+                    const FieldLabel(text: 'تأكيد الباسورد'),
+                    const SizedBox(height: 8),
+
+                    CustomPasswordField(
+                      originalController: passwordController,
+                      controller: confirmPasswordController,
+                      hintText: 'أعد إدخال كلمة المرور',
+                      onSubmit: onSubmit,
+                      textInputAction: TextInputAction.done,
+                    ),
+
+                    const SizedBox(height: 35),
+
+                    // زر إنشاء الحساب
+                    AbsorbPointer(
+                      absorbing: ref.watch(authProvider) is AuthLoadingState,
+                      child: MainButton(
+                        onPressed: onSubmit,
+                        text: 'إنشاء حساب',
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // العودة لتسجيل الدخول
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        text: 'لديك حساب بالفعل؟',
+                        children: [
+                          const TextSpan(text: '  '),
+                          TextSpan(
+                            text: 'سجل الآن',
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                context.pushReplacementTo(const SignInScreen());
+                              },
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

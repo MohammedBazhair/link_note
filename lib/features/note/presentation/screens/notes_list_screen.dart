@@ -2,18 +2,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../../core/presentation/widgets/custom_drawer.dart';
 import '../../../../core/presentation/widgets/floating_actions_buttons.dart';
 import '../../domain/entities/note.dart';
-import '../controllers/note_controller/note_controller.dart';
+import '../controllers/providers.dart';
 import '../widgets/note_tile.dart';
 import '../widgets/notes_widget.dart';
 import '../widgets/nothing_note.dart';
-
-final isInNotesListScreen = StateProvider((_) => false);
 
 class NotesListScreen extends ConsumerStatefulWidget {
   const NotesListScreen({super.key});
@@ -69,8 +67,8 @@ class NotesListAppBar extends ConsumerWidget {
           IconButton(
             hoverColor: Colors.transparent,
 
-            onPressed: () async {
-              await ref.read(noteControllerProvider.notifier).fetchNotes();
+            onPressed: () {
+              ref.invalidate(notesStreamProvider);
             },
             icon: const Icon(Icons.refresh),
           ),
@@ -79,49 +77,29 @@ class NotesListAppBar extends ConsumerWidget {
   }
 }
 
-class NotesStreamBuilder extends ConsumerStatefulWidget {
+class NotesStreamBuilder extends ConsumerWidget {
   const NotesStreamBuilder({super.key});
 
   @override
-  ConsumerState<NotesStreamBuilder> createState() => _NotesStreamBuilderState();
-}
+  Widget build(BuildContext context, ref) {
+    final notesAsync = ref.watch(notesStreamProvider);
 
-class _NotesStreamBuilderState extends ConsumerState<NotesStreamBuilder> {
-  late final Stream<List<Note>> notesStream;
-
-  @override
-  void initState() {
-    super.initState();
-    final controller = ref.read(noteControllerProvider.notifier);
-    controller.fetchNotesRealTime();
-    notesStream = controller.notesStream;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<Note>>(
-      stream: notesStream,
-      builder: (context, snapshot) {
-        final notes = snapshot.data ?? [];
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return NotesListView(
-            notes: List.generate(
-              8,
-              (_) => Note(
-                title: 'Title Testing',
-                content: 'Content' * 6,
-                updatedAt: DateTime.now(),
-              ),
-            ),
-            isShimmerEnabled: true,
-          );
-        }
-
+    return notesAsync.when(
+      data: (notes) {
         return ConditionalBuilder(
           condition: notes.isNotEmpty,
           builder: (_) => NotesListView(notes: notes),
           fallback: (_) => const NothingNoteWidget(),
         );
+      },
+
+      loading: () {
+        final fakeNotes = List.generate(8, (index) => Note.fake());
+        return Skeletonizer(child: NotesListView(notes: fakeNotes));
+      },
+
+      error: (error, stackTrace) {
+        return const Center(child: Text('حدث خطأ ما'));
       },
     );
   }

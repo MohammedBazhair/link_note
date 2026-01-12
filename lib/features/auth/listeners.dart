@@ -4,6 +4,7 @@ import '../../core/extensions/extensions.dart';
 import '../../core/presentation/widgets/custom_progress_widget.dart';
 import '../note/presentation/screens/notes_list_screen.dart';
 
+import 'presentation/controllers/auth_controller.dart';
 import 'presentation/controllers/auth_state.dart';
 
 Future<void> authListener({
@@ -26,8 +27,10 @@ Future<void> authListener({
     case AuthLoadingState():
       await showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (context) => const CustomProgressWidget(),
       );
+      Future.delayed(const Duration(seconds: 10), () {
+        ref.read(authProvider.notifier).reset();
+      });
   }
 }

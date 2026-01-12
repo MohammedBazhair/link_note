@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/assets/app_assets.dart';
 import '../../constants/colors/colors.dart';
-import '../widgets/tile_wrapper.dart';
+
 
 class AboutAppScreen extends StatelessWidget {
   const AboutAppScreen({super.key});
