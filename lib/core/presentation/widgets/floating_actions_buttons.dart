@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../features/note/presentation/screens/note_editor_screen.dart';
 import '../../../features/note/presentation/widgets/note_tile.dart';
-import '../../../features/session/presentation/screens/create_session_screen.dart';
+import '../../../features/session/presentation/screens/session_entry_screen.dart';
 import '../../extensions/extensions.dart';
 
 final _isClicked = StateProvider.autoDispose((ref) => false);
@@ -44,10 +44,10 @@ class FloatingActionsButtons extends ConsumerWidget {
                 shape: const CircleBorder(),
                 onPressed: () {
                   ref.read(_isClicked.notifier).state = false;
-                  context.pushTo(const CreateSessionScreen());
+                  context.pushTo(const SessionEntryScreen());
                 },
-                tooltip: 'Create Session',
-                child: const Icon(Icons.add_link_rounded),
+                tooltip: 'Manage Session',
+                child: const Icon(Icons.settings_input_antenna_sharp),
               ),
             ),
           ),

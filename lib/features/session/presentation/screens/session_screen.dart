@@ -1,9 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../note/domain/entities/note.dart';
-import '../../../note/presentation/controllers/note_controller/note_controller.dart';
 import '../../../note/presentation/controllers/providers.dart';
 import '../../../note/presentation/widgets/editor_form.dart';
 import '../controllers/session_controller.dart';
@@ -18,21 +14,24 @@ class SessionScreen extends ConsumerStatefulWidget {
 }
 
 class _SessionScreenState extends ConsumerState<SessionScreen> {
-  Timer? _debounce;
-
-
-  void updateNoteDebounced(Note note) {
-    _debounce?.cancel();
-    _debounce = Timer(
-      const Duration(seconds: 2),
-      () => ref.read(noteControllerProvider.notifier).updateNote(note),
-    );
-  }
-
   @override
-  void dispose() {
-    _debounce?.cancel();
-    super.dispose();
+  void initState() {
+    super.initState();
+
+    final session = ref.read(sessionControllerProvider).session;
+    final noteId = session?.noteId;
+
+    if (noteId != null) {
+      // استماع مستمر للـ stream
+      ref.listenManual(singleNoteStreamProvider(noteId), (previous, next) {
+        next.whenData((note) {
+          if (note != null) {
+            // مزامنة الفورم مع أحدث بيانات
+            ref.read(editorFormProvider).syncWith(note);
+          }
+        });
+      });
+    }
   }
 
   @override
@@ -46,18 +45,6 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
       );
     }
 
-    
-    ref.listen<AsyncValue<Note?>>(singleNoteStreamProvider(noteId), (
-      previous,
-      next,
-    ) {
-      next.whenData((note) {
-        if (note != null) {
-          ref.read(editorFormProvider).syncWith(note);
-        }
-      });
-    });
-
     final noteAsync = ref.watch(singleNoteStreamProvider(noteId));
 
     return Scaffold(
@@ -70,11 +57,8 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
           if (note == null) {
             return const Center(child: Text('الملاحظة غير موجودة'));
           }
-
-          // ⬅ هنا نغذي الفورم
           ref.read(editorFormProvider).syncWith(note);
-
-          return SessionBody(note: note);
+          return const SessionBody();
         },
         loading: () {
           return const Center(

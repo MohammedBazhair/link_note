@@ -21,57 +21,59 @@ class CustomDrawer extends ConsumerWidget {
 
     if (isSelectable) return const SizedBox.shrink();
     return Drawer(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                RefreshIndicator(
-                  color: DarkColors.primary,
-                  onRefresh: userController.loadProfile,
-                  child: ListView(
-                    padding: const EdgeInsets.only(
-                      top: 30,
-                      bottom: 12,
-                      left: 12,
-                      right: 12,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          top: 30,
+          bottom: 12,
+          left: 12,
+          right: 12,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  RefreshIndicator(
+                    color: DarkColors.primary,
+                    onRefresh: userController.loadProfile,
+                    child: ListView(
+                      children: [
+                        if (isUserLogin) ...[
+                          const UserProfileWidget(),
+                          const Divider(),
+                        ] else ...[
+                          const SizedBox(height: 35),
+                          const SignInTile(),
+                          const SignUpTile(),
+                        ],
+                        const NotesTile(),
+                        if (isUserLogin) ...[
+                          const ManageSessionTile(),
+                          const JoinSessionTile(),
+                        ],
+                        const AboutAppTile(),
+                      ],
                     ),
-                    children: [
-                      if (isUserLogin) ...[
-                        const UserProfileWidget(),
-                        const Divider(),
-                      ] else ...[
-                        const SizedBox(height: 35),
-                        const SignInTile(),
-                        const SignUpTile(),
-                      ],
-                      const NotesTile(),
-                      if (isUserLogin) ...[
-                        const CreateSessionTile(),
-                        const JoinSessionTile(),
-                      ],
-                      const AboutAppTile(),
-                    ],
                   ),
-                ),
 
-                PositionedDirectional(
-                  top: 30,
-                  end: 10,
+                  PositionedDirectional(
+                    top: 30,
+                    end: 10,
 
-                  child: IconButton(
-                    iconSize: 27,
-                    onPressed: Scaffold.of(context).closeDrawer,
-                    icon: const Icon(Icons.arrow_forward_ios),
+                    child: IconButton(
+                      iconSize: 27,
+                      onPressed: Scaffold.of(context).closeDrawer,
+                      icon: const Icon(Icons.arrow_forward_ios),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          if (isUserLogin) const SignOutTile(),
-        ],
+            if (isUserLogin) const SignOutTile(),
+          ],
+        ),
       ),
     );
   }

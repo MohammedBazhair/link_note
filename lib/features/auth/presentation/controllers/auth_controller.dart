@@ -63,6 +63,13 @@ class AuthController extends StateNotifier<AuthState> {
         : AuthFailedState(error);
   }
 
+    Future<void> startLoadingTimeout() async {
+    await Future.delayed(const Duration(seconds: 10));
+    if (mounted) {
+      reset();
+    }
+  }
+
   void reset() {
     state = const AuthInitialState();
   }

@@ -16,9 +16,11 @@ class NoteController extends Notifier<void> {
 
   final NotesRepository _notesRepository;
   final UserRepository _userRepository;
-  final _notesStreamController = StreamController<List<Note>>.broadcast();
 
   String? get _userId => _userRepository.currentUser?.id;
+
+  @override
+  void build() {}
 
   Future<void> addNote(Note note) async {
     final userNote = note.copyWith(uuid: _userId);
@@ -27,8 +29,6 @@ class NoteController extends Notifier<void> {
     _updateUi();
   }
 
-  @override
-  void build() {}
 
   Future<void> updateNote(Note note) async {
     await _notesRepository.update(note);

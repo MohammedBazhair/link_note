@@ -4,12 +4,12 @@ import '../../core/extensions/extensions.dart';
 import '../../core/presentation/widgets/custom_progress_widget.dart';
 import 'presentation/controllers/session_state.dart';
 
-void handleSessionStates(
+/// Listen for session states (loading, success, error)
+Future<void> handleSessionStates(
   BuildContext context, {
   required SessionState? previous,
   required SessionState current,
-}) {
-  if (previous is LoadingSessionState) context.pop();
+}) async {
 
   switch (current) {
     case InitialSessionState():
@@ -30,7 +30,7 @@ void handleSessionStates(
     case AddMemberState():
       context.showSnakbar('تم إضافة العضو بنجاح');
     case LoadingSessionState():
-      showDialog(
+      await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => const CustomProgressWidget(),

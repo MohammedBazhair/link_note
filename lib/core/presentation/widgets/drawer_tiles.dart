@@ -6,10 +6,8 @@ import '../../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../../features/note/presentation/controllers/providers.dart';
 import '../../../features/note/presentation/screens/notes_list_screen.dart';
-import '../../../features/session/presentation/controllers/session_controller.dart';
-import '../../../features/session/presentation/screens/create_session_screen.dart';
 import '../../../features/session/presentation/screens/join_session_by_code_screen.dart';
-import '../../../features/session/presentation/screens/session_screen.dart';
+import '../../../features/session/presentation/screens/session_entry_screen.dart';
 import '../../constants/colors/colors.dart';
 import '../../extensions/extensions.dart';
 import '../screens/about_app_screen.dart';
@@ -106,20 +104,16 @@ class NotesTile extends ConsumerWidget {
   }
 }
 
-class CreateSessionTile extends ConsumerWidget {
-  const CreateSessionTile({super.key});
+class ManageSessionTile extends ConsumerWidget {
+  const ManageSessionTile({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    final session = ref.read(sessionControllerProvider).session;
-    final hasSession = session != null;
     return DrawerTile(
       icon: Icons.meeting_room_rounded,
-      title: hasSession ? 'الجلسة' : 'إنشاء جلسة',
+      title: 'إدارة الجلسة',
       onTap: () {
-        context.pushTo(
-          hasSession ? const SessionScreen() : const CreateSessionScreen(),
-        );
+        context.pushTo(const SessionEntryScreen());
       },
     );
   }

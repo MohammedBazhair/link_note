@@ -21,7 +21,6 @@ Future<void> authListener({
       await context.pushReplacementTo(const NotesListScreen());
 
     case AuthFailedState(:final message):
-      context.pop();
       context.showSnakbar(message);
 
     case AuthLoadingState():
@@ -29,8 +28,6 @@ Future<void> authListener({
         context: context,
         builder: (context) => const CustomProgressWidget(),
       );
-      Future.delayed(const Duration(seconds: 10), () {
-        ref.read(authProvider.notifier).reset();
-      });
+      await ref.read(authProvider.notifier).startLoadingTimeout();
   }
 }

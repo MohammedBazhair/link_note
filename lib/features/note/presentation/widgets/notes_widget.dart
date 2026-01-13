@@ -24,7 +24,7 @@ class NotesListView extends ConsumerWidget {
       effect: StylesConsts.shimmerEffect,
       child: RefreshIndicator(
         color: DarkColors.primary,
-        onRefresh:()async=> ref.invalidate(notesStreamProvider),
+        onRefresh: () async => ref.invalidate(notesStreamProvider),
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
@@ -35,7 +35,7 @@ class NotesListView extends ConsumerWidget {
             final note = notes[index];
             return NoteTile(note);
           },
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          separatorBuilder: (_, __) => const SizedBox(height: 5),
         ),
       ),
     );

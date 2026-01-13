@@ -1,0 +1,1 @@
+enum SessionMode { create, join }

@@ -44,8 +44,8 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(sessionControllerProvider, (previous, current) {
-      handleSessionStates(context, current: current, previous: previous);
+    ref.listen(sessionControllerProvider, (previous, current) async {
+      await handleSessionStates(context, current: current, previous: previous);
     });
 
     return PopScope(

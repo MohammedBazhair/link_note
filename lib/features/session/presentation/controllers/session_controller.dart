@@ -72,6 +72,8 @@ class SessionController extends StateNotifier<SessionState> {
     required String memberId,
   }) async {
     try {
+      state = const LoadingSessionState();
+
       final result = await _sessionRepository.getSessionByCode(
         sessionCode: sessionCode,
       );
@@ -79,7 +81,6 @@ class SessionController extends StateNotifier<SessionState> {
       if (result.hasError) throw Exception(result.errorMessage);
 
       final session = result.value;
-      
 
       final member = SessionMember(
         sessionId: session!.id!,
