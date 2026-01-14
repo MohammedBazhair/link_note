@@ -20,8 +20,8 @@ class ProfileModel extends ProfileEntity {
       avatarPath: map['avatar_path'] as String?,
       updatedAt:
           map['updated_at'] != null
-          ? DateTime.tryParse(map['updated_at']) ?? DateTime.now()
-          : DateTime.now(),
+          ? DateTime.tryParse(map['updated_at']) ?? DateTime.now().toUtc()
+          : DateTime.now().toUtc(),
     );
   }
 

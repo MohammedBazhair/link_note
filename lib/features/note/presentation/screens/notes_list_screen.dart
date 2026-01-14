@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/providers/provider.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../../core/presentation/widgets/custom_drawer.dart';
 import '../../../../core/presentation/widgets/floating_actions_buttons.dart';
 import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
-import '../controllers/providers.dart';
+import '../controllers/note_providers.dart';
 import '../widgets/note_tile.dart';
 import '../widgets/notes_widget.dart';
 import '../widgets/nothing_note.dart';
@@ -26,9 +26,10 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
   void initState() {
     super.initState();
-    // للتأكد من تجديد التوكن عند أول اتصال
-    ref.read(tokenRefreshProvider);
+      ref.read(tokenRefreshProvider);
+      ref.read(syncNotesProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // للتأكد من تجديد التوكن عند أول اتصال
       ref.read(isInNotesListScreen.notifier).update((_) => true);
     });
   }
@@ -106,7 +107,6 @@ class NotesStreamBuilder extends ConsumerWidget {
       },
 
       error: (error, stackTrace) {
-        print(error);
         return const Center(child: Text('حدث خطأ ما'));
       },
     );

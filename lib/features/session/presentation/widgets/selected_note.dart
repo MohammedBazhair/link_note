@@ -5,7 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../note/domain/entities/note.dart';
-import '../../../note/presentation/controllers/providers.dart';
+import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/widgets/note_tile.dart';
 
 class SelectedNote extends ConsumerWidget {

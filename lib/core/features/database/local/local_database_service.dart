@@ -53,7 +53,11 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
     required Map<String, dynamic> map,
     required String table,
   }) {
-    return _database.insert(table, map);
+    return _database.insert(
+      table,
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   @override
@@ -86,6 +90,7 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
       updated,
       where: '$column = ?',
       whereArgs: [id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 

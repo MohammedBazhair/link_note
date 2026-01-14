@@ -38,7 +38,6 @@ class TitleFormField extends StatelessWidget {
             return AiActionButton(
               isProcessing: isProcessing,
               onPressed: () async {
-                if (note == null) return;
                 await aiController.improveTitle(note);
               },
             );

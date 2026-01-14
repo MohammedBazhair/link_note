@@ -3,13 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
+import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../note/presentation/screens/notes_list_screen.dart';
 import '../../../note/presentation/widgets/note_tile.dart';
+import '../../../user/presentation/controllers/user_controller.dart';
+import '../../domain/entities/session.dart';
+import '../controllers/session_controller.dart';
+import '../screens/session_screen.dart';
 import 'selected_note.dart';
 
 class CreateSessionForm extends ConsumerWidget {
-  const CreateSessionForm({super.key, required this.onCreate});
-  final VoidCallback onCreate;
+  const CreateSessionForm({super.key, });
 
   @override
   Widget build(BuildContext context, ref) {
@@ -30,7 +34,35 @@ class CreateSessionForm extends ConsumerWidget {
         const SizedBox(height: 16),
         const SelectedNote(),
         const SizedBox(height: 15),
-        MainButton(onPressed: onCreate, text: 'إنشاء الجلسة'),
+        MainButton(
+          text: 'إنشاء الجلسة',
+          onPressed: () async {
+            final selectable = ref.read(selectableNoteProvider);
+
+            if (!selectable.hasNoteId) {
+              context.showSnakbar('يجب اختيار ملاحظة أولاً');
+              return;
+            }
+
+            final hostId = ref
+                .read(userControllerProvider.notifier)
+                .currentUser
+                ?.id;
+
+            if (hostId == null) {
+              await context.pushTo(const SignInScreen());
+              return;
+            }
+
+            final session = Session(hostId: hostId, noteId: selectable.noteId);
+
+            await ref
+                .read(sessionControllerProvider.notifier)
+                .createSession(session);
+      await context.pushTo(const SessionScreen());
+
+          },
+        ),
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/entities/session_member.dart';
 import '../../domain/entities/sub/session_member_role.dart';
@@ -62,9 +63,11 @@ class SessionController extends StateNotifier<SessionState> {
 
   Stream<Set<SessionMember>> fetchMembersOfSession() {
     final sessionId = state.session?.id;
-    if (sessionId == null) return Stream.value({});
+    if (sessionId == null) return const Stream.empty();
 
-    return _sessionRepository.getMembersStream(sessionId);
+    return _sessionRepository.getMembersStream(sessionId).handleError((e) {
+      Logger.log(error: e);
+    });
   }
 
   Future<void> joinSessionByCode({

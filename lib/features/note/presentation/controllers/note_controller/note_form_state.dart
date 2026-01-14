@@ -36,18 +36,24 @@ class EditorFormState {
     contentController.clear();
   }
 
-  Note? get note => _note?.copyWith(
-    title: titleController.text,
-    content: contentController.text,
-  );
+  Note get note =>
+      _note?.copyWith(
+        title: titleController.text,
+        content: contentController.text,
+      ) ??
+      Note(
+        updatedAt: DateTime.now().toUtc(),
+        title: titleController.text,
+        content: contentController.text,
+      );
 
   void dispose() {
     titleController.dispose();
     contentController.dispose();
   }
 
- void syncWith(Note note) {
-    if (this.note?.id == note.id &&
+  void syncWith(Note note) {
+    if (this.note.id == note.id &&
         titleController.text == note.title &&
         contentController.text == note.content) {
       return;
@@ -57,5 +63,4 @@ class EditorFormState {
     titleController.text = note.title;
     contentController.text = note.content;
   }
-
 }

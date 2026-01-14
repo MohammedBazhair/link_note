@@ -41,7 +41,7 @@ class SessionPopupMenu extends ConsumerWidget {
           case SessionMenuAction.qrGenearator:
             final note = ref.read(editorFormProvider).note;
             await context.pushTo(
-              GenerateQrCodeScreen(data: note?.toJson() ?? ''),
+              GenerateQrCodeScreen(data: note.toJson() ),
             );
         }
       },

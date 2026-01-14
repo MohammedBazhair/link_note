@@ -1,19 +1,21 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
+import '../../../user/presentation/controllers/user_controller.dart';
+import '../controllers/session_controller.dart';
+import '../screens/session_screen.dart';
 
 class JoinSessionForm extends StatelessWidget {
   const JoinSessionForm({
     super.key,
     required this.controller,
-    required this.onJoin,
   });
   final TextEditingController controller;
-  final VoidCallback onJoin;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +44,28 @@ class JoinSessionForm extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 30),
-        MainButton(onPressed: onJoin, text: 'انضم للجلسة'),
+        Consumer(
+          builder: (_,  ref, __) {
+            return MainButton(
+              text: 'انضم للجلسة',
+              onPressed: () async {
+                final code = controller.text.trim().toUpperCase();
+
+                if (code.isEmpty) {
+                  context.showSnakbar('الرجاء إدخال رمز الجلسة');
+                  return;
+                }
+
+                final userId = ref.read(userControllerProvider).profile.userId;
+
+                await ref
+                    .read(sessionControllerProvider.notifier)
+                    .joinSessionByCode(memberId: userId, sessionCode: code);
+                await context.pushTo(const SessionScreen());
+              },
+            );
+          },
+        ),
       ],
     );
   }

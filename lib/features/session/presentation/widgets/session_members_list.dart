@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/theme/styles_consts.dart';
-import '../../../note/presentation/controllers/providers.dart';
 import '../../domain/entities/session_member.dart';
+import '../controllers/session_providers.dart';
 import 'session_members_strip.dart';
 
 class SessionMembersList extends ConsumerWidget {

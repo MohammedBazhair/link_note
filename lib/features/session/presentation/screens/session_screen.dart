@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../note/presentation/controllers/providers.dart';
+import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/widgets/editor_form.dart';
 import '../controllers/session_controller.dart';
 import '../widgets/session_body.dart';

@@ -30,7 +30,7 @@ class UserController extends StateNotifier<UserState> {
       final profile = ProfileEntity(
         userId: currentUser!.id,
         username: user.username,
-        updatedAt: DateTime.now(),
+        updatedAt: DateTime.now().toUtc(),
       );
       await _userRepository.createProfile(profile);
     } catch (e) {

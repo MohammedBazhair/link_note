@@ -46,6 +46,7 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
       id: note.id!,
       column: _idColumn,
       table: _notesTable,
+      
     );
   }
 
@@ -70,8 +71,8 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
     return _database
         .readRowsRealTime(
           table: ExternalConsts.notesTable,
-          primaryKey: ['id'],
-          column: 'id',
+          primaryKey: [_idColumn],
+          column: _idColumn,
           value: noteId,
         )
         .map((rows) {

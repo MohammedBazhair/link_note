@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../../../../user/domain/repositories/user_repository.dart';
 import '../../../domain/entities/note.dart';
 import '../../../domain/repositories/notes_repository.dart';
-import '../providers.dart';
+import '../note_providers.dart';
 
 final noteControllerProvider = NotifierProvider<NoteController, void>(() {
   return GetIt.I<NoteController>();
@@ -29,7 +29,6 @@ class NoteController extends Notifier<void> {
     _updateUi();
   }
 
-
   Future<void> updateNote(Note note) async {
     await _notesRepository.update(note);
     _updateUi();
@@ -41,8 +40,20 @@ class NoteController extends Notifier<void> {
     _updateUi();
   }
 
+  Stream<List<Note>> fetchNotesRealtime() {
+  return  _notesRepository.fetchNotesRealTime(_userId);
+  }
+
+  Stream<Note?> fetchSingleNoteRealtime(String noteId) {
+  return  _notesRepository.fetchNoteStream(noteId);
+  }
+
   Future<Note?> getNoteById(String noteId) {
     return _notesRepository.getNoteById(noteId);
+  }
+
+  Future<void> syncNotes() async {
+    await _notesRepository.syncNotes(_userId);
   }
 
   void _updateUi() {

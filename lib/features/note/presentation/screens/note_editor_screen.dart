@@ -52,7 +52,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
       uuid: widget.note?.uuid,
       title: editorState.titleController.text,
       content: editorState.contentController.text,
-      updatedAt: DateTime.now(),
+      updatedAt: DateTime.now().toUtc(),
     );
 
     if (isEditing) {

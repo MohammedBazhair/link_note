@@ -15,12 +15,15 @@ class Note {
       final map = jsonDecode(json);
       return Note.fromMap(map);
     } catch (e) {
-      return Note(title: '', content: '', updatedAt: DateTime.now());
+      return Note(title: '', content: '', updatedAt: DateTime.now().toUtc());
     }
   }
   factory Note.fake() {
-    final now = DateTime.now();
-    return Note(updatedAt: now, title: 'fffafasf', content: 'asfafsfaf');
+    return Note(
+      updatedAt: DateTime(2025),
+      title: 'title tutjmn',
+      content: 'asfafsfafjhkgjkgkjgjj',
+    );
   }
 
   factory Note.fromMap(Map<String, dynamic> map) {
@@ -29,7 +32,7 @@ class Note {
       uuid: map['owner_id'] as String?,
       title: map['title'] as String,
       content: map['content'] as String,
-      updatedAt: map['updated_at'],
+      updatedAt: DateTime.parse(map['updated_at']),
       deletedAt: DateTime.tryParse(map['deleted_at'] ?? ''),
     );
   }

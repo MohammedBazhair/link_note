@@ -28,7 +28,7 @@ class _SessionBodyState extends ConsumerState<SessionBody> {
     _debounce = Timer(
       const Duration(seconds: 2),
       () =>
-          ref.read(noteControllerProvider.notifier).updateNote(formState.note!),
+          ref.read(noteControllerProvider.notifier).updateNote(formState.note),
     );
   }
 

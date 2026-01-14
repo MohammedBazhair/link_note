@@ -23,7 +23,7 @@ class ExternalConsts {
     content TEXT NOT NULL,
     owner_id TEXT NULL,
     updated_at TEXT NOT NULL,
-    deleted_at TEXT,
+    deleted_at TEXT
   );
   ''';
 

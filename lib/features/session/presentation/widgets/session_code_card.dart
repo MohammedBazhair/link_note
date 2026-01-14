@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
+import '../../../clipboard/presentation/providers/clipboard_providers.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 
 class SessionCodeCard extends StatelessWidget {
@@ -42,12 +44,24 @@ class SessionCodeCard extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          IconButton(
-            tooltip: 'Copy',
-            color: Colors.white,
-            icon: const Icon(Icons.copy),
-            onPressed: () {
-              // TODO: implement copy to clipboard
+          Consumer(
+            builder: (_, ref, __) {
+              return IconButton(
+                tooltip: 'Copy',
+                color: Colors.white,
+                icon: const Icon(Icons.copy),
+                onPressed: () async {
+                  if (sessionCode == null) {
+                    return context.showSnakbar('خطأ لم يتم النسخ');
+                  }
+
+                  await ref
+                      .read(clipboardControllerProvider)
+                      .copyToClipboard(sessionCode!);
+                    return context.showSnakbar('تم نسخ كود الجلسة بنجاح');
+
+                },
+              );
             },
           ),
           IconButton(

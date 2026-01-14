@@ -18,6 +18,7 @@ Future<void> authListener({
       break;
 
     case AuthSuccessfullState():
+    
       await context.pushReplacementTo(const NotesListScreen());
 
     case AuthFailedState(:final message):

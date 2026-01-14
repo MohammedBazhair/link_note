@@ -81,7 +81,7 @@ class NoteFormHeader extends ConsumerWidget {
                 if (Platform.isWindows) {
                   return context.showSnakbar('هذه الميزة لاتعمل على ويندوز');
                 }
-                final noteJson = formState.note?.toJson() ?? '';
+                final noteJson = formState.note.toJson();
                 await context.pushTo(GenerateQrCodeScreen(data: noteJson));
 
               case NotePopupAction.qrScanner:
@@ -94,10 +94,11 @@ class NoteFormHeader extends ConsumerWidget {
                 formState.markedChanges();
               case NotePopupAction.deleteNote:
                 final note = formState.note;
-                if (note?.id == null) return;
+                if (note.id == null) return context.pop();
+
                 await ref
                     .read(noteControllerProvider.notifier)
-                    .deleteNote(note!);
+                    .deleteNote(note);
                 context.pop();
             }
           },

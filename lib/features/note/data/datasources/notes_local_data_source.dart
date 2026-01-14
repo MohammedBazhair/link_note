@@ -45,6 +45,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       id: note.id!,
       column: _idColumn,
       table: _notesTable,
+      
     );
   }
 

@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/network/connectivity_service.dart';
@@ -22,7 +21,7 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Future<Note?> create(Note note) async {
     try {
-      final now = DateTime.now();
+      final now = DateTime.now().toUtc();
       final newNote = note.copyWith(id: const Uuid().v4(), updatedAt: now);
 
       await _local.createNote(newNote);
@@ -43,7 +42,7 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Future<void> update(Note note, {bool changeUpdateDate = true}) async {
     final updatedNote = changeUpdateDate
-        ? note.copyWith(updatedAt: DateTime.now())
+        ? note.copyWith(updatedAt: DateTime.now().toUtc())
         : note;
     if (await _network.hasConnection()) await _remote.updateNote(updatedNote);
     await _local.updateNote(updatedNote);
@@ -58,7 +57,7 @@ class NotesRepositoryImpl implements NotesRepository {
       await _remote.deleteNote(noteId);
       await _local.deleteNote(noteId);
     } else {
-      await _local.updateNote(note.copyWith(deletedAt: DateTime.now()));
+      await _local.updateNote(note.copyWith(deletedAt: DateTime.now().toUtc()));
     }
   }
 
@@ -72,55 +71,46 @@ class NotesRepositoryImpl implements NotesRepository {
           notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
           return notes;
         }))
-        .handleError((_) {});
+        .handleError((e, st) {
+          // Logger.log(error: e, stackTrace: st);
+        });
   }
 
   @override
   Stream<List<Note>> fetchNotesRealTime(String? userId) async* {
-    if (userId?.isEmpty ?? true) {
-      yield* _mapStreamToNotes(_local.fetchNotesRealTime());
+    final localStream = _mapStreamToNotes(_local.fetchNotesRealTime());
+
+    // If no user id provided, fallback to local stream only.
+    if (userId == null || userId.isEmpty) {
+      yield* localStream;
       return;
     }
 
+    final remoteStream = _mapStreamToNotes(_remote.fetchNotesRealTime(userId));
+
+    // Safely check network availability. If the connectivity check fails
+    // for any reason, fall back to the local stream instead of throwing.
+    bool hasConnection = false;
     try {
-      final isConnected = await _network.hasConnection();
-
-      final stream = isConnected
-          ? _remote.fetchNotesRealTime(userId!)
-          : _local.fetchNotesRealTime();
-
-      await for (final notes in _mapStreamToNotes(stream)) {
-        print('Stream sending...');
-        // insertNotes(notes);
-
-        yield notes;
-      }
+      hasConnection = await _network.hasConnection();
     } catch (e) {
-      debugPrint('Error in fetchNotesRealTime: $e');
+      debugPrint('Connectivity check failed: $e');
+      hasConnection = false;
     }
+
+    yield* (hasConnection ? remoteStream : localStream);
   }
 
   @override
   Stream<Note?> fetchNoteStream(String noteId) {
-    return _remote.fetchNoteStream(noteId).map((m) {
-      return m != null ? Note.fromMap(m) : null;
-    });
-  }
-
-  @override
-  Future<void> insertNotes(Iterable<Note> notes) async {
-    try {
-      if (!await _network.hasConnection()) throw const SocketException.closed();
-
-      if (notes.elementAtOrNull(0)?.uuid != null) {
-        return _remote.insertNotes(notes);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    } finally {
-      await _local.insertNotes(notes);
-      print('Saved Sucssufelly in Local Cache');
-    }
+    return _remote
+        .fetchNoteStream(noteId)
+        .map((m) {
+          return m != null ? Note.fromMap(m) : null;
+        })
+        .handleError((e) {
+          Logger.log(error: e);
+        });
   }
 
   @override
@@ -139,7 +129,7 @@ class NotesRepositoryImpl implements NotesRepository {
     final remoteNotes = await _remote.readNotes(id);
 
     final remoteNotesMap = Map.fromEntries(
-      remoteNotes.map((n) => MapEntry(n.id!, n)),
+      remoteNotes.map((n) => MapEntry(n.id, n)),
     );
 
     for (final localNote in localNotes) {
@@ -155,9 +145,12 @@ class NotesRepositoryImpl implements NotesRepository {
         continue;
       }
 
-      if (localNote.updatedAt.isAfter(remoteNote.updatedAt)) {
+      final localTime = localNote.updatedAt;
+      final remoteTime = remoteNote.updatedAt;
+
+      if (localTime.isAfter(remoteTime)) {
         await update(localNote, changeUpdateDate: false);
-      } else if (remoteNote.updatedAt.isAfter(localNote.updatedAt)) {
+      } else if (remoteTime.isAfter(localTime)) {
         await update(remoteNote, changeUpdateDate: false);
       }
     }

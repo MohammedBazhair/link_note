@@ -11,7 +11,7 @@ class ProfileEntity {
   });
 
   factory ProfileEntity.guest() {
-    return ProfileEntity(userId: '', username: '', updatedAt: DateTime.now());
+    return ProfileEntity(userId: '', username: '', updatedAt: DateTime.now().toUtc());
   }
   final String userId;
   final String username;

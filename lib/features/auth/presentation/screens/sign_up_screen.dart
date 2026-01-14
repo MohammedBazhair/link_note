@@ -8,7 +8,7 @@ import '../../../../core/presentation/widgets/home_button.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../../user/presentation/controllers/user_controller.dart';
-import '../../listeners.dart';
+import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 import '../widgets/custom_email_field.dart';

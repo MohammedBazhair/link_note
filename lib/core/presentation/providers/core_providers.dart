@@ -14,7 +14,7 @@ final supabaseProvider = Provider((ref) {
   return GetIt.I<GoTrueClient>();
 });
 
-final tokenRefreshProvider = Provider.autoDispose((ref) {
+final tokenRefreshProvider = Provider((ref) {
   final network = ref.watch(networkProvider);
   final supabase = ref.watch(supabaseProvider);
   // استمع لتغييرات الاتصال

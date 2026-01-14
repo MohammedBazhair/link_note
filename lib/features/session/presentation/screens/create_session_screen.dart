@@ -9,7 +9,7 @@ import '../../../note/presentation/screens/notes_list_screen.dart';
 import '../../../note/presentation/widgets/note_tile.dart';
 import '../../../user/presentation/controllers/user_controller.dart';
 import '../../domain/entities/session.dart';
-import '../../helpers.dart';
+import '../../handle_session_states.dart';
 import '../controllers/session_controller.dart';
 import '../widgets/selected_note.dart';
 import 'session_screen.dart';

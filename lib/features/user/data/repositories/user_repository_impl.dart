@@ -55,7 +55,7 @@ class UserRepositoryImpl implements UserRepository {
             username: appUser.name,
             avatarUrl: appUser.avatarUrl,
             authProviders: providers,
-            updatedAt: DateTime.now(),
+            updatedAt: DateTime.now().toUtc(),
           );
 
         case AuthProvider.unknown:

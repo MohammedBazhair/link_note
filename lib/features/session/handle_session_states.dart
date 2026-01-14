@@ -10,7 +10,6 @@ Future<void> handleSessionStates(
   required SessionState? previous,
   required SessionState current,
 }) async {
-
   switch (current) {
     case InitialSessionState():
       break;
@@ -20,10 +19,8 @@ Future<void> handleSessionStates(
       context.showSnakbar('تم الانضمام إلى الجلسة بنجاح');
     case EndedSessionState():
       context.showSnakbar('تم إنهاء الجلسة بنجاح');
-      context.pop();
     case MemberLeavedSessionState():
       context.showSnakbar('العضو غادر الجلسة.');
-      context.pop();
 
     case ErrorSessionState(:final message):
       context.showSnakbar(message);
