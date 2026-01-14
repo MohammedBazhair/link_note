@@ -58,7 +58,7 @@ Future<void> setupCommonDependincies() async {
 
 Future<Database> _initDatabase() async {
   final dbDir = await getDatabasesPath();
-  final dbPath = join(dbDir, 'link_note.db');
+  final dbPath = join(dbDir, 'LinkNote.db');
   if (Platform.isWindows) {
     final winDb = await databaseFactory.openDatabase(
       dbPath,

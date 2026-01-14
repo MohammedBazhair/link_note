@@ -18,15 +18,16 @@ class JoinSessionForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      key: const ValueKey('join'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 10,
       children: [
+        const Text('أدخل رمز الجلسة للانضمام إليها:'),
         TextField(
           controller: controller,
           textCapitalization: TextCapitalization.characters,
           decoration: InputDecoration(
             hintText: 'DH5T8',
-            labelText: 'رمز الجلسة',
+            helperText: 'الرمز مكون من 5 أحرف يمكنك كتابتها سمول أو كابيتال',
             suffixIcon: Platform.isWindows
                 ? null
                 : IconButton(

@@ -83,28 +83,27 @@ class _SessionEntryScreenState extends ConsumerState<SessionEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Session'), centerTitle: true),
-      body: Padding(
+      appBar: AppBar(title: const Text('إدارة الجلسة'), centerTitle: true),
+      body: ListView(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            SessionModeSwitcher(
-              mode: _mode,
-              onChanged: (m) => setState(() => _mode = m),
-            ),
-            const SizedBox(height: 30),
+        children: [
+          SessionModeSwitcher(
+            mode: _mode,
+            onChanged: (m) => setState(() => _mode = m),
+          ),
+          const SizedBox(height: 30),
 
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _mode == SessionMode.create
-                  ? CreateSessionForm(onCreate: _createSession)
-                  : JoinSessionForm(
-                      controller: _codeController,
-                      onJoin: _joinSession,
-                    ),
-            ),
-          ],
-        ),
+          IndexedStack(
+            index: _mode == SessionMode.create ? 0 : 1,
+            children: [
+              CreateSessionForm(onCreate: _createSession),
+              JoinSessionForm(
+                controller: _codeController,
+                onJoin: _joinSession,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

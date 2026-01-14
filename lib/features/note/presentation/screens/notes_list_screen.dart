@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/providers/provider.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../../core/presentation/widgets/custom_drawer.dart';
 import '../../../../core/presentation/widgets/floating_actions_buttons.dart';
+import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/providers.dart';
 import '../widgets/note_tile.dart';
@@ -24,6 +26,8 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
   void initState() {
     super.initState();
+    // للتأكد من تجديد التوكن عند أول اتصال
+    ref.read(tokenRefreshProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(isInNotesListScreen.notifier).update((_) => true);
     });
@@ -95,10 +99,14 @@ class NotesStreamBuilder extends ConsumerWidget {
 
       loading: () {
         final fakeNotes = List.generate(8, (index) => Note.fake());
-        return Skeletonizer(child: NotesListView(notes: fakeNotes));
+        return Skeletonizer(
+          effect: StylesConsts.shimmerEffect,
+          child: NotesListView(notes: fakeNotes),
+        );
       },
 
       error: (error, stackTrace) {
+        print(error);
         return const Center(child: Text('حدث خطأ ما'));
       },
     );

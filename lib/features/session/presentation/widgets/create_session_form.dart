@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,18 +8,16 @@ import '../../../note/presentation/widgets/note_tile.dart';
 import 'selected_note.dart';
 
 class CreateSessionForm extends ConsumerWidget {
-  const CreateSessionForm({
-    super.key,
-    required this.onCreate,
-  });
+  const CreateSessionForm({super.key, required this.onCreate});
   final VoidCallback onCreate;
 
   @override
   Widget build(BuildContext context, ref) {
     return Column(
-      key: const ValueKey('create'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 15,
       children: [
+        const Text('إنشاء جلسة تعاون لمشاركة وتحرير الملاحظات'),
         ElevatedButton(
           onPressed: () async {
             ref
@@ -32,7 +29,7 @@ class CreateSessionForm extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         const SelectedNote(),
-        const SizedBox(height: 30),
+        const SizedBox(height: 15),
         MainButton(onPressed: onCreate, text: 'إنشاء الجلسة'),
       ],
     );

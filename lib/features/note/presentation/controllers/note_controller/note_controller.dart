@@ -37,7 +37,7 @@ class NoteController extends Notifier<void> {
 
   Future<void> deleteNote(Note note) async {
     if (note.id == null) return;
-    await _notesRepository.delete(note.id!);
+    await _notesRepository.delete(note);
     _updateUi();
   }
 

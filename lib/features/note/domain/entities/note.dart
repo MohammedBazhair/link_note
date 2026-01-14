@@ -7,6 +7,7 @@ class Note {
     required this.updatedAt,
     required this.title,
     required this.content,
+    this.deletedAt,
   });
 
   factory Note.fromJson(String json) {
@@ -19,7 +20,7 @@ class Note {
   }
   factory Note.fake() {
     final now = DateTime.now();
-    return Note(updatedAt: now, title: 'fffafasf', content: 'asfafsfaf',);
+    return Note(updatedAt: now, title: 'fffafasf', content: 'asfafsfaf');
   }
 
   factory Note.fromMap(Map<String, dynamic> map) {
@@ -28,9 +29,8 @@ class Note {
       uuid: map['owner_id'] as String?,
       title: map['title'] as String,
       content: map['content'] as String,
-      updatedAt: map['updated_at'] != null
-          ? DateTime.tryParse(map['updated_at']) ?? DateTime.now()
-          : DateTime.now(),
+      updatedAt: map['updated_at'],
+      deletedAt: DateTime.tryParse(map['deleted_at'] ?? ''),
     );
   }
   final String? id;
@@ -38,6 +38,9 @@ class Note {
   final String title;
   final String content;
   final DateTime updatedAt;
+  final DateTime? deletedAt;
+
+  bool get isDeleted => deletedAt != null;
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -46,6 +49,7 @@ class Note {
       'content': content,
       'updated_at': updatedAt.toIso8601String(),
       'owner_id': ?uuid,
+      'deleted_at': ?deletedAt,
     };
   }
 
@@ -64,6 +68,7 @@ class Note {
     String? title,
     String? content,
     DateTime? updatedAt,
+    DateTime? deletedAt,
   }) {
     return Note(
       id: id ?? this.id,
@@ -71,6 +76,7 @@ class Note {
       title: title ?? this.title,
       content: content ?? this.content,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 

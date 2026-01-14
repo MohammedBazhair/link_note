@@ -36,58 +36,68 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<List<Note>> getAll(String? userId) async {
-    final id =
-        await _cache.getString(key: ExternalConsts.lastUserIdKey) ?? userId;
-    final isOnline = await _network.hasConnection();
-    final isFromRemote = id != null && isOnline;
-
-    final localNotes = await _local.readNotes();
-    if (!isFromRemote) return localNotes;
-
-    final remoteNotes = await _remote.readNotes(id);
-
-    final mapNotes = Map.fromEntries(
-      remoteNotes.map((n) => MapEntry(n.id!, n)),
-    );
-
-    for (final note in localNotes) {
-      mapNotes.update(note.id!, (n) {
-        if (note.updatedAt.isBefore(n.updatedAt)) return n;
-
-        update(note);
-        return note;
-      }, ifAbsent: () => note);
-    }
-
-    return mapNotes.values.toList();
+  Future<List<Note>> getAll() {
+    return _local.readNotes();
   }
 
   @override
-  Future<void> update(Note note) async {
-    final updatedNote = note.copyWith(updatedAt: DateTime.now());
+  Future<void> update(Note note, {bool changeUpdateDate = true}) async {
+    final updatedNote = changeUpdateDate
+        ? note.copyWith(updatedAt: DateTime.now())
+        : note;
     if (await _network.hasConnection()) await _remote.updateNote(updatedNote);
     await _local.updateNote(updatedNote);
   }
 
   @override
-  Future<void> delete(String id) async {
-    if (await _network.hasConnection()) await _remote.deleteNote(id);
+  Future<void> delete(Note note) async {
+    final noteId = note.id;
+    if (noteId == null) return;
 
-    await _local.deleteNote(id);
+    if (await _network.hasConnection()) {
+      await _remote.deleteNote(noteId);
+      await _local.deleteNote(noteId);
+    } else {
+      await _local.updateNote(note.copyWith(deletedAt: DateTime.now()));
+    }
+  }
+
+  Stream<List<Note>> _mapStreamToNotes(Stream<RowList> rawStream) {
+    return rawStream
+        .map(((raws) {
+          final notes = raws
+              .map(Note.fromMap)
+              .where((note) => note.deletedAt == null)
+              .toList();
+          notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+          return notes;
+        }))
+        .handleError((_) {});
   }
 
   @override
-  Stream<List<Note>> fetchNotesRealTime(String? userId) {
-    Stream<RowList> stream;
-    try {
-      if( userId?.isEmpty?? true) throw ArgumentError.notNull();  
-      stream = _remote.fetchNotesRealTime(userId!);
-    } catch (e) {
-      stream = _local.fetchNotesRealTime();
+  Stream<List<Note>> fetchNotesRealTime(String? userId) async* {
+    if (userId?.isEmpty ?? true) {
+      yield* _mapStreamToNotes(_local.fetchNotesRealTime());
+      return;
     }
 
-    return stream.map((raws) => List.from(raws.map(Note.fromMap)));
+    try {
+      final isConnected = await _network.hasConnection();
+
+      final stream = isConnected
+          ? _remote.fetchNotesRealTime(userId!)
+          : _local.fetchNotesRealTime();
+
+      await for (final notes in _mapStreamToNotes(stream)) {
+        print('Stream sending...');
+        // insertNotes(notes);
+
+        yield notes;
+      }
+    } catch (e) {
+      debugPrint('Error in fetchNotesRealTime: $e');
+    }
   }
 
   @override
@@ -109,11 +119,47 @@ class NotesRepositoryImpl implements NotesRepository {
       debugPrint(e.toString());
     } finally {
       await _local.insertNotes(notes);
+      print('Saved Sucssufelly in Local Cache');
     }
   }
-  
+
   @override
   Future<Note?> getNoteById(String noteId) {
     return _remote.getNoteById(noteId);
+  }
+
+  @override
+  Future<void> syncNotes(String? userId) async {
+    final id =
+        await _cache.getString(key: ExternalConsts.lastUserIdKey) ?? userId;
+    if (id == null) return;
+    if (!await _network.hasConnection()) return;
+
+    final localNotes = await _local.readNotes();
+    final remoteNotes = await _remote.readNotes(id);
+
+    final remoteNotesMap = Map.fromEntries(
+      remoteNotes.map((n) => MapEntry(n.id!, n)),
+    );
+
+    for (final localNote in localNotes) {
+      final remoteNote = remoteNotesMap[localNote.id];
+
+      if (remoteNote != null && localNote.isDeleted) {
+        await delete(localNote);
+        continue;
+      }
+
+      if (remoteNote == null) {
+        await create(localNote);
+        continue;
+      }
+
+      if (localNote.updatedAt.isAfter(remoteNote.updatedAt)) {
+        await update(localNote, changeUpdateDate: false);
+      } else if (remoteNote.updatedAt.isAfter(localNote.updatedAt)) {
+        await update(remoteNote, changeUpdateDate: false);
+      }
+    }
   }
 }
