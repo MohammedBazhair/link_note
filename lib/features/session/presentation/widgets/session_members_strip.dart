@@ -37,7 +37,7 @@ class SessionMemberItem extends StatelessWidget {
       children: [
         const PlaceholderAvatar(),
         const SizedBox(height: 10),
-        Text(member.role.name,),
+        Text(member.role.label,),
       ],
     );
   }

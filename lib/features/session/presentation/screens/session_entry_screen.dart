@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../note/presentation/controllers/note_providers.dart';
 import '../../domain/entities/session_mode.dart';
 import '../../handle_session_states.dart';
 import '../controllers/session_controller.dart';
@@ -36,25 +37,33 @@ class _SessionEntryScreenState extends ConsumerState<SessionEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('إدارة الجلسة'), centerTitle: true),
-      body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          SessionModeSwitcher(
-            mode: _mode,
-            onChanged: (m) => setState(() => _mode = m),
-          ),
-          const SizedBox(height: 30),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        ref.read(selectableNoteProvider.notifier).update((s) => s.init());
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('إدارة الجلسة'), centerTitle: true),
+        body: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            SessionModeSwitcher(
+              mode: _mode,
+              onChanged: (m) => setState(() => _mode = m),
+            ),
+            const SizedBox(height: 30),
 
-          IndexedStack(
-            index: _mode == SessionMode.create ? 0 : 1,
-            children: [
-              const CreateSessionForm(),
-              JoinSessionForm(controller: _codeController),
-            ],
-          ),
-        ],
+            IndexedStack(
+              index: _mode == SessionMode.create ? 0 : 1,
+              children: [
+                const CreateSessionForm(),
+                JoinSessionForm(controller: _codeController),
+              ],
+            ),
+            const SizedBox(height: 30),
+
+            const Text('الجلسات المفتوحة'),
+          ],
+        ),
       ),
     );
   }

@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
@@ -11,7 +10,6 @@ import '../../../../core/presentation/widgets/floating_actions_buttons.dart';
 import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/note_providers.dart';
-import '../widgets/note_tile.dart';
 import '../widgets/notes_widget.dart';
 import '../widgets/nothing_note.dart';
 
@@ -26,8 +24,8 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
   void initState() {
     super.initState();
-      ref.read(tokenRefreshProvider);
-      ref.read(syncNotesProvider);
+    ref.read(tokenRefreshProvider);
+    ref.read(syncNotesProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // للتأكد من تجديد التوكن عند أول اتصال
       ref.read(isInNotesListScreen.notifier).update((_) => true);
@@ -36,15 +34,16 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: PreferredSize(
+    return Scaffold(
+      key: widget.key,
+      appBar: const PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: NotesListAppBar(),
       ),
-      drawer: CustomDrawer(),
-      floatingActionButton: FloatingActionsButtons(),
+      drawer: const CustomDrawer(),
+      floatingActionButton: const FloatingActionsButtons(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: NotesStreamBuilder(),
+      body: const NotesStreamBuilder(),
     );
   }
 }
@@ -58,26 +57,35 @@ class NotesListAppBar extends ConsumerWidget {
       selectableNoteProvider.select((s) => s.isSelectable),
     );
 
-    return AppBar(
-      title: isSelectable ? const Text('حدد ملاحظة') : const Text('الملاحظات'),
-      leading: isSelectable
-          ? TextButton.icon(
-              label: const Text('تم'),
-              onPressed: context.pop,
-              icon: const Icon(Icons.check),
-            )
-          : null,
-      actions: [
-        if (!isSelectable && Platform.isWindows)
-          IconButton(
-            hoverColor: Colors.transparent,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            isSelectable
+                ? TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: DarkColors.primary,
+                      overlayColor: Colors.transparent,
+                    ),
+                    label: const Text('تم'),
+                    onPressed: context.pop,
+                    icon: const Icon(Icons.check),
+                  )
+                : const SizedBox(width: 24),
 
-            onPressed: () {
-              ref.invalidate(notesStreamProvider);
-            },
-            icon: const Icon(Icons.refresh),
-          ),
-      ],
+            isSelectable ? const Text('حدد ملاحظة') : const Text('الملاحظات'),
+
+            isSelectable
+                ? const SizedBox(width: 50)
+                : IconButton(
+                    onPressed: Scaffold.of(context).openDrawer,
+                    icon: const Icon(Icons.menu_rounded),
+                  ),
+          ],
+        ),
+      ),
     );
   }
 }

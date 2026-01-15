@@ -1,12 +1,12 @@
 enum SessionMemberRole {
-  host,
-  member;
+  host('مالك'),
+  member('عضو');
+
+  const SessionMemberRole(this.label);
+
+  final String label;
 
   static SessionMemberRole fromString(String roleString) {
-    return switch (roleString) {
-      'host' => SessionMemberRole.host,
-      'member' => SessionMemberRole.member,
-      _ => SessionMemberRole.member,
-    };
+    return values.byName(roleString);
   }
 }

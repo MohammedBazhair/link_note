@@ -6,6 +6,7 @@ import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/domain/repositories/user_repository.dart';
 import '../../domain/entities/note.dart';
+import '../../domain/entities/selectable_note.dart';
 import '../../domain/repositories/notes_repository.dart';
 import 'note_controller/note_controller.dart';
 
@@ -56,3 +57,7 @@ final syncNotesProvider = Provider((ref) {
 
   ref.onDispose(subscription.cancel);
 });
+
+final selectableNoteProvider = StateProvider.autoDispose(
+  (_) => SelectableNote(),
+);

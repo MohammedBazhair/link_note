@@ -22,6 +22,7 @@ class SessionModeSwitcher extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
+        spacing: 5,
         children: SessionMode.values.map((m) {
           final selected = m == mode;
           return Expanded(

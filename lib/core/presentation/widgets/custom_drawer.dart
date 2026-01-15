@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/note/presentation/widgets/note_tile.dart';
+import '../../../features/note/presentation/controllers/note_providers.dart';
 import '../../../features/user/presentation/controllers/user_controller.dart';
 import '../../../features/user/presentation/widgets/user_profile.dart';
 import '../../constants/colors/colors.dart';
@@ -49,10 +49,7 @@ class CustomDrawer extends ConsumerWidget {
                           const SignUpTile(),
                         ],
                         const NotesTile(),
-                        if (isUserLogin) ...[
-                          const ManageSessionTile(),
-                          const JoinSessionTile(),
-                        ],
+                        if (isUserLogin) ...[const ManageSessionTile()],
                         const AboutAppTile(),
                       ],
                     ),

@@ -25,10 +25,8 @@ class SessionPopupMenu extends ConsumerWidget {
         switch (action) {
           case SessionMenuAction.end:
             await controller.endSession();
-            context.pop();
           case SessionMenuAction.leave:
             await controller.leaveSession();
-            context.pop();
 
           case SessionMenuAction.qrScanner:
             final data = await context.pushTo<String?>(

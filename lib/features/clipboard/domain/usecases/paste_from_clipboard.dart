@@ -5,6 +5,6 @@ class PasteFromClipboard {
   final ClipboardRepository repository;
 
   Future<String?> call() {
-    return repository.paste();
+    return repository.pasteText();
   }
 }

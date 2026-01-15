@@ -8,7 +8,6 @@ import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../../user/presentation/controllers/user_controller.dart';
 import '../controllers/session_controller.dart';
-import '../screens/session_screen.dart';
 
 class JoinSessionForm extends StatelessWidget {
   const JoinSessionForm({
@@ -61,7 +60,6 @@ class JoinSessionForm extends StatelessWidget {
                 await ref
                     .read(sessionControllerProvider.notifier)
                     .joinSessionByCode(memberId: userId, sessionCode: code);
-                await context.pushTo(const SessionScreen());
               },
             );
           },

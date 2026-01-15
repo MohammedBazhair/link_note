@@ -4,14 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../clipboard/presentation/providers/clipboard_providers.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
+import '../controllers/session_providers.dart';
 
-class SessionCodeCard extends StatelessWidget {
-  const SessionCodeCard(this.sessionCode, {super.key});
+class SessionCodeCard extends ConsumerWidget {
+  const SessionCodeCard( {super.key});
 
-  final String? sessionCode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,ref) {
+    final sessionCode = ref.watch(sessionProvider)?.sessionCode;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
@@ -23,7 +24,7 @@ class SessionCodeCard extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              text: 'Code:',
+              text: 'كود الجلسة:',
               style: const TextStyle(
                 color: Color(0xE2FFFFFF),
                 fontSize: 17,
@@ -44,29 +45,25 @@ class SessionCodeCard extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          Consumer(
-            builder: (_, ref, __) {
-              return IconButton(
-                tooltip: 'Copy',
-                color: Colors.white,
-                icon: const Icon(Icons.copy),
-                onPressed: () async {
-                  if (sessionCode == null) {
-                    return context.showSnakbar('خطأ لم يتم النسخ');
-                  }
-
-                  await ref
-                      .read(clipboardControllerProvider)
-                      .copyToClipboard(sessionCode!);
-                    return context.showSnakbar('تم نسخ كود الجلسة بنجاح');
-
-                },
-              );
+          IconButton(
+            tooltip: 'نسخ',
+            color: Colors.white,
+            icon: const Icon(Icons.copy),
+            onPressed: () async {
+              if (sessionCode == null) {
+                return context.showSnakbar('خطأ لم يتم النسخ');
+              }
+          
+              await ref
+                  .read(clipboardControllerProvider)
+                  .copyToClipboard(sessionCode);
+                return context.showSnakbar('تم نسخ كود الجلسة بنجاح');
+          
             },
           ),
           IconButton(
             color: Colors.white,
-            tooltip: 'Generate QR Code',
+            tooltip: 'توليد رمز QR',
             icon: const Icon(Icons.qr_code),
             onPressed: () {
               context.pushTo(GenerateQrCodeScreen(data: sessionCode ?? ''));

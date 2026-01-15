@@ -6,6 +6,10 @@ class SelectableNote {
 
   bool get hasNoteId => noteId?.isNotEmpty ?? false;
 
+  SelectableNote init() {
+    return SelectableNote();
+  }
+
   SelectableNote copyWith({bool? isSelectable, String? noteId}) {
     return SelectableNote(
       isSelectable: isSelectable ?? this.isSelectable,

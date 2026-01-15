@@ -7,3 +7,7 @@ final sessionMembersStreamProvider = StreamProvider.autoDispose((ref) {
 
   return sessionController.fetchMembersOfSession();
 });
+
+final sessionProvider = Provider.autoDispose((ref) {
+  return ref.watch(sessionControllerProvider).session;
+});

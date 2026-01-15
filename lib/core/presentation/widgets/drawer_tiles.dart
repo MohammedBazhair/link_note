@@ -6,7 +6,6 @@ import '../../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../../features/auth/presentation/screens/sign_up_screen.dart';
 import '../../../features/note/presentation/controllers/note_providers.dart';
 import '../../../features/note/presentation/screens/notes_list_screen.dart';
-import '../../../features/session/presentation/screens/join_session_by_code_screen.dart';
 import '../../../features/session/presentation/screens/session_entry_screen.dart';
 import '../../constants/colors/colors.dart';
 import '../../extensions/extensions.dart';
@@ -119,20 +118,6 @@ class ManageSessionTile extends ConsumerWidget {
   }
 }
 
-class JoinSessionTile extends StatelessWidget {
-  const JoinSessionTile({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return DrawerTile(
-      icon: Icons.group_add_rounded,
-      title: 'الانضمام إلى الجلسة',
-      onTap: () {
-        context.pushTo(const JoinSessionByCodeScreen());
-      },
-    );
-  }
-}
 
 class AboutAppTile extends StatelessWidget {
   const AboutAppTile({super.key});

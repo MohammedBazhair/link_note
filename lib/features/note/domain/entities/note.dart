@@ -56,6 +56,15 @@ class Note {
     };
   }
 
+  String get lastUpdateText {
+    final date = updatedAt.toLocal();
+    final years = date.year;
+    final months = date.month;
+    final hours = date.hour;
+    final minuts = date.minute;
+    return '$years/$months $hours:$minuts';
+  }
+
   String toJson() {
     return jsonEncode(toMap());
   }

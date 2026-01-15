@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/tile_wrapper.dart';
 import '../../domain/entities/note.dart';
-import '../../domain/entities/selectable_note.dart';
+import '../controllers/note_providers.dart';
 import '../screens/note_editor_screen.dart';
 
-final selectableNoteProvider = StateProvider.autoDispose(
-  (_) => SelectableNote(),
-);
+
 
 class NoteTile extends ConsumerWidget {
   const NoteTile(this.note, {super.key});

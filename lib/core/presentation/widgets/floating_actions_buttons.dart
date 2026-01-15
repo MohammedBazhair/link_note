@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../features/note/presentation/controllers/note_providers.dart';
 import '../../../features/note/presentation/screens/note_editor_screen.dart';
-import '../../../features/note/presentation/widgets/note_tile.dart';
 import '../../../features/session/presentation/screens/session_entry_screen.dart';
 import '../../extensions/extensions.dart';
 
