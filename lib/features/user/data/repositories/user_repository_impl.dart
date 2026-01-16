@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../auth/data/model/app_user.dart';
@@ -112,32 +112,39 @@ class UserRepositoryImpl implements UserRepository {
     ProfileEntity profile,
     String filePath,
   ) async {
+    File? tempFile;
     try {
-      final file = File(filePath); //path/to/image.jpg
-      final folderPath = p.dirname(file.path); // path/to
+      final file = File(filePath);
+      final folderPath = file.parent.path;
 
-      final newFilePath = '$folderPath/${profile.userId}/profile.png';
-      await file.rename(newFilePath);
+      tempFile = await file.copy('$folderPath/profile.png');
 
-      final bytesSize = await file.length();
+      final bytesSize = await tempFile.length();
       final megasSize = bytesSize.bytesToMb;
 
       if (megasSize > ExternalConsts.maxfileMbSize) {
         return Result.error(
-          "Can't upload avatar, File size must be less than ${ExternalConsts.maxfileMbSize} MB",
+          'لا يمكن رفع الصورة الشخصية، يجب أن يكون حجم الملف أقل من ${ExternalConsts.maxfileMbSize} ميجابايت',
         );
       }
 
       final newProfile = await _remoteDataSource.uploadAvatarImage(
         profile,
-        newFilePath,
+        tempFile.path,
       );
 
       return Result.ok(newProfile);
     } on SocketException catch (_) {
-      return Result.error("Can't upload avatar, check your internet first.");
-    } catch (_) {
-      return Result.error("Can't upload avatar, try again.");
+      return Result.error(
+        'لا يمكن رفع الصورة الشخصية، يرجى التحقق من اتصالك بالإنترنت أولاً.',
+      );
+    } catch (e) {
+      Logger.log(error: e);
+      return Result.error('فشل رفع الصورة الشخصية، يرجى المحاولة مرة أخرى.');
+    } finally {
+      if (tempFile != null) {
+        if (await tempFile.exists()) await tempFile.delete();
+      }
     }
   }
 

@@ -21,10 +21,12 @@ class _UserProfileWidgetState extends ConsumerState<UserProfileWidget> {
     userController.loadProfile();
     ref.listenManual(userControllerProvider, (previous, next) {
       switch (next) {
+        
         case UserInitialState():
         case UserUpdateProfileState():
           context.showSnakbar('تم تحديث البروفايل بنجاح');
         case UserLoadProfileState():
+        case UserLoadAvatarState():
           break;
         case UserErrorState(:final message):
           context.showSnakbar(message);

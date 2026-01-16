@@ -27,7 +27,6 @@ final sessionMembersFamilyProfiles = FutureProvider
       ref,
       members,
     ) async {
-      print('run provider');
       final userRepo = ref.read(userRepositoryProvider);
       final usersIds = members.map((e) => e.memberId).toList();
       final profilesMap = await userRepo.getProfiles(usersIds);

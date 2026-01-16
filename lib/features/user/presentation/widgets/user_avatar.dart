@@ -1,9 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../domain/entities/profile.dart';
+import '../controllers/user_controller.dart';
+import '../controllers/user_providers.dart';
+import '../controllers/user_state.dart';
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget(this.profile, {super.key});
@@ -22,31 +27,42 @@ class AvatarWidget extends StatelessWidget {
   }
 }
 
-class NetworkAvatar extends StatelessWidget {
+class NetworkAvatar extends ConsumerWidget {
   const NetworkAvatar(this.avatarUrl, {super.key});
 
   final String avatarUrl;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final avatarAsync = ref.watch(getAvatarFileProvider(avatarUrl));
+
     return ClipOval(
-      child: FutureBuilder(
-        future: DefaultCacheManager().getSingleFile(avatarUrl),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const PlaceholderAvatar();
-          }
-
-          if (!snapshot.hasData || snapshot.hasError) {
-            return const PlaceholderAvatar();
-          }
-
-          return Image.file(
-            snapshot.data!,
-            width: 80,
-            height: 80,
-            fit: BoxFit.cover,
+      child: avatarAsync.when(
+        data: (avatarFile) {
+          final isLoading =
+              ref.watch(userControllerProvider) is UserLoadAvatarState;
+          return Stack(
+            alignment: AlignmentGeometry.center,
+            children: [
+              Image.file(
+                avatarFile,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+                
+              ),
+              if (isLoading) const LoadingAvatar(),
+            ],
           );
+        },
+        loading: () {
+          return const Stack(
+            alignment: AlignmentGeometry.center,
+            children: [PlaceholderAvatar(), LoadingAvatar()],
+          );
+        },
+        error: (_, _) {
+          return const PlaceholderAvatar();
         },
       ),
     );
@@ -61,6 +77,27 @@ class PlaceholderAvatar extends StatelessWidget {
     return const CircleAvatar(
       radius: 40,
       backgroundImage: AssetImage(Assets.imagesBlankProfile),
+    );
+  }
+}
+
+class LoadingAvatar extends StatelessWidget {
+  const LoadingAvatar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BackdropFilter(
+filter: ImageFilter.blur(sigmaX: 5,sigmaY: 5),
+      child: const CircleAvatar(
+        radius: 40,
+        backgroundColor: Color(0x343D3D3D),
+      
+        child: SizedBox(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(),
+        ),
+      ),
     );
   }
 }

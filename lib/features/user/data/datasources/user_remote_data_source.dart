@@ -111,6 +111,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       updatedAt: DateTime.now().toUtc(),
     );
 
+    
+
     await _remoteDatabase.update(
       updated: updatedModel.toMap(),
       id: profile.userId,
@@ -127,16 +129,20 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     final resultPath = await _remoteStorage.uploadFile(
       filePath: filePath,
       storageBucket: ExternalConsts.imagesBucket,
+      userId: profile.userId
     );
 
     final avatarUrl = _remoteStorage.getUrlFrom(
       path: resultPath,
       storageBucket: ExternalConsts.imagesBucket,
     );
-    print('AVATAR URL: $avatarUrl');
+
+
 
     final updatedProfile = profile.copyWith(avatarUrl: avatarUrl);
-    await updateProfile(profile, resultPath);
+    await updateProfile(updatedProfile, resultPath);
+
+
 
     return updatedProfile;
   }

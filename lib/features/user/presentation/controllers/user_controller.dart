@@ -75,6 +75,7 @@ class UserController extends StateNotifier<UserState> {
 
       final file = await uploadImage();
       if (file == null) return;
+      state = UserLoadAvatarState(state.profile);
 
       final result = await _userRepository.uploadAvatar(
         state.profile,

@@ -3,12 +3,16 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../utils.dart';
+
+
 abstract interface class RemoteStorageService {
   String getUrlFrom({required String path, required String storageBucket});
 
   Future<String> uploadFile({
     required String filePath,
     required String storageBucket,
+    required String userId,
   });
 
   Future<void> deleteAllFilesInFolder({
@@ -30,10 +34,12 @@ class RemoteStorageServiceImpl implements RemoteStorageService {
   Future<String> uploadFile({
     required String filePath,
     required String storageBucket,
+    required String userId,
   }) async {
     final filename = p.basename(filePath);
     final file = File(filePath);
-    final resultPath = 'public/$filename';
+    final folderName = CipherService.encrypt(userId);
+    final resultPath = 'public/$folderName/$filename';
 
     await _storage
         .from(storageBucket)

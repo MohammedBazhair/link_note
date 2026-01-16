@@ -18,6 +18,10 @@ class UserLoadProfileState extends UserState {
   UserLoadProfileState(super.profile);
 }
 
+class UserLoadAvatarState extends UserState {
+  UserLoadAvatarState(super.profile);
+}
+
 class UserErrorState extends UserState {
   UserErrorState(super.profile, this.message);
   final String message;
