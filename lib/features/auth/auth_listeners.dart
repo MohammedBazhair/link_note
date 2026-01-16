@@ -13,12 +13,13 @@ Future<void> authListener({
   required AuthState next,
   required WidgetRef ref,
 }) async {
+  if (previous is AuthLoadingState) context.pop();
+  
   switch (next) {
     case AuthInitialState():
       break;
 
     case AuthSuccessfullState():
-    
       await context.pushReplacementTo(const NotesListScreen());
 
     case AuthFailedState(:final message):

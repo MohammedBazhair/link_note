@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
 
@@ -61,13 +60,11 @@ class SessionController extends StateNotifier<SessionState> {
     );
   }
 
-  Stream<Set<SessionMember>> fetchMembersOfSession() {
+  Stream<List<SessionMember>> fetchMembersOfSession() {
     final sessionId = state.session?.id;
     if (sessionId == null) return const Stream.empty();
 
-    return _sessionRepository.getMembersStream(sessionId).handleError((e) {
-      Logger.log(error: e);
-    });
+    return _sessionRepository.getMembersStream(sessionId).handleError((e) {});
   }
 
   Future<void> joinSessionByCode({
@@ -91,18 +88,23 @@ class SessionController extends StateNotifier<SessionState> {
         role: SessionMemberRole.member,
       );
 
+      Logger.log(message: member.toString());
+      Logger.log(message: session.toString());
+
       await _addMemberToSession(member, session);
       state = JoinSessionState(session: session, currentMember: member);
     } catch (e) {
-      state = ErrorSessionState(message: 'Failed to join session');
-      debugPrint(e.toString());
+      state = ErrorSessionState(
+        message: 'فشل الانضمام إلى الجلسة، الرجاء إدخال كود الجلسة المطلوبة',
+      );
+      Logger.log(error: e);
     }
   }
 
   Future<void> leaveSession() async {
     try {
       if (state.currentMember == null || state.session == null) {
-        throw ArgumentError.notNull();
+        return;
       }
 
       if (state.currentMember!.isHost) {
@@ -117,7 +119,7 @@ class SessionController extends StateNotifier<SessionState> {
       if (error != null) throw Exception();
       state = const MemberLeavedSessionState();
     } catch (e) {
-      debugPrint(e.toString());
+      Logger.log(error: e);
       state = ErrorSessionState(
         message: 'Failed to leave the session, please try again.',
       );

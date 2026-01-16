@@ -16,7 +16,7 @@ class SessionMembersList extends ConsumerWidget {
 
     return membersAsync.when(
       data: (members) {
-        return SessionMembersStrip(members: members.toList());
+        return SessionMembersStrip(members: members);
       },
       loading: () {
         final fakeMembers = List.generate(8, (_) => SessionMember.empty());

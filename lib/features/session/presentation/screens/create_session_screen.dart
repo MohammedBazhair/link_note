@@ -12,7 +12,7 @@ import '../../domain/entities/session.dart';
 import '../../handle_session_states.dart';
 import '../controllers/session_controller.dart';
 import '../widgets/selected_note.dart';
-import 'session_screen.dart';
+import 'session_live_screen.dart';
 
 class CreateSessionScreen extends ConsumerStatefulWidget {
   const CreateSessionScreen({super.key});
@@ -39,7 +39,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
 
     await ref.read(sessionControllerProvider.notifier).createSession(session);
 
-    await context.pushTo(const SessionScreen());
+    await context.pushTo(const SessionLiveScreen());
   }
 
   @override

@@ -9,9 +9,9 @@ import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_controller/note_controller.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/widgets/content_form_field.dart';
-import '../../../note/presentation/widgets/editor_form.dart';
 import '../../../note/presentation/widgets/title_form_field.dart';
 import '../controllers/session_controller.dart';
+import '../controllers/session_providers.dart';
 
 class SessionNote extends ConsumerStatefulWidget {
   const SessionNote({super.key});
@@ -23,14 +23,15 @@ class SessionNote extends ConsumerStatefulWidget {
 class _SessionBodyState extends ConsumerState<SessionNote> {
   Timer? _debounce;
 
-  void updateNoteDebounced(Note note) {
+  void updateNoteDebounced() {
     _debounce?.cancel();
     _debounce = Timer(
       const Duration(seconds: 2),
-      () =>
-          ref.read(noteControllerProvider.notifier).updateNote(note),
+      () => ref.read(noteControllerProvider.notifier).updateNote(updatedNote),
     );
   }
+
+  Note get updatedNote => ref.watch(editorFormProvider).note;
 
   @override
   void dispose() {
@@ -40,7 +41,7 @@ class _SessionBodyState extends ConsumerState<SessionNote> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedNoteId = ref.watch(selectableNoteProvider).noteId;
+    final selectedNoteId = ref.watch(sessionProvider)?.noteId;
 
     if (selectedNoteId == null) {
       return const Center(child: Text('لاتوجد ملاحظة محددة'));
@@ -52,7 +53,7 @@ class _SessionBodyState extends ConsumerState<SessionNote> {
       data: (note) {
         return ConditionalBuilder(
           condition: note != null,
-          builder: (_) => SessionNoteForm(onUpdatedNote:()=> updateNoteDebounced(note!)),
+          builder: (_) => SessionNoteForm(onUpdatedNote: updateNoteDebounced),
           fallback: (_) => const Center(child: Text('لا يوجد ملاحظة')),
         );
       },
@@ -76,6 +77,7 @@ class SessionNoteForm extends ConsumerWidget {
     );
 
     return Column(
+      spacing: 16,
       children: [
         TitleFormField(
           controller: formState.titleController,

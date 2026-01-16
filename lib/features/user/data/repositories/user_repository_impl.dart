@@ -29,6 +29,33 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> createProfile(ProfileEntity profile) async {
     try {
+      final appUser = AppUserModel.fromSupabase(
+        userId: profile.userId,
+        userMetadata: currentUser?.userMetadata,
+        appMetadata: currentUser?.appMetadata ?? {},
+      );
+
+      final providers = appUser.providers.toSet();
+
+      final ProfileEntity profileEntity;
+      switch (appUser.provider) {
+        case AuthProvider.google:
+          profileEntity = ProfileEntity(
+            userId: profile.userId,
+            username: appUser.name,
+            avatarUrl: appUser.avatarUrl,
+            authProviders: providers,
+            updatedAt: DateTime.now().toUtc(),
+          );
+        case AuthProvider.email:
+          profileEntity = profile.copyWith(authProviders: providers);
+
+        case AuthProvider.unknown:
+          throw Exception('unKnown provider, try again');
+      }
+
+      await _localDataSource.saveProfile(profileEntity);
+
       await _remoteDataSource.createProfile(profile);
     } catch (e) {
       throw Exception('Failed to create profile');
@@ -39,6 +66,7 @@ class UserRepositoryImpl implements UserRepository {
   Future<ProfileEntity> getProfile(GetProfileParams params) async {
     try {
       final appUser = AppUserModel.fromSupabase(
+        userId: params.userId,
         userMetadata: params.userMetadata,
         appMetadata: params.appMetadata,
       );
@@ -88,7 +116,7 @@ class UserRepositoryImpl implements UserRepository {
       final file = File(filePath); //path/to/image.jpg
       final folderPath = p.dirname(file.path); // path/to
 
-      final newFilePath = '$folderPath/profile.png';
+      final newFilePath = '$folderPath/${profile.userId}/profile.png';
       await file.rename(newFilePath);
 
       final bytesSize = await file.length();
@@ -111,5 +139,14 @@ class UserRepositoryImpl implements UserRepository {
     } catch (_) {
       return Result.error("Can't upload avatar, try again.");
     }
+  }
+
+  @override
+  Future<Map<String, ProfileEntity>> getProfiles(List<String> usersIds) async {
+    final rawProfiles = await _remoteDataSource.readProfilesBatch(usersIds);
+    final appUsersModels = rawProfiles.map(AppUserModel.fromMap);
+
+    final profiles = appUsersModels.map(ProfileEntity.fromAppUser);
+    return Map.fromIterables(usersIds, profiles);
   }
 }

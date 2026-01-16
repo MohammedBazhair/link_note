@@ -4,10 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class RemoteStorageService {
-  Future<String> getUrlFrom({
-    required String path,
-    required String storageBucket,
-  });
+  String getUrlFrom({required String path, required String storageBucket});
 
   Future<String> uploadFile({
     required String filePath,
@@ -25,11 +22,8 @@ class RemoteStorageServiceImpl implements RemoteStorageService {
   final SupabaseStorageClient _storage;
 
   @override
-  Future<String> getUrlFrom({
-    required String path,
-    required String storageBucket,
-  }) {
-    return _storage.from(storageBucket).createSignedUrl(path, 3600);
+  String getUrlFrom({required String path, required String storageBucket}) {
+    return _storage.from(storageBucket).getPublicUrl(path);
   }
 
   @override

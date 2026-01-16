@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
-import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/network/connectivity_service.dart';
@@ -72,7 +71,6 @@ class NotesRepositoryImpl implements NotesRepository {
           return notes;
         }))
         .handleError((e, st) {
-          // Logger.log(error: e, stackTrace: st);
         });
   }
 
@@ -109,7 +107,6 @@ class NotesRepositoryImpl implements NotesRepository {
           return m != null ? Note.fromMap(m) : null;
         })
         .handleError((e) {
-          Logger.log(error: e);
         });
   }
 

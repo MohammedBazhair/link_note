@@ -1,5 +1,5 @@
 enum SessionMemberRole {
-  host('مالك'),
+  host('المالك'),
   member('عضو');
 
   const SessionMemberRole(this.label);

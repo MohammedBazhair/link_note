@@ -5,10 +5,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
-import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/screens/note_editor_screen.dart';
-import '../../../note/presentation/widgets/note_tile.dart';
+import '../../domain/entities/selected_note_params.dart';
 
 class SelectedNote extends ConsumerWidget {
   const SelectedNote({super.key});
@@ -26,11 +25,22 @@ class SelectedNote extends ConsumerWidget {
         return ConditionalBuilder(
           condition: note != null,
           fallback: (_) => fallbackChild,
-          builder: (_) => SelectedNoteCard(note!),
+          builder: (_) {
+            final params = SelectedNoteParams(
+              note: note!,
+              labelOnStack: 'محدد',
+              onButtonPressed: () =>
+                  context.pushTo(NoteEditorScreen(note: note)),
+              onCardPressd: () => context.pushTo(NoteEditorScreen(note: note)),
+              textButtonLabel: 'تعديل',
+              textButtonIcon: Icons.edit,
+            );
+            return SelectedNoteCard(params);
+          },
         );
       },
       loading: () {
-        return Skeletonizer(child: NoteTile(Note.fake()));
+        return Skeletonizer(child: SelectedNoteCard(SelectedNoteParams.fake()));
       },
       error: (_, __) {
         return fallbackChild;
@@ -40,8 +50,8 @@ class SelectedNote extends ConsumerWidget {
 }
 
 class SelectedNoteCard extends StatelessWidget {
-  const SelectedNoteCard(this.note, {super.key});
-  final Note note;
+  const SelectedNoteCard(this.params, {super.key});
+  final SelectedNoteParams params;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +64,7 @@ class SelectedNoteCard extends StatelessWidget {
         side: BorderSide(width: 0.5, color: Colors.white.withOpacity(0.08)),
       ),
       child: InkWell(
-        onTap: () => context.pushTo(NoteEditorScreen(note: note)),
+        onTap: params.onCardPressd,
         highlightColor: DarkColors.primary.withOpacity(0.5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,9 +104,9 @@ class SelectedNoteCard extends StatelessWidget {
                       color: const Color(0XFF18202C),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Text(
-                      'محدد',
-                      style: TextStyle(
+                    child: Text(
+                      params.labelOnStack,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
                       ),
@@ -111,7 +121,7 @@ class SelectedNoteCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    note.title,
+                    params.note.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -122,7 +132,7 @@ class SelectedNoteCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    note.content,
+                    params.note.content,
                     maxLines: 3,
 
                     style: const TextStyle(
@@ -140,7 +150,7 @@ class SelectedNoteCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'آخر تعديل: ${note.lastUpdateText}',
+                        'آخر تعديل: ${params.note.lastUpdateText}',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color.fromARGB(157, 1, 183, 193),
@@ -154,11 +164,11 @@ class SelectedNoteCard extends StatelessWidget {
                             foregroundColor: DarkColors.primary,
                             alignment: Alignment.center,
                             padding: const EdgeInsets.symmetric(horizontal: 10),
+                            textStyle: const TextStyle(height: 1),
                           ),
-                          onPressed: () =>
-                              context.pushTo(NoteEditorScreen(note: note)),
-                          icon: const Icon(Icons.draw_rounded),
-                          label: const Text('تعديل'),
+                          onPressed: params.onButtonPressed,
+                          icon: Icon(params.textButtonIcon),
+                          label: Text(params.textButtonLabel),
                         ),
                       ),
                     ],

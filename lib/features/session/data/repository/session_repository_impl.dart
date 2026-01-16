@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../domain/entities/session.dart';
@@ -41,12 +42,15 @@ class SessionRepositoryImpl implements SessionRepository {
     required Session session,
   }) async {
     try {
-      await _remoteDatabase.insertRow(
+      Logger.log(message: 'Adding member to session');
+      final map = await _remoteDatabase.insertRow(
         map: member.toMap(),
         table: ExternalConsts.sessionMembersTable,
       );
+      Logger.log(message: map.toString());
       return null;
-    } catch (_) {
+    } catch (e) {
+      Logger.log(error: e);
       return 'Failed to add member to session. Please try again, or check your internet connection.';
     }
   }
@@ -120,7 +124,7 @@ class SessionRepositoryImpl implements SessionRepository {
   }
 
   @override
-  Stream<Set<SessionMember>> getMembersStream(String sessionId) {
+  Stream<List<SessionMember>> getMembersStream(String sessionId) {
     final stream = _remoteDatabase.readRowsRealTime(
       table: ExternalConsts.sessionMembersTable,
       primaryKey: ['session_id', 'member_id'],
@@ -128,6 +132,19 @@ class SessionRepositoryImpl implements SessionRepository {
       value: sessionId,
     );
 
-    return stream.map((raw) => Set.from(raw.map(SessionMember.fromMap)));
+    return stream.map((raw) {
+      final members = List<SessionMember>.from(raw.map(SessionMember.fromMap));
+      members.sort((a, b) {
+        // If a is host and b is not → place a before b
+        if (a.isHost && !b.isHost) return -1;
+
+        // If b is host and a is not → place b before a
+        if (!a.isHost && b.isHost) return 1;
+
+        // If both are hosts or both are not → keep their order
+        return 0;
+      });
+      return members;
+    });
   }
 }

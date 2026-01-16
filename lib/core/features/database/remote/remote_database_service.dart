@@ -52,6 +52,13 @@ abstract interface class RemoteDatabaseService {
     required String table,
     required Map<String, Object> filters,
   });
+
+  Future<List<Map<String, dynamic>>> readRowsWhereIn({
+    required String table,
+    required String column,
+    required List<dynamic> values,
+    String columnsSelect = '*',
+  });
 }
 
 class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
@@ -141,6 +148,21 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     } catch (e) {
       debugPrint(e.toString());
       return Future.value(<Map<String, dynamic>>[]);
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> readRowsWhereIn({
+    required String table,
+    required String column,
+    required List<dynamic> values,
+    String columnsSelect = '*',
+  }) {
+    try {
+      return _client.from(table).select(columnsSelect).inFilter(column, values);
+    } catch (e) {
+      debugPrint(e.toString());
+      return Future.value([]);
     }
   }
 

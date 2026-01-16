@@ -45,23 +45,24 @@ class ContentFormField extends StatelessWidget {
           },
         ),
 
-        PositionedDirectional(
-          end: 5,
-          top: 5,
-          child: Consumer(
-            builder: (_, ref, __) {
-              final aiController = ref.read(noteAiProvider.notifier);
-              final isProcessing = ref.watch(
-                noteAiProvider.select((s) => s.isContentProcessing),
-              );
+        if (!readOnly)
+          PositionedDirectional(
+            end: 5,
+            top: 5,
+            child: Consumer(
+              builder: (_, ref, __) {
+                final aiController = ref.read(noteAiProvider.notifier);
+                final isProcessing = ref.watch(
+                  noteAiProvider.select((s) => s.isContentProcessing),
+                );
 
-              return AiActionButton(
-                isProcessing: isProcessing,
-                onPressed: () => aiController.improveContent(controller.text),
-              );
-            },
+                return AiActionButton(
+                  isProcessing: isProcessing,
+                  onPressed: () => aiController.improveContent(controller.text),
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }

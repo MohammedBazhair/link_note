@@ -18,10 +18,8 @@ class ProfileModel extends ProfileEntity {
       userId: map['id'] as String,
       username: map['username'] as String,
       avatarPath: map['avatar_path'] as String?,
-      updatedAt:
-          map['updated_at'] != null
-          ? DateTime.tryParse(map['updated_at']) ?? DateTime.now().toUtc()
-          : DateTime.now().toUtc(),
+      updatedAt: DateTime.tryParse(map['updated_at'] ?? ''),
+      avatarUrl: map['avatar_url'] as String?,
     );
   }
 
@@ -45,8 +43,9 @@ class ProfileModel extends ProfileEntity {
     return <String, dynamic>{
       'id': userId,
       'username': username,
-      'updated_at': updatedAt.toIso8601String(),
+      'updated_at': updatedAt?.toUtc().toIso8601String(),
       'avatar_path': ?avatarPath,
+      'avatar_url': avatarUrl,
     };
   }
 

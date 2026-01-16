@@ -46,7 +46,7 @@ class FloatingActionsButtons extends ConsumerWidget {
                   ref.read(_isClicked.notifier).state = false;
                   context.pushTo(const SessionEntryScreen());
                 },
-                tooltip: 'Manage Session',
+                tooltip: 'إدارة الجلسة',
                 child: const Icon(Icons.settings_input_antenna_sharp),
               ),
             ),
@@ -70,7 +70,7 @@ class FloatingActionsButtons extends ConsumerWidget {
                       .update((s) => s.copyWith(noteId: ''));
                   context.pushTo(const NoteEditorScreen());
                 },
-                tooltip: 'Create Note',
+                tooltip: 'إنشاء ملاحظة',
                 child: const Icon(Icons.add_rounded),
               ),
             ),

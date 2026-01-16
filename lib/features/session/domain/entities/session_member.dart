@@ -48,4 +48,7 @@ class SessionMember {
 
   @override
   int get hashCode => sessionId.hashCode ^ memberId.hashCode;
+
+  @override
+  String toString() => 'SessionMember(sessionId: $sessionId, memberId: $memberId, role: $role)';
 }

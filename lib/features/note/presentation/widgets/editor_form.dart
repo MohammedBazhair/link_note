@@ -2,24 +2,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/note_popup_action.dart';
 import '../controllers/note_controller/note_controller.dart';
-import '../controllers/note_controller/note_form_state.dart';
+import '../controllers/note_providers.dart';
 import 'content_form_field.dart';
 import 'title_form_field.dart';
 
-final editorFormProvider = StateProvider((ref) {
-  final state = EditorFormState();
-
-  ref.onDispose(state.dispose);
-
-  return state;
-});
 
 class EditorForm extends ConsumerWidget {
   const EditorForm({super.key, required this.onPopInvoke});

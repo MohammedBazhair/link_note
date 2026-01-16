@@ -12,7 +12,12 @@ abstract interface class UserRepository {
 
   Future<ProfileEntity> getProfile(GetProfileParams params);
 
+  Future<Map<String,ProfileEntity>> getProfiles(List<String> usersIds);
+
   Future<void> updateProfile(ProfileEntity profile);
 
-  Future<Result<ProfileEntity>> uploadAvatar(ProfileEntity profile, String filePath);
+  Future<Result<ProfileEntity>> uploadAvatar(
+    ProfileEntity profile,
+    String filePath,
+  );
 }

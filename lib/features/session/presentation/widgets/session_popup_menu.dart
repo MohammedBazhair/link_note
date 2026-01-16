@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../note/domain/entities/note.dart';
-import '../../../note/presentation/widgets/editor_form.dart';
+import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../domain/entities/session_menu_action.dart';
@@ -24,7 +24,8 @@ class SessionPopupMenu extends ConsumerWidget {
       onSelected: (action) async {
         switch (action) {
           case SessionMenuAction.end:
-            await controller.endSession();
+            // await controller.endSession();
+
           case SessionMenuAction.leave:
             await controller.leaveSession();
 
@@ -38,9 +39,7 @@ class SessionPopupMenu extends ConsumerWidget {
 
           case SessionMenuAction.qrGenearator:
             final note = ref.read(editorFormProvider).note;
-            await context.pushTo(
-              GenerateQrCodeScreen(data: note.toJson() ),
-            );
+            await context.pushTo(GenerateQrCodeScreen(data: note.toJson()));
         }
       },
       itemBuilder: (_) => [

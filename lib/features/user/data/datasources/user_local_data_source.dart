@@ -1,7 +1,7 @@
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/features/database/local/cache_service.dart';
 import '../../domain/entities/profile.dart';
-import '../models/profile.dart';
+import '../models/profile_model.dart';
 
 abstract interface class UserLocalDataSource {
   Future<void> saveProfile(ProfileEntity profile);

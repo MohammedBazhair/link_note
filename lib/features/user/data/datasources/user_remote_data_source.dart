@@ -5,7 +5,7 @@ import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../../../core/features/database/remote/remote_storage_service.dart';
 import '../../domain/entities/profile.dart';
-import '../models/profile.dart';
+import '../models/profile_model.dart';
 
 abstract interface class UserRemoteDataSource {
   bool get isUserLogin;
@@ -14,6 +14,8 @@ abstract interface class UserRemoteDataSource {
   Future<void> createProfile(ProfileEntity profile);
 
   Future<ProfileEntity> readProfile(String? userId);
+
+  Future<List<Map<String, dynamic>>> readProfilesBatch(List<String> usersIds);
 
   Future<void> updateProfile(ProfileEntity profile, [String? avatrPath]);
 
@@ -44,7 +46,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     final profileModel = ProfileModel(
       userId: profile.userId,
       username: profile.username,
-      updatedAt: profile.updatedAt
+      updatedAt: profile.updatedAt,
+      avatarUrl: profile.avatarUrl,
     );
 
     return _remoteDatabase.insertRow(
@@ -70,12 +73,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       final profileEntity = ProfileEntity(
         userId: userId,
         username: profileModel.username,
-        updatedAt: profileModel.updatedAt
+        updatedAt: profileModel.updatedAt,
       );
 
       if (imagePath == null) return profileEntity;
 
-      final avatarUrl = await _remoteStorage.getUrlFrom(
+      final avatarUrl = _remoteStorage.getUrlFrom(
         path: imagePath,
         storageBucket: ExternalConsts.imagesBucket,
       );
@@ -96,11 +99,17 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       column: 'id',
       table: ExternalConsts.profilesTable,
     );
-    final model = ProfileModel.fromMap(profileMap);
 
-    final newAvatarPath = avatrPath ?? model.avatarPath;
+    final profileModel = ProfileModel.fromMap(profileMap);
 
-    final updatedModel = model.copyWith(avatarPath: newAvatarPath);
+    final updatedModel = profileModel.copyWith(
+      authProviders: profile.authProviders,
+
+      avatarPath: avatrPath,
+      avatarUrl: profile.avatarUrl,
+      username: profile.username,
+      updatedAt: DateTime.now().toUtc(),
+    );
 
     await _remoteDatabase.update(
       updated: updatedModel.toMap(),
@@ -115,18 +124,34 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     ProfileEntity profile,
     String filePath,
   ) async {
-  
     final resultPath = await _remoteStorage.uploadFile(
       filePath: filePath,
       storageBucket: ExternalConsts.imagesBucket,
     );
 
-    await updateProfile(profile, resultPath);
-
-    final avatarUrl = await _remoteStorage.getUrlFrom(
+    final avatarUrl = _remoteStorage.getUrlFrom(
       path: resultPath,
       storageBucket: ExternalConsts.imagesBucket,
     );
-    return profile.copyWith(avatarUrl: avatarUrl);
+    print('AVATAR URL: $avatarUrl');
+
+    final updatedProfile = profile.copyWith(avatarUrl: avatarUrl);
+    await updateProfile(profile, resultPath);
+
+    return updatedProfile;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> readProfilesBatch(
+    List<String> usersIds,
+  ) async {
+    if (usersIds.isEmpty) return [];
+
+    return _remoteDatabase.readRowsWhereIn(
+      column: 'id',
+      values: usersIds,
+      table: ExternalConsts.usersTable,
+      columnsSelect: 'id, email, raw_app_meta_data, raw_user_meta_data',
+    );
   }
 }

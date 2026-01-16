@@ -4,6 +4,7 @@ import '../../../../core/extensions/extensions.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/note_ai_controller/note_ai_controller.dart';
 import '../controllers/note_controller/note_controller.dart';
+import '../controllers/note_providers.dart';
 import '../widgets/editor_form.dart';
 import '../widgets/save_dialog.dart';
 

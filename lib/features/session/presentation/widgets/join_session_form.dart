@@ -10,10 +10,7 @@ import '../../../user/presentation/controllers/user_controller.dart';
 import '../controllers/session_controller.dart';
 
 class JoinSessionForm extends StatelessWidget {
-  const JoinSessionForm({
-    super.key,
-    required this.controller,
-  });
+  const JoinSessionForm({super.key, required this.controller});
   final TextEditingController controller;
 
   @override
@@ -44,7 +41,7 @@ class JoinSessionForm extends StatelessWidget {
         ),
         const SizedBox(height: 30),
         Consumer(
-          builder: (_,  ref, __) {
+          builder: (_, ref, __) {
             return MainButton(
               text: 'انضم للجلسة',
               onPressed: () async {
@@ -60,6 +57,7 @@ class JoinSessionForm extends StatelessWidget {
                 await ref
                     .read(sessionControllerProvider.notifier)
                     .joinSessionByCode(memberId: userId, sessionCode: code);
+
               },
             );
           },
