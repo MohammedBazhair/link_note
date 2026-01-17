@@ -7,8 +7,8 @@ import '../../domain/entities/session_member.dart';
 import '../controllers/session_providers.dart';
 import 'session_members_strip.dart';
 
-class SessionMembersList extends ConsumerWidget {
-  const SessionMembersList({super.key});
+class ActiveSessionMembers extends ConsumerWidget {
+  const ActiveSessionMembers({super.key});
 
   @override
   Widget build(BuildContext context, ref) {

@@ -7,6 +7,7 @@ class ProfileModel extends ProfileEntity {
     required super.userId,
     required super.username,
     required super.updatedAt,
+    required super.credits,
 
     this.avatarPath,
     super.avatarUrl,
@@ -20,6 +21,7 @@ class ProfileModel extends ProfileEntity {
       avatarPath: map['avatar_path'] as String?,
       updatedAt: DateTime.tryParse(map['updated_at'] ?? ''),
       avatarUrl: map['avatar_url'] as String?,
+      credits: map['credits'] as int
     );
   }
 
@@ -35,6 +37,7 @@ class ProfileModel extends ProfileEntity {
       avatarUrl: profile.avatarUrl,
       authProviders: profile.authProviders,
       updatedAt: profile.updatedAt,
+      credits: profile.credits
     );
   }
   final String? avatarPath;
@@ -46,6 +49,8 @@ class ProfileModel extends ProfileEntity {
       'updated_at': updatedAt?.toUtc().toIso8601String(),
       'avatar_path': ?avatarPath,
       'avatar_url': avatarUrl,
+      'credits': credits,
+
     };
   }
 
@@ -59,6 +64,7 @@ class ProfileModel extends ProfileEntity {
     String? avatarPath,
     String? avatarUrl,
     Set<AuthProvider>? authProviders,
+    int ? credits,
   }) {
     return ProfileModel(
       userId: userId ?? this.userId,
@@ -67,6 +73,7 @@ class ProfileModel extends ProfileEntity {
       avatarPath: avatarPath ?? this.avatarPath,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       authProviders: authProviders ?? this.authProviders,
+    credits: credits ?? this.credits
     );
   }
 }

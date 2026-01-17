@@ -11,8 +11,8 @@ import '../../../user/presentation/controllers/user_controller.dart';
 import '../../domain/entities/session.dart';
 import '../../handle_session_states.dart';
 import '../controllers/session_controller.dart';
-import '../widgets/selected_note.dart';
-import 'session_live_screen.dart';
+import '../widgets/selected_note_preview.dart';
+import 'active_session_screen.dart';
 
 class CreateSessionScreen extends ConsumerStatefulWidget {
   const CreateSessionScreen({super.key});
@@ -39,7 +39,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
 
     await ref.read(sessionControllerProvider.notifier).createSession(session);
 
-    await context.pushTo(const SessionLiveScreen());
+    await context.pushTo(const ActiveSessionScreen());
   }
 
   @override
@@ -71,7 +71,7 @@ class _CreateSessionPageState extends ConsumerState<CreateSessionScreen> {
                 child: const Text('اختر ملاحظة'),
               ),
 
-              const SelectedNote(),
+              const SelectedNotePreview(),
               MainButton(onPressed: _createSession, text: 'إنشاء جلسة'),
             ],
           ),

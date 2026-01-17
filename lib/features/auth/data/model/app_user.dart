@@ -13,7 +13,7 @@ class AppUserModel extends AppUser {
     required this.phoneVerified,
     required this.providers,
     required this.userId,
-    required super.updatedAt,
+     super.updatedAt,
   });
 
   factory AppUserModel.fromMap(Map<String, dynamic> map) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/assets/app_assets.dart';
 import '../../constants/colors/colors.dart';
-
+import '../widgets/credits_widget.dart';
 
 class AboutAppScreen extends StatelessWidget {
   const AboutAppScreen({super.key});
@@ -19,13 +19,20 @@ class AboutAppScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            /// ================= Header =================
-            AppBar(
-              backgroundColor: Colors.transparent,
-              title: const Text('حول التطبيق'),
-              centerTitle: true,
-              elevation: 0,
+            const SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    BackButton(),
+                    Text('حول التطبيق'),
+                    CreditsWidget(),
+                  ],
+                ),
+              ),
             ),
+
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.all(16),

@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../../note/domain/entities/note.dart';
 
-class SelectedNoteParams {
-  SelectedNoteParams({
+class SelectedNotePreviewConfig {
+  SelectedNotePreviewConfig({
     required this.note,
     required this.onButtonPressed,
-    required this.onCardPressd,
-    required this.labelOnStack,
+    required this.onCardPressed,
+    required this.statusLabel,
     required this.textButtonLabel,
     required this.textButtonIcon,
   });
 
-  factory SelectedNoteParams.fake() {
-    return SelectedNoteParams(
+  factory SelectedNotePreviewConfig.fake() {
+    return SelectedNotePreviewConfig(
       note: Note.fake(),
-      onButtonPressed: (){},
-      onCardPressd: () {},
-      labelOnStack:'hrjhkjgkjgkjg',
+      onButtonPressed: () {},
+      onCardPressed: () {},
+      statusLabel: 'hrjhkjgkjgkjg',
       textButtonLabel: 'textButtonLabel',
       textButtonIcon: Icons.edit,
     );
@@ -25,8 +25,8 @@ class SelectedNoteParams {
   final Note note;
 
   final VoidCallback onButtonPressed;
-  final VoidCallback onCardPressd;
-  final String labelOnStack;
+  final VoidCallback onCardPressed;
+  final String statusLabel;
   final String textButtonLabel;
   final IconData textButtonIcon;
 }

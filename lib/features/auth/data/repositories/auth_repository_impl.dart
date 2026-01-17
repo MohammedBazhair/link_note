@@ -33,6 +33,7 @@ class AuthRepositoryImpl implements AuthRepository {
         userId: response.user!.id,
         username: user.username,
         updatedAt: DateTime.now().toUtc(),
+        credits: 10
       );
 
       await _userRepository.createProfile(profile);

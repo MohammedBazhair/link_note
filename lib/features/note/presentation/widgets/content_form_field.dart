@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controllers/note_ai_controller/note_ai_controller.dart';
+import '../controllers/note_providers.dart';
 import 'ai_action_button.dart';
 
 class ContentFormField extends StatelessWidget {
@@ -58,7 +58,13 @@ class ContentFormField extends StatelessWidget {
 
                 return AiActionButton(
                   isProcessing: isProcessing,
-                  onPressed: () => aiController.improveContent(controller.text),
+                  onPressed: () async {
+                    final content = await aiController.improveContent(
+                      controller.text,
+                    );
+                    controller.text = content;
+                    onChanged?.call(content);
+                  },
                 );
               },
             ),

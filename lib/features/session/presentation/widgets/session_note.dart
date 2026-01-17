@@ -6,36 +6,35 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../note/domain/entities/note.dart';
-import '../../../note/presentation/controllers/note_controller/note_controller.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/widgets/content_form_field.dart';
 import '../../../note/presentation/widgets/title_form_field.dart';
 import '../controllers/session_controller.dart';
 import '../controllers/session_providers.dart';
 
-class SessionNote extends ConsumerStatefulWidget {
-  const SessionNote({super.key});
+class SessionNoteEditor extends ConsumerStatefulWidget {
+  const SessionNoteEditor({super.key});
 
   @override
-  ConsumerState<SessionNote> createState() => _SessionBodyState();
+  ConsumerState<SessionNoteEditor> createState() => _SessionNoteEditorState();
 }
 
-class _SessionBodyState extends ConsumerState<SessionNote> {
-  Timer? _debounce;
+class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
+  Timer? _updateDebounceTimer;
 
-  void updateNoteDebounced() {
-    _debounce?.cancel();
-    _debounce = Timer(
+  void scheduleNoteUpdate() {
+    _updateDebounceTimer?.cancel();
+    _updateDebounceTimer = Timer(
       const Duration(seconds: 2),
-      () => ref.read(noteControllerProvider.notifier).updateNote(updatedNote),
+      () => ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote),
     );
   }
 
-  Note get updatedNote => ref.watch(editorFormProvider).note;
+  Note get currentEditedNote => ref.read(editorFormProvider).note;
 
   @override
   void dispose() {
-    _debounce?.cancel();
+    _updateDebounceTimer?.cancel();
     super.dispose();
   }
 
@@ -53,7 +52,7 @@ class _SessionBodyState extends ConsumerState<SessionNote> {
       data: (note) {
         return ConditionalBuilder(
           condition: note != null,
-          builder: (_) => SessionNoteForm(onUpdatedNote: updateNoteDebounced),
+          builder: (_) => SessionNoteForm(onNoteChanged: scheduleNoteUpdate),
           fallback: (_) => const Center(child: Text('لا يوجد ملاحظة')),
         );
       },
@@ -66,8 +65,8 @@ class _SessionBodyState extends ConsumerState<SessionNote> {
 }
 
 class SessionNoteForm extends ConsumerWidget {
-  const SessionNoteForm({super.key, this.onUpdatedNote});
-  final VoidCallback? onUpdatedNote;
+  const SessionNoteForm({super.key, this.onNoteChanged});
+  final VoidCallback? onNoteChanged;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -82,14 +81,14 @@ class SessionNoteForm extends ConsumerWidget {
         TitleFormField(
           controller: formState.titleController,
           readOnly: !isHost,
-          onChanged: (_) => onUpdatedNote?.call(),
+          onChanged: (_) => onNoteChanged?.call(),
         ),
 
         Expanded(
           child: ContentFormField(
             controller: formState.contentController,
             readOnly: !isHost,
-            onChanged: (_) => onUpdatedNote?.call(),
+            onChanged: (_) => onNoteChanged?.call(),
           ),
         ),
       ],

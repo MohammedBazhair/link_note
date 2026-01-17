@@ -1,15 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
 import '../../../../user/domain/repositories/user_repository.dart';
 import '../../../domain/entities/note.dart';
 import '../../../domain/repositories/notes_repository.dart';
 import '../note_providers.dart';
 
-final noteControllerProvider = NotifierProvider<NoteController, void>(() {
-  return GetIt.I<NoteController>();
-});
 
 class NoteController extends Notifier<void> {
   NoteController(this._notesRepository, this._userRepository);

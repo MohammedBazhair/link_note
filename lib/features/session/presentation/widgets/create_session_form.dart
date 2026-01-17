@@ -9,7 +9,7 @@ import '../../../note/presentation/screens/notes_list_screen.dart';
 import '../../../user/presentation/controllers/user_controller.dart';
 import '../../domain/entities/session.dart';
 import '../controllers/session_controller.dart';
-import 'selected_note.dart';
+import 'selected_note_preview.dart';
 
 class CreateSessionForm extends ConsumerWidget {
   const CreateSessionForm({super.key});
@@ -45,7 +45,7 @@ class CreateSessionForm extends ConsumerWidget {
           },
           child: const Text('اختر ملاحظة'),
         ),
-        const SelectedNote(),
+        const SelectedNotePreview(),
         MainButton(
           text: 'إنشاء الجلسة',
           onPressed: () async {

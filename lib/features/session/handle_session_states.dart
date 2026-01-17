@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/extensions/extensions.dart';
 import '../../core/presentation/widgets/custom_progress_widget.dart';
 import 'presentation/controllers/session_state.dart';
-import 'presentation/screens/session_live_screen.dart';
+import 'presentation/screens/active_session_screen.dart';
 
 /// Listen for session states (loading, success, error)
 Future<void> handleSessionStates(
@@ -18,11 +18,11 @@ Future<void> handleSessionStates(
       break;
     case CreateSessionState():
       context.showSnakbar('تم إنشاء الجلسة بنجاح');
-      await context.pushTo(const SessionLiveScreen());
+      await context.pushTo(const ActiveSessionScreen());
 
     case JoinSessionState():
       context.showSnakbar('تم الانضمام إلى الجلسة بنجاح');
-      await context.pushTo(const SessionLiveScreen());
+      await context.pushTo(const ActiveSessionScreen());
     case EndedSessionState():
       context.showSnakbar('تم إنهاء الجلسة بنجاح');
       context.pop();

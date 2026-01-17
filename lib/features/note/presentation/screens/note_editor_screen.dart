@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../domain/entities/note.dart';
-import '../controllers/note_ai_controller/note_ai_controller.dart';
-import '../controllers/note_controller/note_controller.dart';
 import '../controllers/note_providers.dart';
 import '../widgets/editor_form.dart';
 import '../widgets/save_dialog.dart';
@@ -22,21 +20,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
-    final formState = ref.read(editorFormProvider);
-
     ref.read(editorFormProvider).initForm(widget.note);
-
-    ref.listenManual(noteAiProvider, (_, state) {
-      if (state.noteContent == state.noteTitle) return;
-
-      formState.titleController.text =
-          state.noteTitle?.text ?? formState.titleController.text;
-
-      formState.contentController.text =
-          state.noteContent?.text ?? formState.contentController.text;
-
-      formState.markedChanges();
-    });
   }
 
   GlobalKey<FormState> get formKey => ref.read(editorFormProvider).formKey;
@@ -87,6 +71,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
         await onPopInvoke();
       },
       child: Scaffold(
+        
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),

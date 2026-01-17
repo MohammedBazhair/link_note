@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/note_ai_controller/note_ai_controller.dart';
 import '../controllers/note_providers.dart';
 import 'ai_action_button.dart';
 
@@ -26,6 +25,7 @@ class TitleFormField extends StatelessWidget {
       cursorColor: const Color(0x809CDEBC),
       decoration: InputDecoration(
         hintText: 'العنوان...',
+
         suffixIcon: readOnly
             ? null
             : Consumer(
@@ -37,11 +37,16 @@ class TitleFormField extends StatelessWidget {
                     noteAiProvider.select((s) => s.isTitleProcessing),
                   );
 
-                  return AiActionButton(
-                    isProcessing: isProcessing,
-                    onPressed: () async {
-                      await aiController.improveTitle(note);
-                    },
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: AiActionButton(
+                      isProcessing: isProcessing,
+                      onPressed: () async {
+                        final title = await aiController.improveTitle(note);
+                        controller.text = title;
+                        onChanged?.call(title);
+                      },
+                    ),
                   );
                 },
               ),

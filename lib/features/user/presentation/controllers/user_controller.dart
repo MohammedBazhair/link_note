@@ -31,6 +31,7 @@ class UserController extends StateNotifier<UserState> {
         userId: currentUser!.id,
         username: user.username,
         updatedAt: DateTime.now().toUtc(),
+        credits: 10
       );
       await _userRepository.createProfile(profile);
     } catch (e) {

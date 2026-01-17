@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
-import '../../domain/entities/session_member.dart';
+import '../../../user/domain/entities/profile.dart';
+import '../../domain/entities/session_members_key.dart';
 import '../../domain/entities/view_members_params.dart';
 import 'session_controller.dart';
 
@@ -22,25 +24,55 @@ final sessionMembersStreamProvider = StreamProvider.autoDispose((ref) {
   return stream;
 });
 
-final sessionMembersFamilyProfiles = FutureProvider
-    .family<Map<String, ViewMembersParams>, List<SessionMember>>((
+final sessionMembersFamilyProfiles = FutureProvider.autoDispose
+    .family<Map<String, ViewMembersParams>, SessionMembersKey>((
       ref,
-      members,
+      key,
     ) async {
-      final userRepo = ref.read(userRepositoryProvider);
-      final usersIds = members.map((e) => e.memberId).toList();
-      final profilesMap = await userRepo.getProfiles(usersIds);
-      final viewMembersMap = profilesMap.map((userId, profile) {
-        return MapEntry(
-          userId,
-          ViewMembersParams(
+      if (key.memberIds.isEmpty) {
+        return <String, ViewMembersParams>{};
+      }
+
+      if (key.memberIds.any((id) => id.isEmpty)) {
+        return key.membersMap.map((id, m) {
+          return MapEntry(id, ViewMembersParams.fake());
+        });
+      }
+
+      try {
+        final userRepo = ref.read(userRepositoryProvider);
+        final profilesMap = await userRepo.getProfiles(key.memberIds);
+        final viewMembersMap = <String, ViewMembersParams>{};
+
+        // التأكد من إضافة جميع الأعضاء حتى لو لم يكن لديهم profile
+        for (final userId in key.memberIds) {
+          final member = key.membersMap[userId];
+          if (member == null) continue;
+
+          final profile = profilesMap[userId];
+
+          // إذا لم يكن هناك profile، استخدم profile افتراضي
+          final profileEntity =
+              profile ??
+              ProfileEntity(
+                userId: userId,
+                username: userId, // استخدام userId كاسم افتراضي
+                updatedAt: DateTime.now().toUtc(),
+                credits: 0
+              );
+
+          viewMembersMap[userId] = ViewMembersParams(
             id: userId,
-            member: members.firstWhere((e) => e.memberId == userId),
-            profileEntity: profile,
-          ),
-        );
-      });
-      return viewMembersMap;
+            member: member,
+            profileEntity: profileEntity,
+          );
+        }
+
+        return viewMembersMap;
+      } catch (e, stackTrace) {
+        Logger.log(error: e, stackTrace: stackTrace);
+        rethrow;
+      }
     });
 
 final sessionProvider = Provider.autoDispose((ref) {

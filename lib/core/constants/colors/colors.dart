@@ -5,6 +5,6 @@ final class DarkColors {
   static const primary = Color(0xFF01B7C1);
   static const cursor = Color(0xA300C2CC);
   static const icon = Color(0xFFA7DDDA);
-  static const secondFont = Color(0xFF9CA4AF);
+  static const secondFont = Color(0xFFA7AEBA);
   
 }

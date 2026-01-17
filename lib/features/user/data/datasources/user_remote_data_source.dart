@@ -48,6 +48,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       username: profile.username,
       updatedAt: profile.updatedAt,
       avatarUrl: profile.avatarUrl,
+      credits: 10
     );
 
     return _remoteDatabase.insertRow(
@@ -74,6 +75,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         userId: userId,
         username: profileModel.username,
         updatedAt: profileModel.updatedAt,
+        credits: profileModel.credits
       );
 
       if (imagePath == null) return profileEntity;
@@ -156,8 +158,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return _remoteDatabase.readRowsWhereIn(
       column: 'id',
       values: usersIds,
-      table: ExternalConsts.usersTable,
-      columnsSelect: 'id, email, raw_app_meta_data, raw_user_meta_data',
+      table: ExternalConsts.profilesTable,
     );
   }
 }

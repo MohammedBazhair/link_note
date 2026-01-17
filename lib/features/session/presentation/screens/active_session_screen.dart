@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/active_session_members.dart';
 import '../widgets/session_code_card.dart';
-import '../widgets/session_members_list.dart';
 import '../widgets/session_note.dart';
 import '../widgets/session_popup_menu.dart';
 
-class SessionLiveScreen extends StatelessWidget {
-  const SessionLiveScreen({super.key});
+class ActiveSessionScreen extends StatelessWidget {
+  const ActiveSessionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +31,9 @@ class SessionLiveScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
-            SessionMembersList(),
+            ActiveSessionMembers(),
             SizedBox(height: 20),
-            Divider(thickness: 0.3),
+            Divider(thickness: 0.5),
 
             SizedBox(height: 20),
             Text(
@@ -45,7 +45,7 @@ class SessionLiveScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 15),
-            Expanded(child: SessionNote()),
+            Expanded(child: SessionNoteEditor()),
           ],
         ),
       ),

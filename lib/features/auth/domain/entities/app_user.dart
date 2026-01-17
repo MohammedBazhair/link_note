@@ -1,7 +1,7 @@
 import 'sub/auth_provider.dart';
 
 class AppUser {
-  AppUser({required this.name, required this.email, required this.avatarUrl, required this.provider, this.updatedAt});
+  AppUser({required this.name, required this.email, required this.avatarUrl, required this.provider,  this.updatedAt});
 
   final String name;
   final DateTime? updatedAt;

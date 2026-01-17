@@ -7,7 +7,6 @@ class ExternalConsts {
   static const profilesTable = 'profiles';
   static const sessionsTable = 'sessions';
   static const sessionMembersTable = 'session_members';
-  static const usersTable = 'auth.users';
 
   static const maxfileMbSize = 3; 
 

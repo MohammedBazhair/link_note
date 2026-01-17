@@ -13,6 +13,8 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
 
   final AiClient _aiClient;
 
+ 
+
   @override
   Future<AiResponseEntity> improveNoteContent(String noteContent) async {
     try {
@@ -39,7 +41,7 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
       );
 
       final response = await _aiClient.generate(params);
-      
+
       return AiResponseModel.fromJson(response);
     } catch (e) {
       debugPrint(e.toString());

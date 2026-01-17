@@ -7,10 +7,10 @@ import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/screens/note_editor_screen.dart';
-import '../../domain/entities/selected_note_params.dart';
+import '../../domain/entities/selected_note_preview_config.dart';
 
-class SelectedNote extends ConsumerWidget {
-  const SelectedNote({super.key});
+class SelectedNotePreview extends ConsumerWidget {
+  const SelectedNotePreview({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -26,21 +26,23 @@ class SelectedNote extends ConsumerWidget {
           condition: note != null,
           fallback: (_) => fallbackChild,
           builder: (_) {
-            final params = SelectedNoteParams(
+            final params = SelectedNotePreviewConfig(
               note: note!,
-              labelOnStack: 'محدد',
+              statusLabel: 'محدد',
               onButtonPressed: () =>
                   context.pushTo(NoteEditorScreen(note: note)),
-              onCardPressd: () => context.pushTo(NoteEditorScreen(note: note)),
+              onCardPressed: () => context.pushTo(NoteEditorScreen(note: note)),
               textButtonLabel: 'تعديل',
               textButtonIcon: Icons.edit,
             );
-            return SelectedNoteCard(params);
+            return SelectedNotePreviewCard(params);
           },
         );
       },
       loading: () {
-        return Skeletonizer(child: SelectedNoteCard(SelectedNoteParams.fake()));
+        return Skeletonizer(
+          child: SelectedNotePreviewCard(SelectedNotePreviewConfig.fake()),
+        );
       },
       error: (_, __) {
         return fallbackChild;
@@ -49,9 +51,9 @@ class SelectedNote extends ConsumerWidget {
   }
 }
 
-class SelectedNoteCard extends StatelessWidget {
-  const SelectedNoteCard(this.params, {super.key});
-  final SelectedNoteParams params;
+class SelectedNotePreviewCard extends StatelessWidget {
+  const SelectedNotePreviewCard(this.params, {super.key});
+  final SelectedNotePreviewConfig params;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +66,7 @@ class SelectedNoteCard extends StatelessWidget {
         side: BorderSide(width: 0.5, color: Colors.white.withOpacity(0.08)),
       ),
       child: InkWell(
-        onTap: params.onCardPressd,
+        onTap: params.onCardPressed,
         highlightColor: DarkColors.primary.withOpacity(0.5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,7 +107,7 @@ class SelectedNoteCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      params.labelOnStack,
+                      params.statusLabel,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,

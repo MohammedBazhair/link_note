@@ -35,21 +35,22 @@ class NetworkAvatar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final avatarAsync = ref.watch(getAvatarFileProvider(avatarUrl));
+    final isLoading = ref.watch(
+      userControllerProvider.select((state) => state is UserLoadAvatarState),
+    );
 
     return ClipOval(
       child: avatarAsync.when(
         data: (avatarFile) {
-          final isLoading =
-              ref.watch(userControllerProvider) is UserLoadAvatarState;
           return Stack(
-            alignment: AlignmentGeometry.center,
+            alignment: Alignment.center,
             children: [
               Image.file(
                 avatarFile,
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
-                
+                gaplessPlayback: true,
               ),
               if (isLoading) const LoadingAvatar(),
             ],
@@ -87,11 +88,11 @@ class LoadingAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BackdropFilter(
-filter: ImageFilter.blur(sigmaX: 5,sigmaY: 5),
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       child: const CircleAvatar(
         radius: 40,
         backgroundColor: Color(0x343D3D3D),
-      
+
         child: SizedBox(
           height: 20,
           width: 20,

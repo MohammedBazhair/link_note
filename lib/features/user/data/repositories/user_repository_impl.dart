@@ -14,6 +14,7 @@ import '../../domain/entities/profile.dart';
 import '../../domain/repositories/user_repository.dart';
 import '../datasources/user_local_data_source.dart';
 import '../datasources/user_remote_data_source.dart';
+import '../models/profile_model.dart';
 
 class UserRepositoryImpl implements UserRepository {
   UserRepositoryImpl(this._remoteDataSource, this._localDataSource);
@@ -46,6 +47,7 @@ class UserRepositoryImpl implements UserRepository {
             avatarUrl: appUser.avatarUrl,
             authProviders: providers,
             updatedAt: DateTime.now().toUtc(),
+            credits: profile.credits
           );
         case AuthProvider.email:
           profileEntity = profile.copyWith(authProviders: providers);
@@ -73,9 +75,9 @@ class UserRepositoryImpl implements UserRepository {
       final providers = appUser.providers.toSet();
 
       final ProfileEntity profileEntity;
+          final profile = await _remoteDataSource.readProfile(params.userId);
       switch (appUser.provider) {
         case AuthProvider.email:
-          final profile = await _remoteDataSource.readProfile(params.userId);
           profileEntity = profile.copyWith(authProviders: providers);
         case AuthProvider.google:
           profileEntity = ProfileEntity(
@@ -83,7 +85,7 @@ class UserRepositoryImpl implements UserRepository {
             username: appUser.name,
             avatarUrl: appUser.avatarUrl,
             authProviders: providers,
-            updatedAt: DateTime.now().toUtc(),
+            credits: profile.credits
           );
 
         case AuthProvider.unknown:
@@ -150,10 +152,48 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<Map<String, ProfileEntity>> getProfiles(List<String> usersIds) async {
-    final rawProfiles = await _remoteDataSource.readProfilesBatch(usersIds);
-    final appUsersModels = rawProfiles.map(AppUserModel.fromMap);
+    if (usersIds.isEmpty) {
+      return <String, ProfileEntity>{};
+    }
 
-    final profiles = appUsersModels.map(ProfileEntity.fromAppUser);
-    return Map.fromIterables(usersIds, profiles);
+    try {
+      final rawProfiles = await _remoteDataSource.readProfilesBatch(usersIds);
+      final profiles = rawProfiles
+          .map<ProfileEntity>(ProfileModel.fromMap)
+          .toList();
+
+      // إنشاء map من الملفات الشخصية التي تم جلبها
+      final result = <String, ProfileEntity>{};
+      for (final profile in profiles) {
+        result[profile.userId] = profile;
+      }
+
+      // التأكد من وجود entry لكل userId (حتى لو كان profile افتراضي)
+      // هذا يضمن أن جميع الأعضاء سيظهرون حتى لو لم يكن لديهم profile في قاعدة البيانات
+      for (final userId in usersIds) {
+        if (!result.containsKey(userId)) {
+          result[userId] = ProfileEntity(
+            userId: userId,
+            username: userId, // استخدام userId كاسم افتراضي
+            updatedAt: DateTime.now().toUtc(),
+            credits: 0
+          );
+        }
+      }
+
+      return result;
+    } catch (e) {
+      debugPrint('Error in getProfiles: $e');
+      // في حالة الخطأ، إرجاع profiles افتراضية لجميع userIds
+      return {
+        for (final userId in usersIds)
+          userId: ProfileEntity(
+            userId: userId,
+            username: userId,
+            updatedAt: DateTime.now().toUtc(),
+            credits: 0
+          ),
+      };
+    }
   }
 }

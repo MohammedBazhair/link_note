@@ -5,7 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
-import '../../domain/entities/selected_note_params.dart';
+import '../../domain/entities/selected_note_preview_config.dart';
 import '../../domain/entities/session_mode.dart';
 import '../../domain/entities/sub/session_status.dart';
 import '../../handle_session_states.dart';
@@ -13,9 +13,9 @@ import '../controllers/session_controller.dart';
 import '../controllers/session_providers.dart';
 import '../widgets/create_session_form.dart';
 import '../widgets/join_session_form.dart';
-import '../widgets/selected_note.dart';
+import '../widgets/selected_note_preview.dart';
 import '../widgets/session_mode_switcher.dart';
-import 'session_live_screen.dart';
+import 'active_session_screen.dart';
 
 class SessionEntryScreen extends ConsumerStatefulWidget {
   const SessionEntryScreen({super.key});
@@ -102,22 +102,25 @@ class SessionRunningCard extends ConsumerWidget {
           fallback: (_) =>
               const Center(child: Text('الملاحظة المرتبطة بهذه الجلسة محذوفة')),
           builder: (_) {
-            final params = SelectedNoteParams(
+            final params = SelectedNotePreviewConfig(
               note: note!,
-              labelOnStack: currentSession.status == SessionStatus.active
+              statusLabel: currentSession.status == SessionStatus.active
                   ? 'جلسة مفتوحة'
                   : 'جلسة مغلقة',
-              onButtonPressed: () => context.pushTo(const SessionLiveScreen()),
-              onCardPressd: () => context.pushTo(const SessionLiveScreen()),
+              onButtonPressed: () =>
+                  context.pushTo(const ActiveSessionScreen()),
+              onCardPressed: () => context.pushTo(const ActiveSessionScreen()),
               textButtonLabel: 'دخول',
               textButtonIcon: Icons.open_in_new,
             );
-            return SelectedNoteCard(params);
+            return SelectedNotePreviewCard(params);
           },
         );
       },
       loading: () {
-        return Skeletonizer(child: SelectedNoteCard(SelectedNoteParams.fake()));
+        return Skeletonizer(
+          child: SelectedNotePreviewCard(SelectedNotePreviewConfig.fake()),
+        );
       },
       error: (error, stackTrace) {
         return const Center(child: Text('حدث خطأ أثناء تحميل الجلسة'));
