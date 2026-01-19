@@ -1,40 +1,48 @@
-import 'package:flutter/rendering.dart';
+import 'package:http/http.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/errors/exceptions.dart';
+import '../../../../core/errors/result.dart';
 import '../../../../core/features/ai/ai_client.dart';
 import '../../../../core/features/ai/ai_client_params.dart';
-import '../../domain/entities/ai_response.dart';
+import '../../../user/data/datasources/user_remote_data_source.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/note_ai_repository.dart';
 import '../models/improved_note_model.dart';
 
 class NoteAiRepositoryImpl implements NoteAiRepository {
-  NoteAiRepositoryImpl(this._aiClient);
+  NoteAiRepositoryImpl(this._aiClient, this._userRemoteDataSource);
 
   final AiClient _aiClient;
+  final UserRemoteDataSource _userRemoteDataSource;
 
- 
-
-  @override
-  Future<AiResponseEntity> improveNoteContent(String noteContent) async {
+  Future<Result<int>> _getCredits() async {
     try {
-      final params = AiClientParams(
-        apiUrl: ExternalConsts.aiApiUrl,
-        prompt: _buildNoteImprovementPrompt(noteContent),
-      );
+      final result = await _userRemoteDataSource.readCredits();
+      final credits = result.value;
 
-      final response = await _aiClient.generate(params);
-
-      return AiResponseModel.fromJson(response);
-    } catch (e) {
-      debugPrint(e.toString());
-      return AiResponseEntity(text: noteContent);
+      if (credits == null || credits == 0) {
+        throw const CreditsZeroException(
+          'الرصيد غير كافي لاستخدام هذه الميزة يمكنك الانتظار 24 ساعة للحصول على 10 نقاط مجانا',
+        );
+      }
+      return result;
+    } on UserNotLoggedInException catch (_) {
+      rethrow;
+    } on CreditsZeroException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
     }
   }
 
   @override
-  Future<AiResponseEntity> improveNoteTitle(Note note) async {
+  Future<Result<String>> improveNoteTitle(Note note) async {
     try {
+      final result = await _getCredits();
+
+      final credits = result.value!;
+
       final params = AiClientParams(
         apiUrl: ExternalConsts.aiApiUrl,
         prompt: _buildTitleOptimizationPrompt(note),
@@ -42,11 +50,38 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
 
       final response = await _aiClient.generate(params);
 
-      return AiResponseModel.fromJson(response);
-    } catch (e) {
-      debugPrint(e.toString());
-      return AiResponseEntity(text: note.title);
-    }
+      final model = AiResponseModel.fromJson(response);
+
+      await _userRemoteDataSource.updateCredits(credits - 1, note.uuid!);
+      return Result.ok(model.text);
+    }  on AppException catch (_) {
+      rethrow;
+    } on ClientException catch (_) {
+      throw const InternetException();
+    } 
+  }
+
+  @override
+  Future<Result<String>> improveNoteContent(Note note) async {
+    try {
+      final result = await _getCredits();
+      final credits = result.value!;
+
+      final params = AiClientParams(
+        apiUrl: ExternalConsts.aiApiUrl,
+        prompt: _buildNoteImprovementPrompt(note.content),
+      );
+
+      final response = await _aiClient.generate(params);
+      final model = AiResponseModel.fromJson(response);
+
+      await _userRemoteDataSource.updateCredits(credits - 1, note.uuid!);
+      return Result.ok(model.text);
+    } on AppException catch (_) {
+      rethrow;
+    } on ClientException catch (_) {
+      throw const InternetException();
+    } 
   }
 
   String _buildNoteImprovementPrompt(String note) {

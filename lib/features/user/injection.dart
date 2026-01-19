@@ -7,7 +7,7 @@ import 'presentation/controllers/user_controller.dart';
 
 void setupUserDependincies() {
   getIt.registerLazySingleton<UserRemoteDataSource>(
-    () => UserRemoteDataSourceImpl(getIt(), getIt(), getIt()),
+    () => UserRemoteDataSourceImpl(getIt(), getIt(), getIt(),getIt()),
   );
 
   getIt.registerLazySingleton<UserLocalDataSource>(
@@ -15,7 +15,7 @@ void setupUserDependincies() {
   );
 
   getIt.registerLazySingleton<UserRepository>(
-    () => UserRepositoryImpl(getIt(), getIt()),
+    () => UserRepositoryImpl(getIt(), getIt(), getIt()),
   );
 
   getIt.registerLazySingleton<UserController>(() => UserController(getIt()));

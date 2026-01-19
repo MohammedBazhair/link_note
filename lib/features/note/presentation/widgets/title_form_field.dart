@@ -19,7 +19,6 @@ class TitleFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
-      maxLines: 2,
       minLines: 1,
       style: TextStyle(color: Colors.white.withAlpha(200)),
       cursorColor: const Color(0x809CDEBC),
@@ -31,7 +30,7 @@ class TitleFormField extends StatelessWidget {
             : Consumer(
                 builder: (_, ref, __) {
                   final aiController = ref.read(noteAiProvider.notifier);
-                  final note = ref.read(editorFormProvider).note;
+                  final note = ref.watch(editorFormProvider).note;
 
                   final isProcessing = ref.watch(
                     noteAiProvider.select((s) => s.isTitleProcessing),

@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:scanner_overlay/scanner_overlay.dart';
+
+import '../widgets/scanner_overlay.dart';
 
 class ScannerQrCodeScreen extends StatefulWidget {
   const ScannerQrCodeScreen({super.key});
@@ -86,7 +87,6 @@ class _ScannerQrCodeScreenState extends State<ScannerQrCodeScreen> {
               ScannerOverlay(
                 height: scanArea,
                 width: scanArea,
-                borderColor: const Color(0x86AEF7FA),
                 borderRadius: 30,
 
                 borderThickness: 1,

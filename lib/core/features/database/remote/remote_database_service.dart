@@ -19,6 +19,7 @@ abstract interface class RemoteDatabaseService {
     required String id,
     required String column,
     required String table,
+    List<String> selectColumns = const ['*'],
   });
 
   Future<List<Map<String, dynamic>>> readRowsWhere({
@@ -42,6 +43,7 @@ abstract interface class RemoteDatabaseService {
     required String table,
   });
 
+
   Future<void> delete({
     required String id,
     required String column,
@@ -57,13 +59,17 @@ abstract interface class RemoteDatabaseService {
     required String table,
     required String column,
     required List<dynamic> values,
-    String columnsSelect = '*',
+    List<String> columnsSelect = const ['*'],
   });
 }
 
 class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
   RemoteDatabaseServiceImpl(this._client);
   final SupabaseClient _client;
+
+  String _listToSelectColumns(List<String> columns) {
+    return columns.join(', ');
+  }
 
   @override
   Future<Map<String, dynamic>> insertRow({
@@ -78,8 +84,10 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     required String id,
     required String column,
     required String table,
+    List<String> selectColumns = const ['*'],
   }) {
-    return _client.from(table).select().eq(column, id).single();
+    final columnsString = _listToSelectColumns(selectColumns);
+    return _client.from(table).select(columnsString).eq(column, id).single();
   }
 
   @override
@@ -156,10 +164,11 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     required String table,
     required String column,
     required List<dynamic> values,
-    String columnsSelect = '*',
+    List<String> columnsSelect = const ['*'],
   }) {
     try {
-      return _client.from(table).select(columnsSelect).inFilter(column, values);
+      final columnsString = _listToSelectColumns(columnsSelect);
+      return _client.from(table).select(columnsString).inFilter(column, values);
     } catch (e) {
       debugPrint(e.toString());
       return Future.value([]);
@@ -178,4 +187,5 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
       debugPrint(e.toString());
     }
   }
+  
 }

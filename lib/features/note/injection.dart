@@ -30,7 +30,7 @@ void setupNotesDependincies() {
 
 
   getIt.registerLazySingleton<NoteAiRepository>(
-    () => NoteAiRepositoryImpl(getIt()),
+    () => NoteAiRepositoryImpl(getIt(),getIt()),
   );
 
   getIt.registerFactory<NoteAiController>(() => NoteAiController(getIt()));

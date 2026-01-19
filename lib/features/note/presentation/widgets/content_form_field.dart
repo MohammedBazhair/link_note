@@ -55,13 +55,12 @@ class ContentFormField extends StatelessWidget {
                 final isProcessing = ref.watch(
                   noteAiProvider.select((s) => s.isContentProcessing),
                 );
+                final note = ref.watch(editorFormProvider).note;
 
                 return AiActionButton(
                   isProcessing: isProcessing,
                   onPressed: () async {
-                    final content = await aiController.improveContent(
-                      controller.text,
-                    );
+                    final content = await aiController.improveContent(note);
                     controller.text = content;
                     onChanged?.call(content);
                   },

@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:firebase_core/firebase_core.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,10 +12,8 @@ import 'features/auth/injection.dart';
 import 'features/note/injection.dart';
 import 'features/session/injection.dart';
 import 'features/user/injection.dart';
-import 'firebase_options.dart';
 
 Future<void> initializeApp() async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   initializeDesktopDatabase();
   await registerAppProtocol();
   await initializeSupabase();
@@ -33,9 +30,7 @@ Future<void> initializePushNotifications() async {
   // await OneSignal.Debug.setLogLevel(OSLogLevel.none);
   // Initialize with your OneSignal App ID
   OneSignal.initialize('77e0bc45-9e18-491e-bc41-0d42d7b86c00');
-  // Use this method to prompt for push notifications.
-  // We recommend removing this method after testing and instead use In-App Messages to prompt for notification permission.
-  await OneSignal.Notifications.requestPermission(true);
+  await Permission.notification.request();
 }
 
 void initializeDesktopDatabase() {
@@ -62,3 +57,5 @@ Future<void> setupDependencyInjection() async {
   setupUserDependincies();
   setupSessionsDependincies();
 }
+
+

@@ -1,16 +1,17 @@
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/errors/exceptions.dart';
+import '../../../../core/errors/result.dart';
+import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../../../core/features/database/remote/remote_storage_service.dart';
 import '../../domain/entities/profile.dart';
 import '../models/profile_model.dart';
 
 abstract interface class UserRemoteDataSource {
-  bool get isUserLogin;
-  User? get currentUser;
-
   Future<void> createProfile(ProfileEntity profile);
 
   Future<ProfileEntity> readProfile(String? userId);
@@ -23,6 +24,9 @@ abstract interface class UserRemoteDataSource {
     ProfileEntity profile,
     String filePath,
   );
+
+  Future<Result<int>> readCredits();
+  Future<void> updateCredits(int credits, String userId);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -30,16 +34,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     this._client,
     this._remoteDatabase,
     this._remoteStorage,
+    this._locaCache,
   );
   final SupabaseClient _client;
   final RemoteDatabaseService _remoteDatabase;
   final RemoteStorageService _remoteStorage;
-
-  @override
-  User? get currentUser => _client.auth.currentUser;
-
-  @override
-  bool get isUserLogin => currentUser != null;
+  final LocalCacheService _locaCache;
 
   @override
   Future<void> createProfile(ProfileEntity profile) {
@@ -48,7 +48,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       username: profile.username,
       updatedAt: profile.updatedAt,
       avatarUrl: profile.avatarUrl,
-      credits: 10
+      credits: 10,
     );
 
     return _remoteDatabase.insertRow(
@@ -75,7 +75,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         userId: userId,
         username: profileModel.username,
         updatedAt: profileModel.updatedAt,
-        credits: profileModel.credits
+        credits: profileModel.credits,
       );
 
       if (imagePath == null) return profileEntity;
@@ -113,8 +113,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       updatedAt: DateTime.now().toUtc(),
     );
 
-    
-
     await _remoteDatabase.update(
       updated: updatedModel.toMap(),
       id: profile.userId,
@@ -131,7 +129,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     final resultPath = await _remoteStorage.uploadFile(
       filePath: filePath,
       storageBucket: ExternalConsts.imagesBucket,
-      userId: profile.userId
+      userId: profile.userId,
     );
 
     final avatarUrl = _remoteStorage.getUrlFrom(
@@ -139,12 +137,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       storageBucket: ExternalConsts.imagesBucket,
     );
 
-
-
     final updatedProfile = profile.copyWith(avatarUrl: avatarUrl);
     await updateProfile(updatedProfile, resultPath);
-
-
 
     return updatedProfile;
   }
@@ -160,5 +154,56 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       values: usersIds,
       table: ExternalConsts.profilesTable,
     );
+  }
+
+  @override
+  Future<Result<int>> readCredits() async {
+    const creditsKey = 'Credits';
+    try {
+      // if()
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw const UserNotLoggedInException(
+          'خطأ.. قم بتسجيل الدخول أولا للاستفادة من الميزات',
+        );
+      }
+      final map = await _remoteDatabase.readRow(
+        id: userId,
+        column: 'id',
+        table: ExternalConsts.profilesTable,
+        selectColumns: ['credits'],
+      );
+
+      final credits = (map['credits'] as int);
+
+      await _locaCache.setInt(key: creditsKey, value: credits);
+      return Result.ok(credits);
+    } on ClientException catch (_) {
+      final credits = await _locaCache.getInt(key: creditsKey);
+      if (credits != null) return Result.ok(credits);
+      rethrow;
+    } on UserNotLoggedInException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateCredits(int credits, String userId) async {
+    try {
+      final updated = {'credits': credits};
+
+      await _remoteDatabase.update(
+        updated: updated,
+        id: userId,
+        column: 'id',
+        table: ExternalConsts.profilesTable,
+      );
+    } catch (e, s) {
+      debugPrint('updateCredits error: $e');
+      debugPrintStack(stackTrace: s);
+      rethrow;
+    }
   }
 }

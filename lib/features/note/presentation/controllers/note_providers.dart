@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
+import '../../../user/data/datasources/user_remote_data_source.dart';
 import '../../../user/domain/repositories/user_repository.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/selectable_note.dart';
@@ -85,3 +86,10 @@ final syncNotesProvider = Provider((ref) {
 final selectableNoteProvider = StateProvider.autoDispose(
   (_) => SelectableNote(),
 );
+
+final getCreditsProvider = FutureProvider((ref) async {
+  final userDataSource = GetIt.I<UserRemoteDataSource>();
+  final result = await userDataSource.readCredits();
+  if (result.value == null) return 0;
+  return result.value!;
+});

@@ -1,10 +1,9 @@
-import '../../domain/entities/ai_response.dart';
 
-class AiResponseModel extends AiResponseEntity {
-  const AiResponseModel({required super.text});
+class AiResponseModel {
+  AiResponseModel({required this.text});
 
   factory AiResponseModel.empty() {
-    return const AiResponseModel(text: '');
+    return AiResponseModel(text: '');
   }
 
   factory AiResponseModel.fromJson(Map<String, dynamic> json) {
@@ -12,4 +11,5 @@ class AiResponseModel extends AiResponseEntity {
       text: json['choices'][0]['message']['content'] as String,
     );
   }
+  final String text;
 }

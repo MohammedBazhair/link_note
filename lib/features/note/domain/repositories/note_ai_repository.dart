@@ -1,8 +1,8 @@
-import '../entities/ai_response.dart';
+import '../../../../core/errors/result.dart';
 import '../entities/note.dart';
 
 abstract class NoteAiRepository {
-  Future<AiResponseEntity> improveNoteContent(String note);
+  Future<Result<String>> improveNoteContent(Note note);
 
-  Future<AiResponseEntity> improveNoteTitle(Note note);
+  Future<Result<String>> improveNoteTitle(Note note);
 }

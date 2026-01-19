@@ -19,6 +19,7 @@ class EditorForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+   
     final formState = ref.read(editorFormProvider);
     return Directionality(
       textDirection: TextDirection.rtl,

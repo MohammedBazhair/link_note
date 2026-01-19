@@ -17,15 +17,17 @@ import '../datasources/user_remote_data_source.dart';
 import '../models/profile_model.dart';
 
 class UserRepositoryImpl implements UserRepository {
-  UserRepositoryImpl(this._remoteDataSource, this._localDataSource);
+  UserRepositoryImpl(this._remoteDataSource, this._localDataSource, this._auth);
   final UserRemoteDataSource _remoteDataSource;
   final UserLocalDataSource _localDataSource;
+    final GoTrueClient  _auth;
+ 
 
   @override
-  bool get isUserLoggedIn => _remoteDataSource.isUserLogin;
+  bool get isUserLoggedIn => _auth.currentUser!= null;
 
   @override
-  User? get currentUser => _remoteDataSource.currentUser;
+  User? get currentUser => _auth.currentUser;
 
   @override
   Future<void> createProfile(ProfileEntity profile) async {
