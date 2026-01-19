@@ -1,14 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:get_it/get_it.dart';
 
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_state.dart';
 
-final authProvider = StateNotifierProvider<AuthController, AuthState>(
-  (ref) => GetIt.I<AuthController>(),
-);
+final authProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
+  final auth = ref.read(authControllerProvider);
+  return auth;
+});
 
 class AuthController extends StateNotifier<AuthState> {
   AuthController(this._auth) : super(const AuthInitialState());
@@ -63,7 +64,7 @@ class AuthController extends StateNotifier<AuthState> {
         : AuthFailedState(error);
   }
 
-    Future<void> startLoadingTimeout() async {
+  Future<void> startLoadingTimeout() async {
     await Future.delayed(const Duration(seconds: 10));
     if (mounted) {
       reset();

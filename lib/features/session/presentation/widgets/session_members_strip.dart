@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/constants/colors/colors.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
-import '../../../user/presentation/controllers/user_controller.dart';
 import '../../../user/presentation/widgets/user_avatar.dart';
 import '../../domain/entities/session_member.dart';
 import '../../domain/entities/session_members_key.dart';

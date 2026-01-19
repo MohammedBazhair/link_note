@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:get_it/get_it.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -11,10 +10,6 @@ import '../../domain/entities/profile.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/user_repository.dart';
 import 'user_state.dart';
-
-final userControllerProvider = StateNotifierProvider<UserController, UserState>(
-  (_) => GetIt.I<UserController>()..loadProfile(),
-);
 
 class UserController extends StateNotifier<UserState> {
   UserController(this._userRepository) : super(UserInitialState());
@@ -31,7 +26,7 @@ class UserController extends StateNotifier<UserState> {
         userId: currentUser!.id,
         username: user.username,
         updatedAt: DateTime.now().toUtc(),
-        credits: 10
+        credits: 10,
       );
       await _userRepository.createProfile(profile);
     } catch (e) {

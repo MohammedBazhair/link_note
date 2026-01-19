@@ -29,7 +29,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
 
   Future<void> onSubmit() async {
     if (!isFormValid) return;
-    final noteController = ref.read(noteControllerProvider.notifier);
+    final noteController = ref.read(noteControllerProvider);
     final editorState = ref.read(editorFormProvider);
 
     final note = Note(

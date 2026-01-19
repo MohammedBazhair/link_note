@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
-import '../../../user/presentation/controllers/user_controller.dart';
-import '../controllers/session_controller.dart';
+import '../../injection.dart';
 
 class JoinSessionForm extends StatelessWidget {
   const JoinSessionForm({super.key, required this.controller});

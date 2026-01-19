@@ -29,11 +29,11 @@ class TitleFormField extends StatelessWidget {
             ? null
             : Consumer(
                 builder: (_, ref, __) {
-                  final aiController = ref.read(noteAiProvider.notifier);
+                  final aiController = ref.read(noteAiNotiferProvider.notifier);
                   final note = ref.watch(editorFormProvider).note;
 
                   final isProcessing = ref.watch(
-                    noteAiProvider.select((s) => s.isTitleProcessing),
+                    noteAiNotiferProvider.select((s) => s.isTitleProcessing),
                   );
 
                   return Padding(

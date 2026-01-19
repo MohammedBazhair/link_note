@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../user/domain/entities/user.dart';
-import '../../../user/presentation/controllers/user_controller.dart';
 import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';

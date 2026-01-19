@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/screens/notes_list_screen.dart';
-import '../../../user/presentation/controllers/user_controller.dart';
 import '../../domain/entities/session.dart';
-import '../controllers/session_controller.dart';
+import '../../injection.dart';
 import 'selected_note_preview.dart';
 
 class CreateSessionForm extends ConsumerWidget {

@@ -12,7 +12,7 @@ class CreditsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-     ref.listen(noteAiProvider, (_, state) {
+    ref.listen(noteAiNotiferProvider, (_, state) {
       switch (state) {
         case ShowMessageAiNoteState(:final message):
           context.showSnakbar(message);

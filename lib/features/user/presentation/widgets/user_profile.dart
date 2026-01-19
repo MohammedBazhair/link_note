@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../domain/entities/profile.dart';
 import '../controllers/user_controller.dart';
 import '../controllers/user_state.dart';

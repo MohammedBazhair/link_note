@@ -7,17 +7,11 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/constants/external_constants/external_constants.dart';
-import 'core/features/common_injections.dart';
-import 'features/auth/injection.dart';
-import 'features/note/injection.dart';
-import 'features/session/injection.dart';
-import 'features/user/injection.dart';
 
 Future<void> initializeApp() async {
   initializeDesktopDatabase();
   await registerAppProtocol();
   await initializeSupabase();
-  await setupDependencyInjection();
   await initializePushNotifications();
 }
 
@@ -48,14 +42,6 @@ Future<void> initializeSupabase() async {
     url: ExternalConsts.supabaseUrl,
     anonKey: ExternalConsts.supabaseAnonKey,
   );
-}
-
-Future<void> setupDependencyInjection() async {
-  await setupCommonDependincies();
-  setupAuthDependincies();
-  setupNotesDependincies();
-  setupUserDependincies();
-  setupSessionsDependincies();
 }
 
 

@@ -1,5 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/features/ai/ai_client.dart';
-import '../auth/injection.dart';
+import '../../core/features/common_injections.dart';
+import '../../core/presentation/providers/core_providers.dart';
 import 'data/datasources/notes_local_data_source.dart';
 import 'data/datasources/notes_remote_data_source.dart';
 import 'data/repositories/note_ai_repository_impl.dart';
@@ -9,29 +12,60 @@ import 'domain/repositories/notes_repository.dart';
 import 'presentation/controllers/note_ai_controller/note_ai_controller.dart';
 import 'presentation/controllers/note_controller/note_controller.dart';
 
-void setupNotesDependincies() {
-  getIt.registerLazySingleton<NotesRemoteDataSource>(
-    () => NotesRemoteDataSourceImpl(getIt()),
+final notesRemoteDataSourceProvider = Provider((ref) {
+  final remoteDatabaseService = ref.read(
+    remoteDatabaseServiceProvider,
+  ); // لاحظ استخدام watch
+  return NotesRemoteDataSourceImpl(remoteDatabaseService);
+});
+
+final notesLocalDataSourceProvider = Provider<NotesLocalDataSource>((ref) {
+  final localCacheService = ref.read(localCacheServiceProvider);
+  final localDatabase = ref
+      .read(localDatabaseProvider)
+      .maybeWhen(
+        data: (data) => data,
+        orElse: () => throw Exception('localDatabase is null'),
+      );
+
+  return NotesLocalDataSourceImpl(localDatabase, localCacheService);
+});
+
+final notesRepositoryProvider = Provider<NotesRepository>((ref) {
+  final localDataSource = ref.read(notesLocalDataSourceProvider);
+  final remote = ref.read(notesRemoteDataSourceProvider);
+  final network = ref.read(networkProvider);
+  final localCacheService = ref.read(localCacheServiceProvider);
+  return NotesRepositoryImpl(
+    remote,
+    localDataSource,
+    network,
+    localCacheService,
   );
+});
 
-  getIt.registerLazySingleton<NotesLocalDataSource>(
-    () => NotesLocalDataSourceImpl(getIt(), getIt()),
-  );
+final noteAiRepositoryProvider = Provider<NoteAiRepository>((ref) {
+  final aiClient = ref.read(aiCilientProvider);
+  final userRemote = ref.watch(userRemoteDataSourceProvider);
 
-  getIt.registerLazySingleton<NotesRepository>(
-    () => NotesRepositoryImpl(getIt(), getIt(), getIt(), getIt()),
-  );
+  return NoteAiRepositoryImpl(aiClient, userRemote);
+});
 
-  getIt.registerLazySingleton<NoteController>(
-    () => NoteController(getIt(), getIt()),
-  );
+final noteControllerProvider = Provider<NoteController>((ref) {
+  final notesRepo = ref.read(notesRepositoryProvider);
+  final userRepo = ref.read(userRepositoryProvider);
+  return NoteController(notesRepo, userRepo);
+});
 
-  getIt.registerLazySingleton<AiClient>(() => AiClientImpl(getIt()));
 
+final noteAiControllerProvider = Provider<NoteAiController>((ref) {
+  final aiRepo = ref.read(noteAiRepositoryProvider);
+  return NoteAiController(aiRepo);
+});
 
-  getIt.registerLazySingleton<NoteAiRepository>(
-    () => NoteAiRepositoryImpl(getIt(),getIt()),
-  );
+final aiClientProvider = Provider<AiClient>((ref) {
+  final networkClint = ref.read(networkCilientProvider);
 
-  getIt.registerFactory<NoteAiController>(() => NoteAiController(getIt()));
-}
+  return AiClientImpl(networkClint);
+});
+

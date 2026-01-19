@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/note/presentation/controllers/note_providers.dart';
-import '../../../features/user/presentation/controllers/user_controller.dart';
 import '../../../features/user/presentation/widgets/user_profile.dart';
 import '../../constants/colors/colors.dart';
+import '../providers/core_providers.dart';
 import 'drawer_tiles.dart';
 
 class CustomDrawer extends ConsumerWidget {
