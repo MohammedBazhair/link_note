@@ -23,15 +23,11 @@ final noteAiRepositoryProvider = Provider((ref) {
   return NoteAiRepositoryImpl(aiClient, userRemoteDataSource);
 });
 
-final noteAiController = Provider((ref) {
-  final noteRepo = ref.read(noteAiRepositoryProvider);
-  return NoteAiController(noteRepo);
-});
 
 
 final noteAiNotiferProvider =
-    StateNotifierProvider.autoDispose<NoteAiController, NoteAiState>((ref) {
-      final controller = ref.read(noteAiController);
+    StateNotifierProvider<NoteAiController, NoteAiState>((ref) {
+      final controller = ref.read(noteAiControllerProvider);
       return controller;
     });
 

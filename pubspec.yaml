@@ -52,6 +52,8 @@ flutter:
     - family: IBM Plex Sans Arabic
       fonts:
         - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
+        - asset: assets/fonts/IBMPlexSansArabic-Medium.ttf
+          weight: 500
         - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
           weight: 700
 
