@@ -54,7 +54,8 @@ final aiCilientProvider = Provider((ref) {
 
 final authRemoteDataSourceProvider = Provider((ref) {
   final auth = ref.read(supabaseAuthProvider);
-  return AuthRemoteDataSourceImpl(auth);
+  final userRemote = ref.read(userRemoteDataSourceProvider);
+  return AuthRemoteDataSourceImpl(auth,userRemote);
 });
 
 final userLocalDataSourceProvider = Provider((ref) {
@@ -118,7 +119,7 @@ final authRepositoryProvider = Provider((ref) {
   final remoteAuth = ref.read(authRemoteDataSourceProvider);
   final network = ref.read(networkProvider);
   final localCacheService = ref.read(localCacheServiceProvider);
-  return AuthRepositoryImpl(remoteAuth, network,  localCacheService);
+  return AuthRepositoryImpl(remoteAuth, network, localCacheService);
 });
 
 final authControllerProvider = Provider((ref) {

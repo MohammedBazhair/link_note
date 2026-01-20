@@ -6,6 +6,8 @@ import '../note/presentation/screens/notes_list_screen.dart';
 
 import 'presentation/controllers/auth_controller.dart';
 import 'presentation/controllers/auth_state.dart';
+import 'presentation/screens/reconfirm_password_screen.dart';
+import 'presentation/screens/sign_in_screen.dart';
 
 Future<void> authListener({
   required BuildContext context,
@@ -14,7 +16,7 @@ Future<void> authListener({
   required WidgetRef ref,
 }) async {
   if (previous is AuthLoadingState) context.pop();
-  
+
   switch (next) {
     case AuthInitialState():
       break;
@@ -31,5 +33,15 @@ Future<void> authListener({
         builder: (context) => const CustomProgressWidget(),
       );
       await ref.read(authProvider.notifier).startLoadingTimeout();
+    case AuthResetPasswordSuccessfullState(:final email):
+      context.showSnakbar(
+        'تم ارسال رمز اعادة تعيين كلمة المرور الى بريدك الالكتروني',
+      );
+      await context.pushTo(ReconfirmPasswordScreen(email: email));
+    case AuthPasswordChangedSuccessfullState():
+      context.showSnakbar(
+        'تم تغيير الباسورد بنجاح جرب تسجيل الدخول الان',
+      );
+      await context.pushReplacementTo(const SignInScreen());
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../../core/errors/exceptions.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -57,6 +58,42 @@ class AuthController extends StateNotifier<AuthState> {
     } catch (e) {
       debugPrint(e.toString());
       _handleState(e.toString());
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    state = const AuthLoadingState();
+    try {
+      await _auth.resetPassword(email);
+      state = AuthResetPasswordSuccessfullState(email);
+    } on AppException catch (e) {
+      state = AuthFailedState(e.message);
+    } catch (e) {
+      state = AuthFailedState('فشلت عملية استعادة الباسورد حاول مرة أخرى');
+    } finally {
+      reset();
+    }
+  }
+
+  Future<void> changePassword({
+    required String email,
+    required String newPassword,
+    required String nonce,
+  }) async {
+    state = const AuthLoadingState();
+    try {
+      await _auth.updateUser(
+        email: email,
+        newPassword: newPassword,
+        nonce: nonce,
+      );
+      state = const AuthPasswordChangedSuccessfullState();
+    } on AppException catch (e) {
+      state = AuthFailedState(e.message);
+    } catch (e) {
+      state = AuthFailedState('فشلت عملية استعادة الباسورد حاول مرة أخرى');
+    } finally {
+      reset();
     }
   }
 
