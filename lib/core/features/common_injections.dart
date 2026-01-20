@@ -1,16 +1,21 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../constants/external_constants/external_constants.dart';
 import 'database/local/local_database_service.dart';
 
-final localDatabaseProvider = FutureProvider((ref) async{
-  final db= await _initDatabase();
-  return LocalDatabaseServiceImpl(db);
+final localDatabaseProvider = Provider<LocalDatabaseServiceImpl>((ref) {
+  throw Exception('');
 });
 
+Future<Override> getOverrideDatabase() async {
+  final db = await _initDatabase();
+  final value = LocalDatabaseServiceImpl(db);
+  return localDatabaseProvider.overrideWithValue(value);
+}
 
 Future<Database> _initDatabase() async {
   final dbDir = await getDatabasesPath();

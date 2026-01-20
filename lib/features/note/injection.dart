@@ -21,12 +21,7 @@ final notesRemoteDataSourceProvider = Provider((ref) {
 
 final notesLocalDataSourceProvider = Provider<NotesLocalDataSource>((ref) {
   final localCacheService = ref.read(localCacheServiceProvider);
-  final localDatabase = ref
-      .read(localDatabaseProvider)
-      .maybeWhen(
-        data: (data) => data,
-        orElse: () => throw Exception('localDatabase is null'),
-      );
+  final localDatabase = ref.read(localDatabaseProvider);
 
   return NotesLocalDataSourceImpl(localDatabase, localCacheService);
 });
@@ -57,7 +52,6 @@ final noteControllerProvider = Provider<NoteController>((ref) {
   return NoteController(notesRepo, userRepo);
 });
 
-
 final noteAiControllerProvider = Provider<NoteAiController>((ref) {
   final aiRepo = ref.read(noteAiRepositoryProvider);
   return NoteAiController(aiRepo);
@@ -68,4 +62,3 @@ final aiClientProvider = Provider<AiClient>((ref) {
 
   return AiClientImpl(networkClint);
 });
-

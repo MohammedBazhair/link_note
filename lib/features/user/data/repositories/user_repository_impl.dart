@@ -30,43 +30,6 @@ class UserRepositoryImpl implements UserRepository {
   User? get currentUser => _auth.currentUser;
 
   @override
-  Future<void> createProfile(ProfileEntity profile) async {
-    try {
-      final appUser = AppUserModel.fromSupabase(
-        userId: profile.userId,
-        userMetadata: currentUser?.userMetadata,
-        appMetadata: currentUser?.appMetadata ?? {},
-      );
-
-      final providers = appUser.providers.toSet();
-
-      final ProfileEntity profileEntity;
-      switch (appUser.provider) {
-        case AuthProvider.google:
-          profileEntity = ProfileEntity(
-            userId: profile.userId,
-            username: appUser.name,
-            avatarUrl: appUser.avatarUrl,
-            authProviders: providers,
-            updatedAt: DateTime.now().toUtc(),
-            credits: profile.credits
-          );
-        case AuthProvider.email:
-          profileEntity = profile.copyWith(authProviders: providers);
-
-        case AuthProvider.unknown:
-          throw Exception('unKnown provider, try again');
-      }
-
-      await _localDataSource.saveProfile(profileEntity);
-
-      await _remoteDataSource.createProfile(profile);
-    } catch (e) {
-      throw Exception('Failed to create profile');
-    }
-  }
-
-  @override
   Future<ProfileEntity> getProfile(GetProfileParams params) async {
     try {
       final appUser = AppUserModel.fromSupabase(

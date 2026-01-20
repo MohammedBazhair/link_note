@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,7 @@ import '../../../features/user/data/repositories/user_repository_impl.dart';
 import '../../../features/user/presentation/controllers/user_controller.dart';
 import '../../../features/user/presentation/controllers/user_state.dart';
 import '../../features/ai/ai_client.dart';
+import '../../features/common_injections.dart';
 import '../../features/database/local/cache_service.dart';
 import '../../features/database/remote/remote_database_service.dart';
 import '../../features/database/remote/remote_storage_service.dart';
@@ -78,17 +80,12 @@ final remoteStorageServiceProvider = Provider((ref) {
   return RemoteStorageServiceImpl(supabaseStorage);
 });
 
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) {
-  return SharedPreferences.getInstance();
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  return throw Exception('sharedPreferencesProvider is not implemented');
 });
 
 final localCacheServiceProvider = Provider((ref) {
-  final prefs = ref
-      .read(sharedPreferencesProvider)
-      .maybeWhen(
-        data: (prefs) => prefs,
-        orElse: () => throw Exception('Shared preferences not initialized'),
-      );
+  final prefs = ref.read(sharedPreferencesProvider);
   return LocalCacheServiceImpl(prefs);
 });
 
@@ -120,9 +117,8 @@ final userControllerProvider = StateNotifierProvider<UserController, UserState>(
 final authRepositoryProvider = Provider((ref) {
   final remoteAuth = ref.read(authRemoteDataSourceProvider);
   final network = ref.read(networkProvider);
-  final userRepo = ref.read(userRepositoryProvider);
   final localCacheService = ref.read(localCacheServiceProvider);
-  return AuthRepositoryImpl(remoteAuth, network, userRepo, localCacheService);
+  return AuthRepositoryImpl(remoteAuth, network,  localCacheService);
 });
 
 final authControllerProvider = Provider((ref) {
@@ -150,3 +146,9 @@ final tokenRefreshProvider = Provider((ref) {
 
   ref.onDispose(subscription.cancel);
 });
+
+Future<List<Override>> getOverrides() async {
+  final prefs = await SharedPreferences.getInstance();
+  final dbOverride = await getOverrideDatabase();
+  return [sharedPreferencesProvider.overrideWithValue(prefs), dbOverride];
+}

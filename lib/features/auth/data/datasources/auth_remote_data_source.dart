@@ -24,7 +24,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<AuthResponse> signUp(UserEntity user) {
-    return _auth.signUp(email: user.email, password: user.password);
+    return _auth.signUp(
+      email: user.email,
+      password: user.password,
+      
+      data: {
+        'full_name': user.username,
+        'avatar_url': null,
+      },
+    );
   }
 
   @override

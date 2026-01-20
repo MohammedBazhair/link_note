@@ -44,6 +44,8 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> signUp(UserEntity user) async {
+    state = const AuthLoadingState();
+
     final error = await _auth.signUp(user);
 
     _handleState(error);

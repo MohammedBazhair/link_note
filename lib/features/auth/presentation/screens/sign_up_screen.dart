@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
@@ -48,7 +47,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final isValid = formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
-    final userCtrl = ref.read(userControllerProvider.notifier);
 
     final user = UserEntity(
       username: nameController.text,
@@ -57,7 +55,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     );
 
     await ref.read(authProvider.notifier).signUp(user);
-    await userCtrl.createProfile(user);
   }
 
   @override

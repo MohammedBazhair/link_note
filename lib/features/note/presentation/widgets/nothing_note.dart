@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 class NothingNoteWidget extends ConsumerWidget {
   const NothingNoteWidget({super.key});
 
@@ -11,7 +10,7 @@ class NothingNoteWidget extends ConsumerWidget {
       child: Text(
         'لاتوجد اي ملاحظات. \n قم بإنشاء ملاحظة جديدة بالضغط على زر الإضافة.',
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 18, height: 1.8),
+        style: TextStyle(fontSize: 15, height: 1.8),
       ),
     );
   }

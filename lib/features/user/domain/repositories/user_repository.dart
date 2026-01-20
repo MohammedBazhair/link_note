@@ -8,8 +8,6 @@ abstract interface class UserRepository {
   bool get isUserLoggedIn;
   User? get currentUser;
 
-  Future<void> createProfile(ProfileEntity profile);
-
   Future<ProfileEntity> getProfile(GetProfileParams params);
 
   Future<Map<String,ProfileEntity>> getProfiles(List<String> usersIds);
