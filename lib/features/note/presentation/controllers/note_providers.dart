@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
+import '../../../user/presentation/controllers/user_providers.dart';
 import '../../data/repositories/note_ai_repository_impl.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/selectable_note.dart';
@@ -87,8 +88,9 @@ final selectableNoteProvider = StateProvider.autoDispose(
 );
 
 final getCreditsProvider = FutureProvider((ref) async {
-  ref.keepAlive();
   final userDataSource = ref.read(userRemoteDataSourceProvider);
+  final isUserLoggedIn = ref.read(isUserLoggedInProvider);
+  if (!isUserLoggedIn) return 0;
   final result = await userDataSource.readCredits();
   if (result.value == null) return 0;
   return result.value!;
