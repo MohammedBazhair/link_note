@@ -2,23 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/constants/internal_constants/log.dart';
+import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/network/connectivity_service.dart';
-import '../../../user/domain/entities/profile.dart';
 import '../../../user/domain/entities/user.dart';
-import '../../../user/domain/repositories/user_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(
-    this._remote,
-    this._networkService,
-    this._userRepository,
-    this._cache,
-  );
-  final UserRepository _userRepository;
+  AuthRepositoryImpl(this._remote, this._networkService, this._cache);
   final AuthRemoteDataSource _remote;
   final ConnectivityService _networkService;
   final LocalCacheService _cache;
@@ -29,18 +23,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _remote.signUp(user);
       if (response.user == null) throw const AuthException('no id found');
 
-      final profile = ProfileEntity(
-        userId: response.user!.id,
-        username: user.username,
-        updatedAt: DateTime.now().toUtc(),
-        credits: 10
-      );
-
-      await _userRepository.createProfile(profile);
-
       await _cache.setString(
         key: ExternalConsts.lastUserIdKey,
-        value: profile.userId,
+        value: response.user!.id,
       );
       return null; // تم التسجيل بنجاح
     } on AuthException catch (e) {
@@ -74,7 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> signOut() {
+  Future<void> signOut() async {
+    await _cache.remove(key: ExternalConsts.lastUserIdKey);
     return _remote.signOut();
   }
 
@@ -136,6 +122,39 @@ class AuthRepositoryImpl implements AuthRepository {
       return Result.ok(authResponse);
     } catch (e) {
       return Result.error('فشل تسجيل الدخول، يرجى المحاولة مرة أخرى');
+    }
+  }
+
+  @override
+  Future<void> resetPassword(String email) async {
+    try {
+      await _remote.resetPassword(email);
+    } on AuthRetryableFetchException catch (_) {
+      throw const InternetException();
+    } catch (e) {
+      throw const AuthException(
+        'فشلت عملية ارسال رسالة الى الايميل واستعادة الباسورد',
+      );
+    }
+  }
+
+  @override
+  Future<void> updateUser({
+    required String email,
+    required String newPassword,
+    required String nonce,
+  }) async {
+    try {
+      await _remote.updateUser(
+        email: email,
+        newPassword: newPassword,
+        nonce: nonce,
+      );
+    } on AuthRetryableFetchException catch (_) {
+      throw const InternetException();
+    } on AppException catch (_) {
+      Logger.log(message: 'here');
+      rethrow;
     }
   }
 }

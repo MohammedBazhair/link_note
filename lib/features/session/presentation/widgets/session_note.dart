@@ -9,7 +9,7 @@ import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/widgets/content_form_field.dart';
 import '../../../note/presentation/widgets/title_form_field.dart';
-import '../controllers/session_controller.dart';
+import '../../injection.dart';
 import '../controllers/session_providers.dart';
 
 class SessionNoteEditor extends ConsumerStatefulWidget {
@@ -26,7 +26,7 @@ class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
     _updateDebounceTimer?.cancel();
     _updateDebounceTimer = Timer(
       const Duration(seconds: 2),
-      () => ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote),
+      () => ref.read(noteControllerProvider).updateNote(currentEditedNote),
     );
   }
 

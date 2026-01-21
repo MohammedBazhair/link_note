@@ -6,7 +6,8 @@ ThemeData darkTheme() => ThemeData(
   scaffoldBackgroundColor: const Color(0xFF151825),
   brightness: Brightness.dark,
   textTheme: ThemeData.dark().textTheme.apply(
-    bodyColor: const Color.fromARGB(255, 163, 235, 243),
+    bodyColor: const Color(0xFFA3EBF3),
+    fontFamily: ExternalConsts.fontFamily,
   ),
   fontFamily: ExternalConsts.fontFamily,
 
@@ -24,7 +25,7 @@ ThemeData darkTheme() => ThemeData(
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       fixedSize: const Size.fromHeight(50),
-      backgroundColor: DarkColors.primary,
+      backgroundColor: DarkColors.primary.withOpacity(0.8),
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       textStyle: const TextStyle(fontSize: 14),
@@ -36,7 +37,7 @@ ThemeData darkTheme() => ThemeData(
       fontSize: 13,
     ),
     filled: true,
-    fillColor: const Color(0xFF2C324C),
+    fillColor: const Color.fromARGB(208, 44, 50, 76),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(25),
       borderSide: const BorderSide(color: Colors.transparent),
@@ -60,7 +61,11 @@ ThemeData darkTheme() => ThemeData(
       borderSide: const BorderSide(color: Colors.transparent),
     ),
     errorStyle: const TextStyle(height: 3, color: Color(0xFFE4736B)),
-    helperStyle: const TextStyle(color: Color(0xB1BDBDBD), fontSize: 11, height: 1.5),
+    helperStyle: const TextStyle(
+      color: Color(0xB1BDBDBD),
+      fontSize: 11,
+      height: 1.5,
+    ),
   ),
   iconTheme: const IconThemeData(color: DarkColors.icon),
   iconButtonTheme: IconButtonThemeData(

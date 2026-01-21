@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../domain/entities/profile.dart';
-import '../controllers/user_controller.dart';
 import '../controllers/user_providers.dart';
 import '../controllers/user_state.dart';
 

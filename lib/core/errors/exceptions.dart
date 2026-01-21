@@ -16,6 +16,18 @@ class CreditsZeroException extends AppException {
   const CreditsZeroException(super.message);
 }
 
+class SaveNoteFirstException extends AppException {
+  const SaveNoteFirstException(super.message);
+}
+
+class AuthFailedException extends AppException {
+  const AuthFailedException(super.message);
+}
+
+class OtpWrongException extends AppException {
+  const OtpWrongException(super.message);
+}
+
 class InternetException extends AppException {
   const InternetException([
     super.message =

@@ -9,7 +9,7 @@ import '../../domain/entities/selected_note_preview_config.dart';
 import '../../domain/entities/session_mode.dart';
 import '../../domain/entities/sub/session_status.dart';
 import '../../handle_session_states.dart';
-import '../controllers/session_controller.dart';
+import '../../injection.dart';
 import '../controllers/session_providers.dart';
 import '../widgets/create_session_form.dart';
 import '../widgets/join_session_form.dart';

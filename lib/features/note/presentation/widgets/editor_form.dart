@@ -19,7 +19,6 @@ class EditorForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-   
     final formState = ref.read(editorFormProvider);
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -87,9 +86,7 @@ class NoteFormHeader extends ConsumerWidget {
                 final note = formState.note;
                 if (note.id == null) return context.pop();
 
-                await ref
-                    .read(noteControllerProvider.notifier)
-                    .deleteNote(note);
+                await ref.read(noteControllerProvider).deleteNote(note);
                 context.pop();
             }
           },

@@ -12,7 +12,7 @@ class CreditsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-     ref.listen(noteAiProvider, (_, state) {
+    ref.listen(noteAiNotiferProvider, (_, state) {
       switch (state) {
         case ShowMessageAiNoteState(:final message):
           context.showSnakbar(message);
@@ -36,6 +36,7 @@ class CreditsWidget extends ConsumerWidget {
       error: (error, stackTrace) {
         return const SizedBox.shrink();
       },
+      
     );
   }
 }
@@ -47,7 +48,7 @@ class _CreditsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: DarkColors.primary.withOpacity(0.15),
         borderRadius: BorderRadius.circular(25),
@@ -57,7 +58,10 @@ class _CreditsBody extends StatelessWidget {
         spacing: 5,
         children: [
           const Icon(Icons.flash_on, size: 16),
-          Text('$credits', style: const TextStyle(fontSize: 12)),
+          Text(
+            '$credits',
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );

@@ -14,5 +14,14 @@ abstract interface class AuthRepository {
   Future<void> signInWithGoogle();
     
   Future<Result<AuthResponse>> signInWithUrl(Uri uri);
+
+  Future<void> resetPassword(String email);
+
+ Future<void> updateUser({
+    required String email,
+    required String newPassword,
+    required String nonce,
+  });
+
 }
 

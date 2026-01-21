@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../domain/entities/profile.dart';
 import '../controllers/user_controller.dart';
 import '../controllers/user_state.dart';
@@ -21,7 +22,6 @@ class _UserProfileWidgetState extends ConsumerState<UserProfileWidget> {
     userController.loadProfile();
     ref.listenManual(userControllerProvider, (previous, next) {
       switch (next) {
-        
         case UserInitialState():
         case UserUpdateProfileState():
           context.showSnakbar('تم تحديث البروفايل بنجاح');
@@ -46,7 +46,9 @@ class _UserProfileWidgetState extends ConsumerState<UserProfileWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           MouseRegion(
-            cursor: SystemMouseCursors.click,
+            cursor: profile.isEmailLogin
+                ? SystemMouseCursors.click
+                : SystemMouseCursors.basic,
             child: GestureDetector(
               onTap: profile.isEmailLogin
                   ? userController.pickAndUploadAvatar
@@ -72,9 +74,9 @@ class _UserProfileWidgetState extends ConsumerState<UserProfileWidget> {
           ),
 
           const SizedBox(height: 20),
-          Text(profile.username),
+          FittedBox(child: Text(profile.username)),
           const SizedBox(height: 5),
-          Text(userController.currentUser?.email ?? ''),
+          FittedBox(child: Text(userController.currentUser?.email ?? '')),
         ],
       ),
     );

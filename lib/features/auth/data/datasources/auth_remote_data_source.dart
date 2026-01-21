@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/errors/exceptions.dart';
+import '../../../user/data/datasources/user_remote_data_source.dart';
 import '../../../user/domain/entities/user.dart';
 
 abstract interface class AuthRemoteDataSource {
@@ -16,15 +18,29 @@ abstract interface class AuthRemoteDataSource {
   Future<void> signInWithGoogle();
 
   Future<Session> getSessionFromUrl(Uri originUrl);
+
+  Future<void> resetPassword(String email);
+
+  Future<void> updateUser({
+    required String email,
+    required String newPassword,
+    required String nonce,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  AuthRemoteDataSourceImpl(this._auth);
+  AuthRemoteDataSourceImpl(this._auth, this._userRemote);
   final GoTrueClient _auth;
+  final UserRemoteDataSource _userRemote;
 
   @override
   Future<AuthResponse> signUp(UserEntity user) {
-    return _auth.signUp(email: user.email, password: user.password);
+    return _auth.signUp(
+      email: user.email,
+      password: user.password,
+
+      data: {'full_name': user.username, 'avatar_url': null},
+    );
   }
 
   @override
@@ -57,5 +73,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final response = await _auth.getSessionFromUrl(originUrl);
 
     return response.session;
+  }
+
+  @override
+  Future<void> resetPassword(String email) {
+    return _auth.resetPasswordForEmail(email);
+  }
+
+  @override
+  Future<void> updateUser({
+    required String email,
+    required String newPassword,
+    required String nonce,
+  }) async {
+    try {
+      await _auth.verifyOTP(type: OtpType.recovery, token: nonce, email: email);
+
+      await _auth.updateUser(
+        UserAttributes(nonce: nonce, email: email, password: newPassword),
+      );
+    } on AuthException catch (_) {
+      throw const OtpWrongException('الرمز المدخل غير صحيح');
+    }
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/session.dart';
@@ -8,10 +7,6 @@ import '../../domain/entities/sub/session_member_role.dart';
 import '../../domain/repository/session_repository.dart';
 import 'session_state.dart';
 
-final sessionControllerProvider =
-    StateNotifierProvider<SessionController, SessionState>(
-      (_) => GetIt.I<SessionController>(),
-    );
 
 class SessionController extends StateNotifier<SessionState> {
   SessionController(this._sessionRepository)

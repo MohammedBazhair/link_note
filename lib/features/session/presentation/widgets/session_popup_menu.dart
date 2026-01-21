@@ -6,7 +6,7 @@ import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../domain/entities/session_menu_action.dart';
-import '../controllers/session_controller.dart';
+import '../../injection.dart';
 
 class SessionPopupMenu extends ConsumerWidget {
   const SessionPopupMenu({super.key});

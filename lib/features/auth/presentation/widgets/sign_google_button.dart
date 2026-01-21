@@ -12,7 +12,7 @@ class SignGoogleButton extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xEAFFFFFF),
+        backgroundColor: const Color(0xEAFFFFFF).withOpacity(0.9),
         foregroundColor: Colors.black,
       ),
       onPressed: () async {

@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
-import '../../../note/presentation/controllers/note_providers.dart';
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/domain/entities/profile.dart';
 import '../../domain/entities/session_members_key.dart';
 import '../../domain/entities/view_members_params.dart';
-import 'session_controller.dart';
+import '../../injection.dart';
 
 final sessionMembersStreamProvider = StreamProvider.autoDispose((ref) {
   final sessionController = ref.read(sessionControllerProvider.notifier);

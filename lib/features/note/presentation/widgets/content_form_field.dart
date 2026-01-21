@@ -51,9 +51,9 @@ class ContentFormField extends StatelessWidget {
             top: 5,
             child: Consumer(
               builder: (_, ref, __) {
-                final aiController = ref.read(noteAiProvider.notifier);
+                final aiController = ref.read(noteAiNotiferProvider.notifier);
                 final isProcessing = ref.watch(
-                  noteAiProvider.select((s) => s.isContentProcessing),
+                  noteAiNotiferProvider.select((s) => s.isContentProcessing),
                 );
                 final note = ref.watch(editorFormProvider).note;
 
