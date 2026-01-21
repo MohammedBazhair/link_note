@@ -23,8 +23,6 @@ final noteAiRepositoryProvider = Provider((ref) {
   return NoteAiRepositoryImpl(aiClient, userRemoteDataSource);
 });
 
-
-
 final noteAiNotiferProvider =
     StateNotifierProvider<NoteAiController, NoteAiState>((ref) {
       final controller = ref.read(noteAiControllerProvider);
@@ -89,7 +87,8 @@ final selectableNoteProvider = StateProvider.autoDispose(
 );
 
 final getCreditsProvider = FutureProvider((ref) async {
-  final userDataSource =ref.read(userRemoteDataSourceProvider);
+  ref.keepAlive();
+  final userDataSource = ref.read(userRemoteDataSourceProvider);
   final result = await userDataSource.readCredits();
   if (result.value == null) return 0;
   return result.value!;

@@ -25,7 +25,7 @@ ThemeData darkTheme() => ThemeData(
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       fixedSize: const Size.fromHeight(50),
-      backgroundColor: DarkColors.primary,
+      backgroundColor: DarkColors.primary.withOpacity(0.8),
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       textStyle: const TextStyle(fontSize: 14),
@@ -37,7 +37,7 @@ ThemeData darkTheme() => ThemeData(
       fontSize: 13,
     ),
     filled: true,
-    fillColor: const Color(0xFF2C324C),
+    fillColor: const Color.fromARGB(208, 44, 50, 76),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(25),
       borderSide: const BorderSide(color: Colors.transparent),

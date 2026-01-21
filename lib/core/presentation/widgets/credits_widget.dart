@@ -36,6 +36,7 @@ class CreditsWidget extends ConsumerWidget {
       error: (error, stackTrace) {
         return const SizedBox.shrink();
       },
+      
     );
   }
 }
