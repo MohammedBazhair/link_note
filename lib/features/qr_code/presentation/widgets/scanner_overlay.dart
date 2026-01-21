@@ -61,6 +61,8 @@ class ScannerOverlay extends StatelessWidget {
             style: const TextStyle(color: Color(0xD8FFFFFF)),
           ),
         ),
+
+       
       ],
     );
   }

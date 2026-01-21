@@ -8,11 +8,11 @@ class ContentFormField extends StatelessWidget {
   const ContentFormField({
     super.key,
     required this.controller,
-    this.onChanged,
+   required this.onChanged,
     this.readOnly = false,
   });
   final TextEditingController controller;
-  final ValueChanged<String>? onChanged;
+  final ValueChanged<String> onChanged;
   final bool readOnly;
 
   @override
@@ -55,14 +55,14 @@ class ContentFormField extends StatelessWidget {
                 final isProcessing = ref.watch(
                   noteAiNotiferProvider.select((s) => s.isContentProcessing),
                 );
-                final note = ref.watch(editorFormProvider).note;
-
                 return AiActionButton(
                   isProcessing: isProcessing,
                   onPressed: () async {
+                    final note = ref.watch(editorFormProvider).note;
+                    
                     final content = await aiController.improveContent(note);
                     controller.text = content;
-                    onChanged?.call(content);
+                    onChanged(content);
                   },
                 );
               },

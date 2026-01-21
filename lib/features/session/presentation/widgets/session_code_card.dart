@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
 import '../../../clipboard/presentation/providers/clipboard_providers.dart';
+import '../../../qr_code/domain/entities/qr_data.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 import '../controllers/session_providers.dart';
 
@@ -66,7 +67,10 @@ class SessionCodeCard extends ConsumerWidget {
             tooltip: 'توليد رمز QR',
             icon: const Icon(Icons.qr_code),
             onPressed: () {
-              context.pushTo(GenerateQrCodeScreen(data: sessionCode ?? ''));
+              if(sessionCode == null )return context.showSnakbar('لا يمكن توليد Qr رمز لانه لا يوجد كود للجلسة');
+              final qrData= QrData(name: sessionCode,qrCodeRaw: sessionCode);
+
+              context.pushTo(GenerateQrCodeScreen(data: qrData ));
             },
           ),
         ],

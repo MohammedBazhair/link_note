@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
+import '../../../qr_code/domain/entities/qr_data.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../domain/entities/session_menu_action.dart';
@@ -39,7 +40,8 @@ class SessionPopupMenu extends ConsumerWidget {
 
           case SessionMenuAction.qrGenearator:
             final note = ref.read(editorFormProvider).note;
-            await context.pushTo(GenerateQrCodeScreen(data: note.toJson()));
+            final qrData = QrData(name: note.title, qrCodeRaw:note.toJson());
+            await context.pushTo(GenerateQrCodeScreen(data: qrData));
         }
       },
       itemBuilder: (_) => [

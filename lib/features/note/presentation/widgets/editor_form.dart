@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/credits_widget.dart';
+import '../../../qr_code/domain/entities/qr_data.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../domain/entities/note.dart';
@@ -71,8 +72,9 @@ class NoteFormHeader extends ConsumerWidget {
                 if (Platform.isWindows) {
                   return context.showSnakbar('هذه الميزة لاتعمل على ويندوز');
                 }
-                final noteJson = formState.note.toJson();
-                await context.pushTo(GenerateQrCodeScreen(data: noteJson));
+                final note = formState.note;
+                final qrData = QrData(name: note.title, qrCodeRaw: note.toJson());
+                await context.pushTo(GenerateQrCodeScreen(data: qrData));
 
               case NotePopupAction.qrScanner:
                 final data = await context.pushTo<String?>(
