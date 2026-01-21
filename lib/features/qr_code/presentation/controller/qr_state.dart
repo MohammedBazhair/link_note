@@ -28,6 +28,7 @@ class QrScannedDoneState extends QrState {
   final String scannedRawResult;
 }
 
+
 class QrImageSavedState extends QrState {
   QrImageSavedState({required super.scannerState,required this.imageName});
   final String imageName;

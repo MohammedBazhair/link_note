@@ -5,7 +5,7 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../domain/entities/qr_data.dart';
 import '../controller/qr_providers.dart';
-import 'scanner_qr_code_screen.dart';
+import '../handle_qr_states.dart';
 
 class GenerateQrCodeScreen extends ConsumerWidget {
   const GenerateQrCodeScreen({super.key, required this.data});
@@ -67,7 +67,7 @@ class GenerateQrCodeScreen extends ConsumerWidget {
 
                     QrCodeWidget(data: data.qrCodeRaw),
                     const Text(
-                      'أصبح الرمز جاهزاالان..\n يمكنك تحميله أو مشاركته مع أصدقائك',
+                      'أصبح الرمز جاهزا الان..\n يمكنك تحميله وحفظه في المعرض',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Color(0xEDFFFFFF),
@@ -84,7 +84,7 @@ class GenerateQrCodeScreen extends ConsumerWidget {
                   final controller = ref.read(qrControllerProvider.notifier);
                   return ElevatedButton(
                     onPressed: () => controller.saveQrAsImage(data),
-                    child: const Text('تحميل'),
+                    child: const Text('حفظ في المعرض'),
                   );
                 },
               ),

@@ -26,7 +26,7 @@ class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
     _updateDebounceTimer?.cancel();
     _updateDebounceTimer = Timer(
       const Duration(seconds: 2),
-      () => ref.read(noteControllerProvider).updateNote(currentEditedNote),
+      () => ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote),
     );
   }
 

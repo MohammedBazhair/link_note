@@ -52,7 +52,7 @@ class Note {
       'content': content,
       'updated_at': updatedAt.toIso8601String(),
       'owner_id': ?uuid,
-      'deleted_at': ?deletedAt,
+      'deleted_at': ?(deletedAt?.toUtc().toIso8601String()),
     };
   }
 

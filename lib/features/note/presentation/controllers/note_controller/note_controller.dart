@@ -1,22 +1,24 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/presentation/providers/core_providers.dart';
 import '../../../../user/domain/repositories/user_repository.dart';
 import '../../../domain/entities/note.dart';
 import '../../../domain/repositories/notes_repository.dart';
+import '../../../injection.dart';
 import '../note_providers.dart';
 
-
 class NoteController extends Notifier<void> {
-  NoteController(this._notesRepository, this._userRepository);
-
-  final NotesRepository _notesRepository;
-  final UserRepository _userRepository;
+  late final NotesRepository _notesRepository;
+  late final UserRepository _userRepository;
 
   String? get _userId => _userRepository.currentUser?.id;
 
   @override
-  void build() {}
+  void build() {
+    _notesRepository = ref.read(notesRepositoryProvider);
+    _userRepository = ref.read(userRepositoryProvider);
+  }
 
   Future<void> addNote(Note note) async {
     final userNote = note.copyWith(uuid: _userId);
@@ -37,11 +39,11 @@ class NoteController extends Notifier<void> {
   }
 
   Stream<List<Note>> fetchNotesRealtime() {
-  return  _notesRepository.fetchNotesRealTime(_userId);
+    return _notesRepository.fetchNotesRealTime(_userId);
   }
 
   Stream<Note?> fetchSingleNoteRealtime(String noteId) {
-  return  _notesRepository.fetchNoteStream(noteId);
+    return _notesRepository.fetchNoteStream(noteId);
   }
 
   Future<Note?> getNoteById(String noteId) {

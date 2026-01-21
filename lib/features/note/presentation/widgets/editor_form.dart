@@ -88,7 +88,7 @@ class NoteFormHeader extends ConsumerWidget {
                 final note = formState.note;
                 if (note.id == null) return context.pop();
 
-                await ref.read(noteControllerProvider).deleteNote(note);
+                await ref.read(noteControllerProvider.notifier).deleteNote(note);
                 context.pop();
             }
           },

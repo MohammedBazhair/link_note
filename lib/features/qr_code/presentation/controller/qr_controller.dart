@@ -1,4 +1,7 @@
+// ignore_for_file: non_const_call_to_literal_constructor
+
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -36,8 +39,7 @@ class QrController extends StateNotifier<QrState> {
 
   Future<void> switchCamera() async {
     await _sacnnerController.switchCamera();
-    final isFrontCamera =
-        _sacnnerController.value.cameraDirection == CameraFacing.front;
+    final isFrontCamera = !state.scannerState.isFrontCamera;
 
     final newScannerState = state.scannerState.copyWith(
       isFrontCamera: isFrontCamera,
@@ -47,7 +49,7 @@ class QrController extends StateNotifier<QrState> {
 
   Future<void> toggleFlash() async {
     await _sacnnerController.toggleTorch();
-    final isFlashOn = _sacnnerController.value.torchState == TorchState.on;
+    final isFlashOn = !state.scannerState.isFlashOn;
 
     final newScannerState = state.scannerState.copyWith(isFlashOn: isFlashOn);
     state = QrCameraUpdatedState(scannerState: newScannerState);
@@ -85,11 +87,20 @@ class QrController extends StateNotifier<QrState> {
         errorCorrectLevel: QrErrorCorrectLevel.H,
       );
       final qrImage = QrImage(qrCode);
-      final byteData = await qrImage.toImageAsBytes(size: 300);
+      final byteData = await qrImage.toImageAsBytes(
+        size: 512,
+        decoration: PrettyQrDecoration(
+          background: Colors.white,
+          quietZone: PrettyQrPixelsQuietZone(20),
+        ),
+      );
       final imageBytes = byteData?.buffer.asUint8List();
       if (imageBytes == null) throw Exception();
       await ImageGallerySaverPlus.saveImage(imageBytes, name: qrData.name);
-      state = QrImageSavedState(scannerState: state.scannerState, imageName: qrData.name);
+      state = QrImageSavedState(
+        scannerState: state.scannerState,
+        imageName: qrData.name,
+      );
     } catch (e) {
       state = QrErrorState(
         scannerState: state.scannerState,

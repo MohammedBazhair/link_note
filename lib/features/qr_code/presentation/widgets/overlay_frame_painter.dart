@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Responsible for drawing the white border/frame with rounded corners and corner lines.
 class OverlayFramePainter extends CustomPainter {
   OverlayFramePainter({
     required this.paintColor,

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'overlay_frame_painter.dart';
 import 'overlay_mask_painter.dart';
 
-/// Widget that combines the semi-transparent overlay with the scan frame.
 class ScannerOverlay extends StatelessWidget {
   const ScannerOverlay({
     super.key,
@@ -31,8 +30,8 @@ class ScannerOverlay extends StatelessWidget {
         CustomPaint(
           size: Size.infinite,
           painter: OverlayMaskPainter(
-            width: width,
-            height: height,
+            width: width - 10,
+            height: height - 10,
             borderRadius: borderRadius,
           ),
         ),
@@ -61,8 +60,6 @@ class ScannerOverlay extends StatelessWidget {
             style: const TextStyle(color: Color(0xD8FFFFFF)),
           ),
         ),
-
-       
       ],
     );
   }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Paints the semi-transparent black overlay around the scan area with a transparent cut-out.
 class OverlayMaskPainter extends CustomPainter {
   OverlayMaskPainter({
     required this.width,
@@ -19,7 +18,7 @@ class OverlayMaskPainter extends CustomPainter {
     final outer = Rect.fromLTWH(0, 0, size.width, size.height);
     final inner = RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(size.width / 2, size.height / 2),
+        center: Offset(size.width / 2 , size.height / 2 ),
         width: width,
         height: height,
       ),
