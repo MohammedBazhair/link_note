@@ -38,7 +38,7 @@ final editorFormProvider = StateProvider((ref) {
   return state;
 });
 
-final isInNotesListScreen = StateProvider((_) => false);
+final isInNotesListScreen = StateProvider.autoDispose((_) => false);
 
 final notesStreamProvider = StreamProvider.autoDispose((ref) {
   final notesController = ref.read(noteControllerProvider);

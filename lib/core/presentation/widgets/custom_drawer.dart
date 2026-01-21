@@ -49,6 +49,7 @@ class CustomDrawer extends ConsumerWidget {
                           const SignUpTile(),
                         ],
                         const NotesTile(),
+                        const ImageMemoriesTile(),
                         if (isUserLogin) ...[const ManageSessionTile()],
                         const AboutAppTile(),
                       ],
