@@ -1,95 +1,82 @@
 import 'package:flutter/material.dart';
 
 class OverlayFramePainter extends CustomPainter {
-  OverlayFramePainter({
-    required this.paintColor,
-    this.borderThickness = 2,
-    this.borderRadius = 20,
-  });
+  const OverlayFramePainter();
 
-  final Color paintColor;
-  final double borderThickness;
-  final double borderRadius;
+  double get _borderRadius => 8.0;
+  double get _cornerExtension => 15;
 
   @override
   void paint(Canvas canvas, Size size) {
+    const paintColor = Colors.white;
+    const borderThickness = 2.0;
+
     final paint = Paint()
       ..color = paintColor
-      ..strokeWidth = borderThickness
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderThickness;
 
-    final radius = borderRadius;
-    final cornerLength = 15 + borderThickness;
-
-    _drawTopLeft(canvas, paint, radius, cornerLength);
-    _drawTopRight(canvas, paint, size, radius, cornerLength);
-    _drawBottomLeft(canvas, paint, size, radius, cornerLength);
-    _drawBottomRight(canvas, paint, size, radius, cornerLength);
-  }
-
-  void _drawTopLeft(Canvas canvas, Paint paint, double radius, double length) {
-    final path = Path();
-    path.moveTo(0, radius + length);
-    path.lineTo(0, radius);
-    path.arcToPoint(Offset(radius, 0), radius: Radius.circular(radius));
-    path.lineTo(radius + length, 0);
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawTopRight(
-    Canvas canvas,
-    Paint paint,
-    Size size,
-    double radius,
-    double length,
-  ) {
-    final path = Path();
-    path.moveTo(size.width - radius - length, 0);
-    path.lineTo(size.width - radius, 0);
-    path.arcToPoint(
-      Offset(size.width, radius),
-      radius: Radius.circular(radius),
-    );
-    path.lineTo(size.width, radius + length);
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawBottomLeft(
-    Canvas canvas,
-    Paint paint,
-    Size size,
-    double radius,
-    double length,
-  ) {
-    final path = Path();
-    path.moveTo(radius + length, size.height);
-    path.lineTo(radius, size.height);
-    path.arcToPoint(
-      Offset(0, size.height - radius),
-      radius: Radius.circular(radius),
-    );
-    path.lineTo(0, size.height - radius - length);
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawBottomRight(
-    Canvas canvas,
-    Paint paint,
-    Size size,
-    double radius,
-    double length,
-  ) {
-    final path = Path();
-    path.moveTo(size.width, size.height - radius - length);
-    path.lineTo(size.width, size.height - radius);
-    path.arcToPoint(
-      Offset(size.width - radius, size.height),
-      radius: Radius.circular(radius),
-    );
-    path.lineTo(size.width - radius - length, size.height);
-    canvas.drawPath(path, paint);
+    _drawTopLeft(canvas, paint);
+    _drawTopRight(canvas, paint, size);
+    _drawBottomLeft(canvas, paint, size);
+    _drawBottomRight(canvas, paint, size);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+
+  void _drawTopLeft(Canvas canvas, Paint paint) {
+    final path = Path();
+
+    path.moveTo(0, _borderRadius + _cornerExtension);
+    path.lineTo(0, _borderRadius);
+    path.arcToPoint(
+      Offset(_borderRadius, 0),
+      radius: Radius.circular(_borderRadius),
+    );
+    path.lineTo(_borderRadius + _cornerExtension, 0);
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawTopRight(Canvas canvas, Paint paint, Size size) {
+    final path = Path();
+
+    path.moveTo(size.width - _borderRadius - _cornerExtension, 0);
+    path.lineTo(size.width - _borderRadius, 0);
+    path.arcToPoint(
+      Offset(size.width, _borderRadius),
+      radius: Radius.circular(_borderRadius),
+    );
+    path.lineTo(size.width, _borderRadius + _cornerExtension);
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawBottomLeft(Canvas canvas, Paint paint, Size size) {
+    final path = Path();
+
+    path.moveTo(0, size.height - _borderRadius - _cornerExtension);
+    path.lineTo(0, size.height - _borderRadius);
+    path.arcToPoint(
+      Offset(_borderRadius, size.height),
+      radius: Radius.circular(_borderRadius),
+      clockwise: false,
+    );
+    path.lineTo(_cornerExtension + _borderRadius, size.height);
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawBottomRight(Canvas canvas, Paint paint, Size size) {
+    final path = Path();
+
+    path.moveTo(size.width, size.height - _borderRadius - _cornerExtension);
+    path.lineTo(size.width, size.height - _borderRadius);
+    path.arcToPoint(
+      Offset(size.width - _borderRadius, size.height),
+      radius: Radius.circular(_borderRadius),
+    );
+    path.lineTo(size.width - _cornerExtension - _borderRadius, size.height);
+    canvas.drawPath(path, paint);
+  }
 }

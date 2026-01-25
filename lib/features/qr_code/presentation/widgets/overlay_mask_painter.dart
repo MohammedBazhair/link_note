@@ -1,16 +1,8 @@
 import 'package:flutter/material.dart';
 
 class OverlayMaskPainter extends CustomPainter {
-  OverlayMaskPainter({
-    required this.width,
-    required this.height,
-    required this.borderRadius,
-  });
-
-  final double width;
-  final double height;
-  final double borderRadius;
-
+  const OverlayMaskPainter(this.innerSize);
+final  Size innerSize;
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black.withOpacity(0.6);
@@ -18,11 +10,11 @@ class OverlayMaskPainter extends CustomPainter {
     final outer = Rect.fromLTWH(0, 0, size.width, size.height);
     final inner = RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(size.width / 2 , size.height / 2 ),
-        width: width,
-        height: height,
+        center: Offset(size.width / 2, size.height / 2),
+        width: size.width,
+        height: size.height,
       ),
-      Radius.circular(borderRadius),
+      const Radius.circular(10),
     );
 
     final path = Path()

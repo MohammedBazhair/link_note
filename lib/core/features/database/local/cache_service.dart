@@ -3,22 +3,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract interface class LocalCacheService {
   Future<bool> setString({required String key, required String value});
 
-  Future<String?> getString({required String key});
+  String? getString({required String key});
 
   Future<bool> setBool({required String key, required bool value});
 
-  Future<bool?> getBool({required String key});
+  bool? getBool({required String key});
 
   Future<bool> setInt({required String key, required int value});
 
-  Future<int?> getInt({required String key});
+  int? getInt({required String key});
 
   Future<bool> setStringList({
     required String key,
     required List<String> value,
   });
 
-  Future<List<String>?> getStringList({required String key});
+  List<String>? getStringList({required String key});
 
   Future<bool> remove({required String key});
 
@@ -35,7 +35,7 @@ class LocalCacheServiceImpl implements LocalCacheService {
   }
 
   @override
-  Future<String?> getString({required String key}) async {
+String? getString({required String key})  {
     return _prefs.getString(key);
   }
 
@@ -45,7 +45,7 @@ class LocalCacheServiceImpl implements LocalCacheService {
   }
 
   @override
-  Future<bool?> getBool({required String key}) async {
+  bool? getBool({required String key})  {
     return _prefs.getBool(key);
   }
 
@@ -55,7 +55,7 @@ class LocalCacheServiceImpl implements LocalCacheService {
   }
 
   @override
-  Future<int?> getInt({required String key}) async {
+  int? getInt({required String key})  {
     return _prefs.getInt(key);
   }
 
@@ -68,7 +68,7 @@ class LocalCacheServiceImpl implements LocalCacheService {
   }
 
   @override
-  Future<List<String>?> getStringList({required String key}) async {
+  List<String>? getStringList({required String key})  {
     return _prefs.getStringList(key);
   }
 

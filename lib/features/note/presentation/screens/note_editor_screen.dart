@@ -34,7 +34,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
 
     final note = Note(
       id: widget.note?.id,
-      uuid: widget.note?.uuid,
+      ownerId: widget.note?.ownerId,
       title: editorState.titleController.text,
       content: editorState.contentController.text,
       updatedAt: DateTime.now().toUtc(),
@@ -44,7 +44,6 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
       await noteController.updateNote(note);
     } else {
       await noteController.addNote(note);
-
     }
     context.pop();
   }
@@ -71,7 +70,6 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
         await onPopInvoke();
       },
       child: Scaffold(
-        
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),

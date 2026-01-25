@@ -19,7 +19,7 @@ Future<Override> getOverrideDatabase() async {
 
 Future<Database> _initDatabase() async {
   final dbDir = await getDatabasesPath();
-  final dbPath = join(dbDir, 'LinkNote.db');
+  final dbPath = join(dbDir, 'Link Note.db');
   if (Platform.isWindows) {
     final winDb = await databaseFactory.openDatabase(
       dbPath,

@@ -6,8 +6,8 @@ class Logger {
   static void log({String? message, Object? error, StackTrace? stackTrace}) {
     if (!kDebugMode) return;
     debugPrint('------------------[LOGGER]------------------');
-   if(message!=null) debugPrint(message);
-    if(error!=null) debugPrint(error.toString());
+   if(message!=null) debugPrint( 'Message: $message');
+    if(error!=null) debugPrint('Error: $error');
     if(stackTrace!=null) debugPrint(stackTrace.toString());
   }
 }

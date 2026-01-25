@@ -24,14 +24,11 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<ProfileEntity> readProfile() async {
-    final raw = await _cacheService.getString(
-      key: ExternalConsts.profileUserKey,
-    );
+    final raw = _cacheService.getString(key: ExternalConsts.profileUserKey);
     if (raw == null) return ProfileEntity.guest();
 
     final model = ProfileModel.fromJson(raw);
 
     return model;
   }
-
 }

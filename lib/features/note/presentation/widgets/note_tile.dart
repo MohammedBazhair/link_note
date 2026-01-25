@@ -8,8 +8,6 @@ import '../../domain/entities/note.dart';
 import '../controllers/note_providers.dart';
 import '../screens/note_editor_screen.dart';
 
-
-
 class NoteTile extends ConsumerWidget {
   const NoteTile(this.note, {super.key});
 
@@ -22,10 +20,14 @@ class NoteTile extends ConsumerWidget {
 
     return TileWrapper(
       child: ListTile(
+        minTileHeight: 73,
         tileColor: isSelected ? DarkColors.primary : Colors.transparent,
-        title: Text(note.title.isEmpty ? 'No Title' : note.title, maxLines: 1),
+        title: Text(
+          note.title.isEmpty ? note.content : note.title,
+          maxLines: 1,
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-        subtitle: Text(note.content, maxLines: 1),
+        subtitle:note.title.isEmpty ? null: Text(note.content, maxLines: 1),
         trailing: Skeleton.ignore(
           child: isSelected
               ? const Icon(Icons.check_circle_outline_rounded, size: 30)

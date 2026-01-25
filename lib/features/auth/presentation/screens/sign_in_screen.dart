@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/extensions/extensions.dart';
@@ -62,9 +63,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
-
+    TextInput.finishAutofillContext();
     final password = _passwordController.text;
     final email = _emailController.text;
+
     await ref
         .read(authProvider.notifier)
         .loginWithEmail(email: email, password: password);

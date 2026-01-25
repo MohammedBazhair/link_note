@@ -16,7 +16,7 @@ import '../../../features/user/data/repositories/user_repository_impl.dart';
 import '../../../features/user/presentation/controllers/user_controller.dart';
 import '../../../features/user/presentation/controllers/user_state.dart';
 import '../../features/ai/ai_client.dart';
-import '../../features/common_injections.dart';
+import '../../features/init_local_data_base.dart';
 import '../../features/database/local/cache_service.dart';
 import '../../features/database/remote/remote_database_service.dart';
 import '../../features/database/remote/remote_storage_service.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
@@ -48,6 +49,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final isValid = formKey.currentState?.validate() ?? false;
 
     if (!isValid) return;
+
+    TextInput.finishAutofillContext();
 
     final user = UserEntity(
       username: nameController.text,

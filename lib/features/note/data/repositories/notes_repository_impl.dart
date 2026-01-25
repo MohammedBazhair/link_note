@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
@@ -21,7 +20,7 @@ class NotesRepositoryImpl implements NotesRepository {
   Future<Note?> create(Note note) async {
     try {
       final now = DateTime.now().toUtc();
-      final newNote = note.copyWith(id: const Uuid().v4(), updatedAt: now);
+      final newNote = note.copyWith(updatedAt: now);
 
       await _local.createNote(newNote);
 
@@ -70,8 +69,7 @@ class NotesRepositoryImpl implements NotesRepository {
           notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
           return notes;
         }))
-        .handleError((e, st) {
-        });
+        .handleError((e, st) {});
   }
 
   @override
@@ -106,8 +104,7 @@ class NotesRepositoryImpl implements NotesRepository {
         .map((m) {
           return m != null ? Note.fromMap(m) : null;
         })
-        .handleError((e) {
-        });
+        .handleError((e) {});
   }
 
   @override
@@ -117,8 +114,7 @@ class NotesRepositoryImpl implements NotesRepository {
 
   @override
   Future<void> syncNotes(String? userId) async {
-    final id =
-        await _cache.getString(key: ExternalConsts.lastUserIdKey) ?? userId;
+    final id = _cache.getString(key: ExternalConsts.lastUserIdKey) ?? userId;
     if (id == null) return;
     if (!await _network.hasConnection()) return;
 

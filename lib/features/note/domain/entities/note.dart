@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import '../../../../core/constants/internal_constants/log.dart';
+
 class Note {
   Note({
     this.id,
-    this.uuid,
+    this.ownerId,
     required this.updatedAt,
     required this.title,
     required this.content,
@@ -12,10 +14,13 @@ class Note {
 
   factory Note.fromJson(String json) {
     try {
+      Logger.log(message: json);
       final map = jsonDecode(json);
+
+      Logger.log(message: map.toString());
       return Note.fromMap(map);
     } catch (e) {
-      return Note(title: '', content: '', updatedAt: DateTime.now().toUtc());
+      return Note(title: '', content: json, updatedAt: DateTime.now().toUtc());
     }
   }
   factory Note.fake() {
@@ -29,7 +34,7 @@ class Note {
   factory Note.fromMap(Map<String, dynamic> map) {
     return Note(
       id: map['id'] as String?,
-      uuid: map['owner_id'] as String?,
+      ownerId: map['owner_id'] as String?,
       title: map['title'] as String,
       content: map['content'] as String,
       updatedAt: DateTime.parse(map['updated_at']),
@@ -37,7 +42,7 @@ class Note {
     );
   }
   final String? id;
-  final String? uuid; // user id
+  final String? ownerId;
   final String title;
   final String content;
   final DateTime updatedAt;
@@ -51,7 +56,7 @@ class Note {
       'title': title,
       'content': content,
       'updated_at': updatedAt.toIso8601String(),
-      'owner_id': ?uuid,
+      'owner_id': ?ownerId,
       'deleted_at': ?(deletedAt?.toUtc().toIso8601String()),
     };
   }
@@ -71,7 +76,7 @@ class Note {
 
   @override
   String toString() {
-    return 'Note{id: $id, uuid: $uuid, title: $title, content: $content}.\n';
+    return 'Note{id: $id, uuid: $ownerId, title: $title, content: $content}.\n';
   }
 
   Note copyWith({
@@ -84,7 +89,7 @@ class Note {
   }) {
     return Note(
       id: id ?? this.id,
-      uuid: uuid ?? this.uuid,
+      ownerId: uuid ?? ownerId,
       title: title ?? this.title,
       content: content ?? this.content,
       updatedAt: updatedAt ?? this.updatedAt,

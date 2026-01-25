@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/features/ai/ai_client.dart';
-import '../../core/features/common_injections.dart';
+import '../../core/features/init_local_data_base.dart';
 import '../../core/presentation/providers/core_providers.dart';
 import 'data/datasources/notes_local_data_source.dart';
 import 'data/datasources/notes_remote_data_source.dart';

@@ -12,8 +12,10 @@ class ScannerQrCodeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final cameraArea = screenWidth * 0.7;
     final scanArea = cameraArea - 60;
+    final centerPoint = Offset(screenWidth / 2, screenHeight / 2);
     ref.listen(qrControllerProvider, (_, state) {
       handleQrStates(context, state);
     });
@@ -24,11 +26,16 @@ class ScannerQrCodeScreen extends ConsumerWidget {
           // Camera preview
           MobileScanner(
             controller: ref.read(moblieScannerProvider),
-            onDetect: (result) {},
+            onDetect: ref.read(qrControllerProvider.notifier).onDetect,
+            scanWindow: Rect.fromCenter(
+              center: centerPoint,
+              width: scanArea,
+              height: scanArea,
+            ),
+            overlayBuilder: (_, _) {
+              return ScannerOverlay(size: Size.square(scanArea));
+            },
           ),
-
-          // Overlay
-          ScannerOverlay(width: scanArea, height: scanArea, borderRadius: 8),
 
           // Top buttons (Back, Camera flip, Flash)
           const Align(alignment: Alignment.topCenter, child: ScannerActions()),

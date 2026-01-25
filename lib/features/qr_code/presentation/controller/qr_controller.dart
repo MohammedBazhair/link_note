@@ -17,7 +17,7 @@ class QrController extends StateNotifier<QrState> {
   final MobileScannerController _sacnnerController;
 
   Future<void> onDetect(BarcodeCapture result) async {
-    if (_sacnnerController.value.isRunning) return;
+    if (!state.scannerState.canScan) return;
 
     await _sacnnerController.stop();
 
@@ -25,6 +25,8 @@ class QrController extends StateNotifier<QrState> {
     state = QrScanningState(scannerState: newScannerState);
 
     final rawValue = result.barcodes.first.rawValue;
+
+
 
     if (rawValue?.isNotEmpty ?? false) {
       state = QrScannedDoneState(
@@ -35,6 +37,9 @@ class QrController extends StateNotifier<QrState> {
     }
 
     await _sacnnerController.start();
+    state = QrCameraUpdatedState(
+      scannerState: state.scannerState.copyWith(canScan: true),
+    );
   }
 
   Future<void> switchCamera() async {

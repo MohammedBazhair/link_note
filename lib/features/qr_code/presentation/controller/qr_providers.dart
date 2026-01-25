@@ -13,7 +13,7 @@ final moblieScannerProvider = Provider((ref) {
   return controller;
 });
 
-final qrControllerProvider = StateNotifierProvider.autoDispose<QrController, QrState>((
+final qrControllerProvider = StateNotifierProvider<QrController, QrState>((
   ref,
 ) {
   final mobileController = ref.read(moblieScannerProvider);

@@ -8,9 +8,6 @@ import '../../domain/usecases/update_image_memory.dart';
 import 'image_memories_providers.dart';
 
 class ImageMemoriesController extends AsyncNotifier<List<ImageMemory>> {
-  late final CreateImageMemory _create;
-  late final UpdateImageMemory _update;
-  late final DeleteImageMemory _delete;
 
   @override
   Future<List<ImageMemory>> build() async {

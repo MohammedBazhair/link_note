@@ -179,7 +179,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       await _locaCache.setInt(key: creditsKey, value: credits);
       return Result.ok(credits);
     } on ClientException catch (_) {
-      final credits = await _locaCache.getInt(key: creditsKey);
+      final credits = _locaCache.getInt(key: creditsKey);
       if (credits != null) return Result.ok(credits);
       rethrow;
     } on UserNotLoggedInException catch (_) {

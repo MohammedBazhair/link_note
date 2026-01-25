@@ -39,7 +39,7 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
   @override
   Future<Result<String>> improveNoteTitle(Note note) async {
     try {
-      if (note.uuid == null) {
+      if (note.ownerId == null) {
         throw const SaveNoteFirstException('احفظ الملاحظة أولا');
       }
 
@@ -56,7 +56,7 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
 
       final model = AiResponseModel.fromJson(response);
 
-      await _userRemoteDataSource.updateCredits(credits - 1, note.uuid!);
+      await _userRemoteDataSource.updateCredits(credits - 1, note.ownerId!);
       return Result.ok(model.text);
     } on AppException catch (_) {
       rethrow;
@@ -68,10 +68,10 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
   @override
   Future<Result<String>> improveNoteContent(Note note) async {
     try {
-        if (note.uuid == null) {
+      if (note.ownerId == null) {
         throw const SaveNoteFirstException('احفظ الملاحظة أولا');
       }
-      
+
       final result = await _getCredits();
       final credits = result.value!;
 
@@ -83,7 +83,7 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
       final response = await _aiClient.generate(params);
       final model = AiResponseModel.fromJson(response);
 
-      await _userRemoteDataSource.updateCredits(credits - 1, note.uuid!);
+      await _userRemoteDataSource.updateCredits(credits - 1, note.ownerId!);
       return Result.ok(model.text);
     } on AppException catch (_) {
       rethrow;

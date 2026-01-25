@@ -1,25 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'overlay_frame_painter.dart';
 import 'overlay_mask_painter.dart';
+import 'scanner_animated_builder.dart';
 
 class ScannerOverlay extends StatelessWidget {
-  const ScannerOverlay({
-    super.key,
-    required this.width,
-    required this.height,
-    this.borderColor = Colors.white,
-    this.borderThickness = 2,
-    this.borderRadius = 20,
-    this.infoText = 'امسح رمز QR داخل الإطار.',
-  });
+  const ScannerOverlay({super.key, required this.size});
 
-  final double width;
-  final double height;
-  final Color borderColor;
-  final double borderThickness;
-  final double borderRadius;
-  final String infoText;
+  final Size size;
 
   @override
   Widget build(BuildContext context) {
@@ -27,37 +14,20 @@ class ScannerOverlay extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         // Overlay layer
-        CustomPaint(
-          size: Size.infinite,
-          painter: OverlayMaskPainter(
-            width: width - 10,
-            height: height - 10,
-            borderRadius: borderRadius,
-          ),
-        ),
+        CustomPaint(size: Size.infinite, painter: OverlayMaskPainter(size)),
 
         // Scan frame
-        SizedBox(
-          width: width,
-          height: height,
-          child: CustomPaint(
-            painter: OverlayFramePainter(
-              paintColor: borderColor,
-              borderThickness: borderThickness,
-              borderRadius: borderRadius,
-            ),
-          ),
-        ),
+        ScannerAnimatedBuilder(size: size),
 
         // Info text below the frame
-        Positioned(
+        const Positioned(
           bottom: -33,
           left: 0,
           right: 0,
           child: Text(
-            infoText,
+            'امسح الرمز في داخل هذا الإطار',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Color(0xD8FFFFFF)),
+            style: TextStyle(color: Color(0xD8FFFFFF)),
           ),
         ),
       ],
