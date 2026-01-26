@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
 import '../../../../core/constants/colors/colors.dart';
+import '../../../../core/extensions/extensions.dart';
 import '../../domain/entities/qr_data.dart';
 import '../controller/qr_providers.dart';
 import '../handle_qr_states.dart';
@@ -17,6 +18,15 @@ class GenerateQrCodeScreen extends ConsumerWidget {
       handleQrStates(context, state);
     });
 
+    if (!data.qrCodeRaw.isQrDataSafe) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.showSnakbar('النص طويل جدا ولا يمكن انشاء Qr Code');
+        context.pop();
+      });
+
+      return const SizedBox();
+    }
+    
     return Scaffold(
       appBar: AppBar(title: const Text('رمز QR')),
       body: Padding(
@@ -110,11 +120,12 @@ class QrCodeWidget extends StatelessWidget {
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(30)),
       child: PrettyQrView.data(
         data: data,
-        errorBuilder: (context, error, stackTrace) => Text(
-          error.toString(),
+        errorBuilder: (context, error, stackTrace) => const Text(
+          'حدثت مشكلة أثناء توليد الرمز',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
+
         decoration: const PrettyQrDecoration(
           background: Color(0xFBFFFFFF),
 

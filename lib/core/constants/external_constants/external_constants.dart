@@ -7,12 +7,13 @@ class ExternalConsts {
   static const profilesTable = 'profiles';
   static const sessionsTable = 'sessions';
   static const sessionMembersTable = 'session_members';
+  static const qrSafeLimitBytes = 1800;
 
-  static const maxfileMbSize = 3; 
-
+  static const maxfileMbSize = 3;
 
   static const supabaseUrl = 'https://fyfutnuahjknmvdorkwa.supabase.co';
-  static const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZnV0bnVhaGprbm12ZG9ya3dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MDY1MDgsImV4cCI6MjA3OTQ4MjUwOH0.QMY5rWu8kzSJdayLsnSiUQnQLkMNyimRImNvrDsBu30';
+  static const supabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZnV0bnVhaGprbm12ZG9ya3dhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MDY1MDgsImV4cCI6MjA3OTQ4MjUwOH0.QMY5rWu8kzSJdayLsnSiUQnQLkMNyimRImNvrDsBu30';
   static const authRedirectUrl = 'https://bhf-s.github.io/auth/';
 
   static const createTableNotesQuery =

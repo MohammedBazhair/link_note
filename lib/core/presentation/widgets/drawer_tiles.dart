@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../features/auth/presentation/screens/sign_in_screen.dart';
 import '../../../features/auth/presentation/screens/sign_up_screen.dart';
-import '../../../features/image/presentation/controllers/image_memories_providers.dart';
-import '../../../features/image/presentation/screens/image_memories_gallery_screen.dart';
 import '../../../features/note/presentation/controllers/note_providers.dart';
 import '../../../features/note/presentation/screens/notes_list_screen.dart';
 import '../../../features/session/presentation/screens/session_entry_screen.dart';
@@ -105,23 +103,23 @@ class NotesTile extends ConsumerWidget {
   }
 }
 
-class ImageMemoriesTile extends ConsumerWidget {
-  const ImageMemoriesTile({super.key});
+// class ImageMemoriesTile extends ConsumerWidget {
+//   const ImageMemoriesTile({super.key});
 
-  @override
-  Widget build(BuildContext context, ref) {
-    return DrawerTile(
-      isSelected: ref.watch(isInImageMemoriesScreen),
-      icon: Icons.photo_library_outlined,
-      title: 'ذكريات الصور',
-      onTap: () {
-        Scaffold.of(context).closeDrawer();
-        final isOpenedNow = ref.read(isInImageMemoriesScreen);
-        if (!isOpenedNow) context.pushTo(const ImageMemoriesGalleryScreen());
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context, ref) {
+//     return DrawerTile(
+//       isSelected: ref.watch(isInImageMemoriesScreen),
+//       icon: Icons.photo_library_outlined,
+//       title: 'ذكريات الصور',
+//       onTap: () {
+//         Scaffold.of(context).closeDrawer();
+//         final isOpenedNow = ref.read(isInImageMemoriesScreen);
+//         if (!isOpenedNow) context.pushTo(const ImageMemoriesGalleryScreen());
+//       },
+//     );
+//   }
+// }
 
 class ManageSessionTile extends ConsumerWidget {
   const ManageSessionTile({super.key});

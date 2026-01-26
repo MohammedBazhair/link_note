@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/colors/colors.dart';
 import '../controllers/note_providers.dart';
 import 'ai_action_button.dart';
 
@@ -8,7 +9,7 @@ class ContentFormField extends StatelessWidget {
   const ContentFormField({
     super.key,
     required this.controller,
-   required this.onChanged,
+    required this.onChanged,
     this.readOnly = false,
   });
   final TextEditingController controller;
@@ -24,12 +25,26 @@ class ContentFormField extends StatelessWidget {
           maxLines: null,
           expands: true,
           readOnly: readOnly,
+
           textAlignVertical: TextAlignVertical.top,
           style: TextStyle(color: Colors.white.withAlpha(200)),
           cursorColor: const Color(0x809CDEBC),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'اكتب ما تريد...',
-            contentPadding: EdgeInsetsDirectional.only(
+            counter: ValueListenableBuilder(
+              valueListenable: controller,
+              builder: (context, value, _) {
+                return Text(
+                  '${controller.text.length}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    height: 2.5,
+                    color: DarkColors.secondFont,
+                  ),
+                );
+              },
+            ),
+            contentPadding: const EdgeInsetsDirectional.only(
               end: 40,
               start: 15,
               bottom: 15,
@@ -59,7 +74,7 @@ class ContentFormField extends StatelessWidget {
                   isProcessing: isProcessing,
                   onPressed: () async {
                     final note = ref.watch(editorFormProvider).note;
-                    
+
                     final content = await aiController.improveContent(note);
                     controller.text = content;
                     onChanged(content);

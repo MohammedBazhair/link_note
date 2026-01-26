@@ -74,6 +74,8 @@ class NoteFormHeader extends ConsumerWidget {
                 }
                 final note = formState.note;
                 final qrData = QrData(name: note.title, qrCodeRaw: note.toJson());
+
+
                 await context.pushTo(GenerateQrCodeScreen(data: qrData));
 
               case NotePopupAction.qrScanner:

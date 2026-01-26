@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
+import '../constants/external_constants/external_constants.dart';
 
 extension ShowSnackbar on BuildContext {
   void showSnakbar(String msg) {
@@ -26,7 +30,6 @@ extension RoutesNavigators on BuildContext {
     return Navigator.pushReplacement(
       this,
       MaterialPageRoute(builder: (context) => screen),
-      
     );
   }
 
@@ -37,4 +40,11 @@ extension RoutesNavigators on BuildContext {
 
 extension FilesSizes on num {
   double get bytesToMb => this / (1024 * 1024);
+}
+
+extension QrDataMinpulation on String {
+  bool get isQrDataSafe {
+    final bytes = utf8.encode(this);
+    return bytes.length <= ExternalConsts.qrSafeLimitBytes;
+  }
 }

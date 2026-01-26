@@ -5,9 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../data/datasources/image_memories_remote_data_source.dart';
 import '../../data/repositories/image_memories_repository_impl.dart';
-import '../../domain/entities/image_memory.dart';
 import '../../domain/repositories/image_memories_repository.dart';
-import 'image_memories_controller.dart';
 
 final isInImageMemoriesScreen = StateProvider((_) => false);
 
@@ -26,8 +24,3 @@ final imageMemoriesRepositoryProvider = Provider<ImageMemoriesRepository>((ref) 
 });
 
 
-
-final imageMemoriesControllerProvider =
-    AsyncNotifierProvider<ImageMemoriesController, List<ImageMemory>>(
-  ImageMemoriesController.new,
-);
