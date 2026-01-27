@@ -1,3 +1,4 @@
+// ignore_for_file: non_const_call_to_literal_constructor
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -103,15 +104,12 @@ class QrController extends StateNotifier<QrState> {
         scannerState: state.scannerState,
         imageName: qrData.name,
       );
-    } on InputTooLongException catch(_){
+    } on InputTooLongException catch (_) {
       state = QrErrorState(
         scannerState: state.scannerState,
         message: 'حدث خطأ أثناء محاولة حفظ الصورة بسبب طول النص المدخل',
       );
-
-    }
-    
-     catch (e) {
+    } catch (e) {
       state = QrErrorState(
         scannerState: state.scannerState,
         message: 'حدث خطأ أثناء محاولة حفظ الصورة',
