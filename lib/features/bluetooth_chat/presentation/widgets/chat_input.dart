@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../qr_code/presentation/widgets/filled_icon_button.dart';
+
 class ChatInput extends StatefulWidget {
   const ChatInput({super.key, required this.onSend});
 
@@ -21,22 +23,25 @@ class _ChatInputState extends State<ChatInput> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(18),
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'اكتب رسالة...',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(hintText: 'اكتب رسالة...'),
             ),
           ),
           const SizedBox(width: 8),
-          IconButton(icon: const Icon(Icons.send), onPressed: send),
+          FilledIconButton(onPressed: send, iconData: Icons.send),
         ],
       ),
     );

@@ -6,25 +6,26 @@ import '../../domain/entities/message.dart';
 import '../../domain/repositories/chat_repository.dart';
 import 'providers.dart';
 
+/// Presentation-layer controller that exposes a flat list of all messages
+/// across active chat sessions. UI widgets are responsible for filtering
+/// by `chatId` where needed.
 class ChatController extends Notifier<List<Message>> {
-  ChatController() {
-    _repo.messages.listen((msg) {
-      state = [...state, msg];
-    });
-  }
   late final ChatRepository _repo;
 
   @override
   List<Message> build() {
     _repo = ref.read(chatRepository);
+    _repo.messages.listen((msg) {
+      state = [...state, msg];
+    });
     return [];
   }
 
-  void sendText(String peerId, String text) {
+  void sendText({required String peerId, required String text}) {
     _repo.sendText(peerId, text);
   }
 
-  void sendImage(String peerId, Uint8List bytes) {
+  void sendImage({required String peerId, required Uint8List bytes}) {
     _repo.sendImage(peerId, bytes);
   }
 }

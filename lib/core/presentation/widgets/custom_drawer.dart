@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/note/presentation/controllers/note_providers.dart';
@@ -49,6 +51,7 @@ class CustomDrawer extends ConsumerWidget {
                           const SignUpTile(),
                         ],
                         const NotesTile(),
+                      if(Platform.isAndroid)  const ChatsTile(),
                         // const ImageMemoriesTile(),
                         if (isUserLogin) ...[const ManageSessionTile()],
                         const AboutAppTile(),

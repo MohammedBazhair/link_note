@@ -2,13 +2,20 @@ import 'dart:convert';
 
 import 'package:uuid/uuid.dart';
 
-import '../../data/bluetooth/packet.dart';
+import '../../data/models/packet.dart';
 
 enum MessageType {
-  text(1),
-  image(2);
+  handshake(1),
+  text(2),
+  image(3);
 
   const MessageType(this.typeCode);
+  static MessageType fromValue(int v) {
+    return MessageType.values.firstWhere(
+      (e) => e.typeCode == v,
+      orElse: () => MessageType.text,
+    );
+  }
 
   final int typeCode;
 }
@@ -48,7 +55,14 @@ class Message {
         type: packet.messageType,
         imagePath:
             'received_image_${DateTime.now().millisecondsSinceEpoch}.png',
-        time: DateTime.now().toUtc(),
+        time: timeNow,
+      ),
+      MessageType.handshake => Message(
+        id: messageId,
+        senderUserId: senderId,
+        type: MessageType.handshake,
+        time: timeNow,
+        chatId: chatId,
       ),
     };
   }

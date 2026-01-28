@@ -5,10 +5,17 @@ import '../controllers/providers.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/message_list.dart';
 
-class ChatPage extends ConsumerWidget {
-  const ChatPage({super.key, required this.peerId, required this.myId});
+class ChatScreen extends ConsumerWidget {
+  const ChatScreen({
+    super.key,
+    required this.peerId,
+    required this.myId,
+    required this.peerUserId,
+  });
 
   final String peerId;
+  final String peerUserId;
+
   final String myId;
 
   @override
@@ -24,7 +31,9 @@ class ChatPage extends ConsumerWidget {
           ),
           ChatInput(
             onSend: (text) {
-              ref.read(chatControllerProvider.notifier).sendText(peerId, text);
+              ref
+                  .read(chatControllerProvider.notifier)
+                  .sendText(peerId: peerId, text: text);
             },
           ),
         ],

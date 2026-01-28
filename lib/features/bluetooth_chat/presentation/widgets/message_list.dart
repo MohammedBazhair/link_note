@@ -20,6 +20,10 @@ class MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     final chatMessages = messages.where((m) => m.chatId == chatId).toList();
 
+     if (messages.isEmpty) {
+      return const Center(child: Text('No messages yet'));
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: chatMessages.length,
@@ -48,3 +52,5 @@ class MessageList extends StatelessWidget {
     );
   }
 }
+
+
