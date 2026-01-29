@@ -51,7 +51,11 @@ class NoteController extends Notifier<void> {
   }
 
   Future<void> syncNotes() async {
-    await _notesRepository.syncNotes(_userId);
+    try {
+  await _notesRepository.syncNotes(_userId);
+}  catch (e) {
+// 
+}
   }
 
   void _updateUi() {

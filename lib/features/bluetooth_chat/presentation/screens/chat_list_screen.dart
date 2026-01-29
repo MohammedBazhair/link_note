@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
-import '../controllers/providers.dart';
-import 'bluetooth_devices_screen.dart';
+import '../controllers/chat_providers.dart';
 import 'chat_screen.dart';
+import 'nearby_devices_screen.dart';
 
 class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
@@ -78,7 +78,7 @@ class ChatListScreen extends ConsumerWidget {
         shape: const CircleBorder(),
         child: const Icon(Icons.person_add),
         onPressed: () {
-          context.pushTo(BluetoothDevicesScreen(myUserId: myUserId));
+          context.pushTo(NearbyDevicesScreen(myUserId: myUserId));
         },
       ),
     );

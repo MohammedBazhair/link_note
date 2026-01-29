@@ -15,11 +15,15 @@ class FilledIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      backgroundColor:
-          backgroundColor ?? Colors.grey.shade200.withOpacity(0.2),
+      backgroundColor: backgroundColor ?? Colors.grey.shade200.withOpacity(0.2),
       child: IconButton(
         onPressed: onPressed,
-        icon: Icon(iconData, color: foregroungColor, size: 22),
+        icon: Icon(
+          iconData,
+          color: foregroungColor,
+          size: 22,
+          textDirection: TextDirection.ltr,
+        ),
       ),
     );
   }

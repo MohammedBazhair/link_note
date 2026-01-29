@@ -68,7 +68,9 @@ class Message {
   }
 
   static String buildChatId(String a, String b) {
-    final ids = [a, b]..sort();
+    final s1 = a.trim().toLowerCase();
+    final s2 = b.trim().toLowerCase();
+    final ids = [s1, s2]..sort();
     return ids.join('_');
   }
 

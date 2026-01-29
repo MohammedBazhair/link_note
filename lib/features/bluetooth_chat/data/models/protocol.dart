@@ -21,16 +21,18 @@ class Protocol {
     required Uint8List payload,
   }) {
     final userIdBytes = utf8.encode(senderUserId);
+    final userIdLength = userIdBytes.length;
 
-    if (userIdBytes.length != _userIdLength) {
-      throw Exception('Invalid UUID length');
+    if (userIdLength > 255) {
+      throw Exception('UserId too long');
     }
 
     final lengthBytes = ByteData(_lengthFieldBytes)
       ..setUint32(0, payload.length);
 
     final buffer = BytesBuilder();
-    buffer.add(userIdBytes); // [36 bytes] userId
+    buffer.addByte(userIdLength); // [1 byte] userId length
+    buffer.add(userIdBytes); // [N bytes] userId
     buffer.addByte(type.typeCode); // [1 byte] type
     buffer.add(lengthBytes.buffer.asUint8List()); // [4 bytes] payload length
     buffer.add(payload); // [N bytes] payload
@@ -40,18 +42,24 @@ class Protocol {
 
   /// Reads header + payload from a fully assembled frame.
   static Packet parsePacket(Uint8List data) {
-    const minimumLength = _userIdLength + 1 + _lengthFieldBytes;
-    if (data.length < minimumLength) {
-      throw Exception('Invalid packet');
+    if (data.isEmpty) {
+      throw Exception('Empty data');
     }
 
     var offset = 0;
 
-    final userIdBytes = data.sublist(offset, _userIdLength);
-    final senderUserId = utf8.decode(userIdBytes);
-    offset += _userIdLength;
+    final userIdLength = data[offset];
+    offset += 1;
 
-    final type = data[offset];
+    if (data.length < offset + userIdLength + 1 + _lengthFieldBytes) {
+      throw Exception('Packet too short for header');
+    }
+
+    final userIdBytes = data.sublist(offset, offset + userIdLength);
+    final senderUserId = utf8.decode(userIdBytes);
+    offset += userIdLength;
+
+    final typeValue = data[offset];
     offset += 1;
 
     final lengthView = ByteData.sublistView(
@@ -62,15 +70,17 @@ class Protocol {
     final payloadLength = lengthView.getUint32(0);
     offset += _lengthFieldBytes;
 
-    if (data.length < minimumLength + payloadLength) {
-      throw Exception('Incomplete packet payload');
+    if (data.length < offset + payloadLength) {
+      throw Exception(
+        'Incomplete packet payload: expected $payloadLength more bytes',
+      );
     }
 
     final payload = data.sublist(offset, offset + payloadLength);
 
     return Packet(
       senderUserId: senderUserId,
-      messageType: MessageType.fromValue(type),
+      messageType: MessageType.fromValue(typeValue),
       payload: payload,
     );
   }

@@ -11,6 +11,9 @@ abstract class ChatRepository {
   /// Stream of all incoming messages across all chat sessions.
   Stream<Message> get messages;
 
+  /// Full history of messages in current session.
+  List<Message> get messageHistory;
+
   /// Sends a text message to the peer identified by their user id.
   void sendText(String peerUserId, String text);
 

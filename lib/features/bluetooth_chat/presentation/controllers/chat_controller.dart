@@ -3,29 +3,38 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/message.dart';
-import '../../domain/repositories/chat_repository.dart';
-import 'providers.dart';
+import 'chat_providers.dart';
 
 /// Presentation-layer controller that exposes a flat list of all messages
 /// across active chat sessions. UI widgets are responsible for filtering
 /// by `chatId` where needed.
 class ChatController extends Notifier<List<Message>> {
-  late final ChatRepository _repo;
-
   @override
   List<Message> build() {
-    _repo = ref.read(chatRepository);
-    _repo.messages.listen((msg) {
-      state = [...state, msg];
+    final repo = ref.watch(chatRepository);
+
+    // Initial history
+    final history = repo.messageHistory;
+    final seenIds = <String>{for (final m in history) m.id};
+
+    final sub = repo.messages.listen((msg) {
+      if (!seenIds.contains(msg.id)) {
+        seenIds.add(msg.id);
+        // We use state = ... to trigger UI rebuild
+        state = [...state, msg];
+      }
     });
-    return [];
+
+    ref.onDispose(sub.cancel);
+
+    return history;
   }
 
   void sendText({required String peerId, required String text}) {
-    _repo.sendText(peerId, text);
+    ref.read(chatRepository).sendText(peerId, text);
   }
 
   void sendImage({required String peerId, required Uint8List bytes}) {
-    _repo.sendImage(peerId, bytes);
+    ref.read(chatRepository).sendImage(peerId, bytes);
   }
 }
