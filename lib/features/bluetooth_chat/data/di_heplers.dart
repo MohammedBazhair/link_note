@@ -1,18 +1,21 @@
+import 'package:bluetooth_enable_fork/bluetooth_enable_fork.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:location/location.dart' as loc;
 import 'package:permission_handler/permission_handler.dart';
 
-Future<void> ensureLocationReady() async {
+Future<bool> ensureBluetoothEnabled() async {
+  final enabled =await BluetoothEnable.enableBluetooth;
+
+  return enabled=='true';
+}
+
+Future<bool> ensureLocationEnabled() async {
   final location = loc.Location();
 
   bool enabled = await location.serviceEnabled();
-  if (!enabled)   enabled = await location.requestService();
-  
+  if (!enabled) enabled = await location.requestService();
 
-  final permission = await location.hasPermission();
-  if (permission == loc.PermissionStatus.denied) {
-    await location.requestPermission();
-  }
+  return enabled;
 }
 
 Future<bool> requestNearbyPermissions() async {
@@ -33,8 +36,13 @@ Future<bool> requestNearbyPermissions() async {
   }
 
   final statuses = await permissions.request();
-  await ensureLocationReady();
+
+  final location = loc.Location();
+
+  final locationPermission = await location.requestPermission();
+  final isLocationGranted = locationPermission == loc.PermissionStatus.granted;
   final allGranted = statuses.values.every((s) => s.isGranted);
-  if (!allGranted) await openAppSettings();
-  return allGranted;
+  if (!allGranted || !isLocationGranted) await openAppSettings();
+
+  return allGranted && isLocationGranted;
 }

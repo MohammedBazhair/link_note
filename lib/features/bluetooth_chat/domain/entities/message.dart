@@ -81,4 +81,9 @@ class Message {
   final String? text;
   final String? imagePath;
   final DateTime time;
+
+  @override
+  String toString() {
+    return 'Message(id: $id, chatId: $chatId, senderUserId: $senderUserId, type: $type, text: $text, imagePath: $imagePath, time: $time)';
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/message.dart';
+import 'build_message_content.dart';
 
 class MessageList extends StatelessWidget {
   const MessageList({
@@ -48,37 +49,3 @@ class MessageList extends StatelessWidget {
   }
 }
 
-class MessageContnetWidget extends StatelessWidget {
-  const MessageContnetWidget({
-    super.key,
-    required this.message,
-    required this.isMe,
-  });
-  final Message message;
-  final bool isMe;
-  @override
-  Widget build(BuildContext context) {
-    switch (message.type) {
-      case MessageType.handshake:
-        return MessageText(text: '👋', isMe: isMe);
-      case MessageType.text:
-        return MessageText(text: message.text ?? '🙂', isMe: isMe);
-      case MessageType.image:
-        return MessageText(text: message.text ?? '📷 صورة', isMe: isMe);
-    }
-  }
-}
-
-class MessageText extends StatelessWidget {
-  const MessageText({super.key, required this.text, required this.isMe});
-  final String text;
-  final bool isMe;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(color: isMe ? Colors.white : Colors.black),
-    );
-  }
-}

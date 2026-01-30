@@ -3,10 +3,12 @@ import 'package:nearby_connections/nearby_connections.dart';
 
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../data/datasource/nearby_service.dart';
+import '../../data/models/nearby_identity_model.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/message.dart';
 import 'chat_controller.dart';
+import 'nearby_discovery_controller.dart';
 
 final chatControllerProvider = NotifierProvider<ChatController, List<Message>>(
   () {
@@ -34,21 +36,30 @@ final nearbyProvider = Provider<Nearby>((ref) {
   return raw;
 });
 
-final connectionManagerProvider = Provider<NearbyConnectionManager>((ref) {
-  final adapter = ref.watch(nearbyProvider);
-  final displayName = ref.watch(nearbyDisplayNameProvider);
-  final userRepo = ref.watch(userRepositoryProvider);
-  final currentUser = userRepo.currentUser;
+final connectionManagerProvider = Provider.autoDispose<NearbyConnectionManager>(
+  (ref) {
+    final adapter = ref.watch(nearbyProvider);
+    final displayName = ref.watch(nearbyDisplayNameProvider);
+    final userRepo = ref.watch(userRepositoryProvider);
+    final currentUser = userRepo.currentUser;
 
-  // We encode identity as "UUID|DisplayName" to ensure stable chat filtering
-  // while still showing a human-readable name in discovery.
-  final identity = '${currentUser?.id ?? 'unknown'}|$displayName';
+    // We encode identity as JSON to ensure stable data handling
+    final identity = NearbyIdentityModel(
+      uuid: currentUser?.id ?? 'unknown',
+      displayName: displayName,
+    );
 
-  final manager = NearbyConnectionManager(adapter, identity);
+    final manager = NearbyConnectionManager(adapter, identity);
 
-  ref.onDispose(manager.dispose);
-  return manager;
-});
+    ref.onDispose(manager.dispose);
+    return manager;
+  },
+);
+
+final nearbyDiscoveryControllerProvider =
+    NotifierProvider.autoDispose<NearbyDiscoveryController, void>(() {
+      return NearbyDiscoveryController();
+    });
 
 final nearbyEndpointsProvider = StreamProvider<Map<String, String>>((ref) {
   final manager = ref.watch(connectionManagerProvider);
@@ -71,10 +82,13 @@ final chatRepository = Provider((ref) {
 
   final sessionManager = ref.read(chatSessionManagerProvider);
 
+  final displayName = ref.watch(nearbyDisplayNameProvider);
+
   final repo = ChatRepositoryImpl(
     connectionManager,
     sessionManager,
     myUserId: currentUser.id,
+    myDisplayName: displayName,
   );
   ref.onDispose(repo.dispose);
 

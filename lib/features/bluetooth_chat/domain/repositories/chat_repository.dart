@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import '../entities/message.dart';
 
@@ -15,10 +14,10 @@ abstract class ChatRepository {
   List<Message> get messageHistory;
 
   /// Sends a text message to the peer identified by their user id.
-  void sendText(String peerUserId, String text);
+  void sendText({required String peerUserId, required String text});
 
   /// Sends an image payload to the peer identified by their user id.
-  void sendImage(String peerUserId, Uint8List bytes);
+  void sendImage({required String peerUserId, required String filePath});
 
   /// Disposes any resources held by the repository.
   void dispose();

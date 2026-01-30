@@ -89,6 +89,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  bluetooth_enable_fork:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "7eeaa427cc913f9a28b0be20fc704b56ce14ebfd"
+      resolved-ref: "7eeaa427cc913f9a28b0be20fc704b56ce14ebfd"
+      url: "https://github.com/MohammedBazhair/bluetooth_enable_fork.git"
+    source: git
+    version: "0.1.9"
   boolean_selector:
     dependency: transitive
     description:

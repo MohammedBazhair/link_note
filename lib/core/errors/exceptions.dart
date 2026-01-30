@@ -12,6 +12,10 @@ class UserNotLoggedInException extends AppException {
   const UserNotLoggedInException(super.message);
 }
 
+class AuthAppException extends AppException {
+  const AuthAppException(super.message);
+}
+
 class CreditsZeroException extends AppException {
   const CreditsZeroException(super.message);
 }

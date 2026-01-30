@@ -11,6 +11,10 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  bluetooth_enable_fork:
+    git:
+      url: https://github.com/MohammedBazhair/bluetooth_enable_fork.git
+      ref: 7eeaa427cc913f9a28b0be20fc704b56ce14ebfd
   mobile_scanner: ^7.1.2
   path: ^1.9.1
   pretty_qr_code: ^3.5.0

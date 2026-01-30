@@ -13,6 +13,7 @@ Future<void> initializeApp() async {
   await registerAppProtocol();
   await initializeSupabase();
   await initializePushNotifications();
+  await storagePermission();
 }
 
 Future<void> initializePushNotifications() async {
@@ -44,4 +45,9 @@ Future<void> initializeSupabase() async {
   );
 }
 
-
+Future<void> storagePermission() async {
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    return;
+  }
+  await Permission.storage.request();
+}

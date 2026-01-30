@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/domain/entities/user.dart';
@@ -25,12 +25,12 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> loginWithUri(Uri uri) async {
     try {
       final result = await _auth.signInWithUrl(uri);
-      if (result.hasError) throw Exception(result.errorMessage);
+      if (result.hasError) throw AuthAppException(result.errorMessage!);
 
       state = const AuthSuccessfullState();
-    } catch (e) {
-      debugPrint(e.toString());
-      state = AuthFailedState(e.toString());
+    } on AuthAppException catch  (e) {
+      Logger.log(error: e.message);
+      state = AuthFailedState(e.message);
     }
   }
 
@@ -56,8 +56,7 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       await _auth.signOut();
     } catch (e) {
-      debugPrint(e.toString());
-      _handleState(e.toString());
+      _handleState('حدث خطأ في الخروج حاول مرة أخرى');
     }
   }
 

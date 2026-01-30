@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 
+import '../../../image/presentation/controllers/image_providers.dart';
 import '../controllers/chat_providers.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/message_list.dart';
@@ -23,13 +23,12 @@ class ChatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(chatControllerProvider);
     final manager = ref.watch(connectionManagerProvider);
-    final endpointId = manager.getEndpointIdByUserName(peerId);
-    final displayName = endpointId != null
-        ? manager.getDisplayName(endpointId)
-        : '';
+    final displayName = manager.getDisplayNameByUuid(peerId);
 
     return Scaffold(
-      appBar: AppBar(title: Text(displayName.isEmpty ? 'دردشة' : displayName)),
+      appBar: AppBar(
+        title: Text(displayName == peerId ? 'دردشة' : displayName),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Column(
@@ -48,15 +47,13 @@ class ChatScreen extends ConsumerWidget {
                     .sendText(peerId: peerId, text: text);
               },
               onPickImage: () async {
-                final picker = ImagePicker();
-                final file = await picker.pickImage(
-                  source: ImageSource.gallery,
-                );
-                if (file == null) return;
-                final bytes = await file.readAsBytes();
+                final imagePath = await ref
+                    .read(imagePickerControllerProvider.notifier)
+                    .pickImage();
+                if (imagePath == null) return;
                 ref
                     .read(chatControllerProvider.notifier)
-                    .sendImage(peerId: peerId, bytes: bytes);
+                    .sendImage(peerId: peerId, filePath: imagePath);
               },
             ),
           ],

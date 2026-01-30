@@ -5,6 +5,7 @@ import '../../../../core/extensions/extensions.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
 import '../controllers/chat_providers.dart';
+import '../widgets/user_avatar_with_status.dart';
 import 'chat_screen.dart';
 import 'nearby_devices_screen.dart';
 
@@ -45,6 +46,7 @@ class ChatListScreen extends ConsumerWidget {
         )
         .toSet()
         .toList();
+    final manager = ref.watch(connectionManagerProvider);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
@@ -57,10 +59,12 @@ class ChatListScreen extends ConsumerWidget {
               itemCount: chatUserIds.length,
               itemBuilder: (context, index) {
                 final peerUserId = chatUserIds[index];
+                final username = manager.getDisplayNameByUuid(peerUserId);
+                final isconnected = manager.isConnected(peerUserId);
                 return ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.person)),
-                  title: Text('User: $peerUserId'),
-                  subtitle: const Text('Tap to chat'),
+                  leading: UserAvatarWithStatus(connected: isconnected),
+                  title: Text(username),
+                  subtitle: Text(isconnected ? 'متصل' : 'غير متصل'),
                   onTap: () {
                     context.pushTo(
                       ChatScreen(

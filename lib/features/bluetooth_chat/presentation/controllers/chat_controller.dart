@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,10 +30,10 @@ class ChatController extends Notifier<List<Message>> {
   }
 
   void sendText({required String peerId, required String text}) {
-    ref.read(chatRepository).sendText(peerId, text);
+    ref.read(chatRepository).sendText(peerUserId:  peerId,text: text);
   }
 
-  void sendImage({required String peerId, required Uint8List bytes}) {
-    ref.read(chatRepository).sendImage(peerId, bytes);
+  void sendImage({required String peerId, required String filePath}) {
+    ref.read(chatRepository).sendImage(peerUserId: peerId,filePath: filePath);
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +17,9 @@ class ChatRepositoryImpl implements ChatRepository {
     this._connectionManager,
     this._sessionManager, {
     required String myUserId,
-  }) : _myUserId = myUserId {
+    required String myDisplayName,
+  }) : _myUserId = myUserId,
+       _myDisplayName = myDisplayName {
     _incomingSub = _connectionManager.incoming.listen(_handleIncoming);
     _connectedSub = _connectionManager.connectedStream.listen(
       _handleConnectedChange,
@@ -35,11 +38,14 @@ class ChatRepositoryImpl implements ChatRepository {
   final NearbyConnectionManager _connectionManager;
   final ChatSessionManager _sessionManager;
   final String _myUserId;
+  final String _myDisplayName;
   final _controller = StreamController<Message>.broadcast();
   final List<Message> _history = [];
   late final StreamSubscription<IncomingFrame> _incomingSub;
   late final StreamSubscription<Set<String>> _connectedSub;
   final Set<String> _handshakedEndpoints = {};
+  final Map<int, String> _pendingImageSenders = {}; // payloadId -> senderUserId
+  final Map<int, String> _completedFilePaths = {}; // payloadId -> filePath
 
   void _handleConnectedChange(Set<String> connectedIds) {
     for (final id in connectedIds) {
@@ -67,15 +73,31 @@ class ChatRepositoryImpl implements ChatRepository {
     final packet = Protocol.buildPacket(
       senderUserId: _myUserId,
       type: MessageType.handshake,
-      payload: Uint8List(0),
+      payload: Uint8List.fromList(utf8.encode(_myDisplayName)),
     );
     _connectionManager.sendBytes(endpointId, packet);
   }
 
   void _handleIncoming(IncomingFrame frame) {
     Logger.log(message: 'Incoming frame from ${frame.peerEndpointId}');
+
+    // 1. Handle file payload (image data completion)
+    if (frame.payloadId != null && frame.filePath != null) {
+      final payloadId = frame.payloadId!;
+      _completedFilePaths[payloadId] = frame.filePath!;
+
+      final senderId = _pendingImageSenders[payloadId];
+      if (senderId != null) {
+        _checkAndEmitImage(payloadId, senderId);
+      }
+      return;
+    }
+
+    // 2. If no bytes, we can't parse a protocol packet
+    if (frame.bytes == null) return;
+
     try {
-      final packet = Protocol.parsePacket(frame.bytes);
+      final packet = Protocol.parsePacket(frame.bytes!);
       Logger.log(
         message:
             'Parsed packet: type=${packet.messageType}, sender=${packet.senderUserId}',
@@ -89,9 +111,35 @@ class ChatRepositoryImpl implements ChatRepository {
       );
       _sessionManager.addSession(session);
 
-      if (packet.messageType == MessageType.handshake) {
-        Logger.log(message: 'Handshake successful from ${packet.senderUserId}');
-        return;
+      switch (packet.messageType) {
+        case MessageType.handshake:
+          final peerName = utf8.decode(packet.payload);
+          Logger.log(
+            message:
+                'Handshake successful from ${packet.senderUserId} (Name: $peerName)',
+          );
+          if (peerName.isNotEmpty) {
+            _connectionManager.updateUuidMapping(
+              uuid: packet.senderUserId,
+              name: peerName,
+            );
+          }
+          return;
+
+        case MessageType.image:
+          final payloadId = int.tryParse(utf8.decode(packet.payload));
+          if (payloadId == null) return;
+
+          Logger.log(
+            message:
+                'Received image metadata for payload $payloadId from ${packet.senderUserId}',
+          );
+          _pendingImageSenders[payloadId] = packet.senderUserId;
+          _checkAndEmitImage(payloadId, packet.senderUserId);
+          return;
+
+        case MessageType.text:
+          break;
       }
 
       final message = Message.fromPacket(
@@ -110,6 +158,46 @@ class ChatRepositoryImpl implements ChatRepository {
     } catch (e, st) {
       Logger.log(error: 'Error in _handleIncoming: $e', stackTrace: st);
     }
+  }
+
+  void _checkAndEmitImage(int payloadId, String senderUserId) {
+    final rawPath = _completedFilePaths[payloadId];
+    if (rawPath == null) return;
+
+    final pathWithExtension = '$rawPath.png';
+
+    try {
+      // Actually rename the file on disk so Image.file can find it
+      final file = File(rawPath);
+      if (file.existsSync()) {
+        file.renameSync(pathWithExtension);
+        Logger.log(message: 'File renamed to: $pathWithExtension');
+      } else {
+        Logger.log(error: 'Source file does not exist: $rawPath');
+        return;
+      }
+    } catch (e) {
+      Logger.log(error: 'Failed to rename received file: $e');
+      // If rename fails, we'll keep the rawPath as a fallback in our logic
+      // but the UI might fail if it expects pathWithExtension.
+      // For now, let's just return if we can't ensure the file exists at the expected path.
+      return;
+    }
+
+    Logger.log(message: 'Image fully received for payload $payloadId');
+    final message = Message(
+      id: const Uuid().v4(),
+      senderUserId: senderUserId,
+      type: MessageType.image,
+      imagePath: pathWithExtension,
+      time: DateTime.now().toUtc(),
+      chatId: Message.buildChatId(_myUserId, senderUserId),
+    );
+    _history.add(message);
+    _controller.add(message);
+
+    _pendingImageSenders.remove(payloadId);
+    _completedFilePaths.remove(payloadId);
   }
 
   /// Resolves a peer's Bluetooth address from their logical user id.
@@ -143,7 +231,7 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  void sendText(String peerUserId, String text) {
+  void sendText({required String peerUserId, required String text}) {
     Logger.log(message: 'sendText called. peerUserId: $peerUserId');
     final session = _resolveSession(peerUserId);
     if (session == null) {
@@ -174,33 +262,44 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  void sendImage(String peerUserId, Uint8List bytes) {
+  Future<void> sendImage({
+    required String peerUserId,
+    required String filePath,
+  }) async {
     final session = _resolveSession(peerUserId);
+
     if (session == null) {
       Logger.log(error: 'No active session for peer $peerUserId');
       return;
     }
 
-    final packet = Protocol.buildPacket(
-      senderUserId: _myUserId,
-      type: MessageType.image,
-      payload: bytes,
+    final payloadId = await _connectionManager.sendFileBytes(
+      endpointId: session.peerAddress,
+      filePath: filePath,
     );
 
-    _connectionManager.sendBytes(session.peerAddress, packet);
+    if (payloadId == null) {
+      Logger.log(error: 'Failed to start file transfer');
+      return;
+    }
 
-    // Add to local stream so it shows in UI
+    Logger.log(message: 'File transfer started: $payloadId. Sending metadata.');
+    final metadataPacket = Protocol.buildPacket(
+      senderUserId: _myUserId,
+      type: MessageType.image,
+      payload: Uint8List.fromList(utf8.encode(payloadId.toString())),
+    );
+    await _connectionManager.sendBytes(session.peerAddress, metadataPacket);
+
+    // Add to local stream immediately for feedback
     final message = Message(
       id: const Uuid().v4(),
       senderUserId: _myUserId,
       type: MessageType.image,
-      imagePath: 'sent_image_${DateTime.now().millisecondsSinceEpoch}.png',
+      imagePath: filePath,
       time: DateTime.now().toUtc(),
       chatId: Message.buildChatId(_myUserId, peerUserId),
     );
-    // Actually, we should probably save the bytes to a file if we want to display it properly,
-    // but for now let's just add it to the stream.
-    // The UI might need the imagePath to exist.
     _history.add(message);
     _controller.add(message);
   }

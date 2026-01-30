@@ -32,20 +32,20 @@ class _ChatInputState extends State<ChatInput> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      spacing: 8,
+      spacing: 2,
       children: [
         FilledIconButton(onPressed: send, iconData: Icons.send),
-    
+        IconButton(
+          onPressed: () => widget.onPickImage.call(),
+          icon: const Icon(Icons.image_outlined, color: Colors.white),
+          tooltip: 'إرسال صورة',
+        ),
         Expanded(
           child: TextField(
             controller: controller,
             decoration: const InputDecoration(hintText: 'اكتب رسالة...'),
+            style: const TextStyle(fontSize: 13),
           ),
-        ),
-        IconButton(
-          onPressed: () => widget.onPickImage.call(),
-          icon: const Icon(Icons.image_outlined),
-          tooltip: 'إرسال صورة',
         ),
       ],
     );

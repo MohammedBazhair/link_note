@@ -7,7 +7,8 @@ import 'package:nearby_connections/nearby_connections.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../data/permissions.dart';
+import '../../data/datasource/nearby_service.dart';
+import '../../data/models/nearby_identity_model.dart';
 import '../../domain/entities/chat_session.dart';
 import '../controllers/chat_providers.dart';
 import '../widgets/user_avatar_with_status.dart';
@@ -42,23 +43,19 @@ class _NearbyDevicesScreenState extends ConsumerState<NearbyDevicesScreen> {
     setState(() {
       _loading = true;
     });
-    final ok = await requestNearbyPermissions();
-    if (!ok) {
+    final result = await NearbyConnectionManager.runDependencies();
+    if (result.hasError) {
       setState(() {
-        _error = 'الصلاحيات غير كافية لتشغيل الشات القريب.';
+        _error = result.errorMessage;
         _loading = false;
       });
       return;
     }
 
-    final manager = ref.read(connectionManagerProvider);
-
     try {
-      await manager.startAdvertising(
-        strategy: _strategy,
-        serviceId: _serviceId,
-      );
-      await manager.startDiscovery(strategy: _strategy, serviceId: _serviceId);
+      await ref
+          .read(nearbyDiscoveryControllerProvider.notifier)
+          .beginNearbyCommunication(strategy: _strategy, serviceId: _serviceId);
     } catch (e) {
       if (!mounted) return;
       Logger.log(error: e);
@@ -76,16 +73,12 @@ class _NearbyDevicesScreenState extends ConsumerState<NearbyDevicesScreen> {
       _error = null;
     });
 
-    final manager = ref.read(connectionManagerProvider);
     try {
-      await manager.restartAdvertising(
-        strategy: _strategy,
-        serviceId: _serviceId,
-      );
-      await manager.restartDiscovery(
-        strategy: _strategy,
-        serviceId: _serviceId,
-      );
+     await ref.read(nearbyDiscoveryControllerProvider.notifier).restartNearbyCommunication(
+      strategy: _strategy,
+      serviceId: _serviceId,
+     );
+  
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -98,6 +91,13 @@ class _NearbyDevicesScreenState extends ConsumerState<NearbyDevicesScreen> {
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    ref.read(nearbyDiscoveryControllerProvider.notifier).stopAll();
+
+    super.deactivate();
   }
 
   @override
@@ -189,10 +189,12 @@ class _NearbyDevicesScreenState extends ConsumerState<NearbyDevicesScreen> {
                             final endpointId = endpoints.keys.elementAt(index);
                             final rawName = endpoints[endpointId] ?? endpointId;
 
-                            // Identity is "UUID|DisplayName"
-                            final parts = rawName.split('|');
-                            final peerUuid = parts[0];
-                            final name = parts.length > 1 ? parts[1] : peerUuid;
+                            // Identity is JSON
+                            final identityModel = NearbyIdentityModel.fromJson(
+                              rawName,
+                            );
+                            final peerUuid = identityModel.uuid;
+                            final name = identityModel.displayName;
 
                             final isIdentified = name != endpointId;
                             final connected =
