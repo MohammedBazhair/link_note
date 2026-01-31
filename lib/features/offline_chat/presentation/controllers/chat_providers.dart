@@ -9,6 +9,7 @@ import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/message.dart';
 import 'chat_controller.dart';
 import 'nearby_discovery_controller.dart';
+import 'nearby_state.dart';
 
 final chatControllerProvider = NotifierProvider<ChatController, List<Message>>(
   () {
@@ -57,7 +58,7 @@ final connectionManagerProvider = Provider.autoDispose<NearbyConnectionManager>(
 );
 
 final nearbyDiscoveryControllerProvider =
-    NotifierProvider.autoDispose<NearbyDiscoveryController, void>(() {
+    NotifierProvider<NearbyDiscoveryController, NearbyState>(() {
       return NearbyDiscoveryController();
     });
 

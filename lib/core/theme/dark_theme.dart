@@ -6,7 +6,7 @@ ThemeData darkTheme() => ThemeData(
   scaffoldBackgroundColor: const Color(0xFF151825),
   brightness: Brightness.dark,
   textTheme: ThemeData.dark().textTheme.apply(
-    bodyColor: const Color(0xFFA3EBF3),
+    bodyColor: const Color(0xFFC8F9FF),
     fontFamily: ExternalConsts.fontFamily,
   ),
   fontFamily: ExternalConsts.fontFamily,

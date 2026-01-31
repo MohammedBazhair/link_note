@@ -45,13 +45,7 @@ class NearbyConnectionManager {
   /// Helper to get all endpoints that we know about (discovered or connection info)
   Iterable<String> get discoveredEndpoints => _endpointNames.keys;
 
-  bool _advertising = false;
-  bool _discovering = false;
-
-  bool get isAdvertising => _advertising;
-  bool get isDiscovering => _discovering;
-
-  static Future<Result<bool>> runDependencies() async {
+   Future<Result<bool>> runDependencies() async {
     final isPermissionGranted = await requestNearbyPermissions();
 
     if (!isPermissionGranted) {
@@ -74,14 +68,12 @@ class NearbyConnectionManager {
   }
 
   /// Start advertising to allow others to discover and connect.
-  Future<void> startAdvertising({
+  Future<bool> startAdvertising({
     required Strategy strategy,
     required String serviceId,
   }) async {
-    if (_advertising) return;
-
     try {
-      _advertising = await _adapter.startAdvertising(
+      return await _adapter.startAdvertising(
         _currentIdentity.toJson(),
         strategy,
         // عندما يطلب جهاز الاتصال
@@ -104,14 +96,12 @@ class NearbyConnectionManager {
   }
 
   /// Start discovery to find nearby advertisers.
-  Future<void> startDiscovery({
+  Future<bool> startDiscovery({
     required Strategy strategy,
     required String serviceId,
   }) async {
-    if (_discovering) return;
-
     try {
-      _discovering = await _adapter.startDiscovery(
+      return await _adapter.startDiscovery(
         _currentIdentity.toJson(),
         strategy,
         onEndpointFound: (endpointId, endpointName, serviceIdFound) {
@@ -188,7 +178,7 @@ class NearbyConnectionManager {
           IncomingFrame(
             peerEndpointId: endpointId,
             payloadId: update.id,
-            filePath:   path,
+            filePath: path,
           ),
         );
         break;
@@ -228,9 +218,9 @@ class NearbyConnectionManager {
 
     try {
       // PRO TIP: On some devices, stopping discovery before connecting improves reliability.
-      if (_discovering) {
-        await stopDiscovery();
-      }
+      await stopDiscovery();
+      // Give the radio a moment to stabilize
+      await Future.delayed(const Duration(milliseconds: 500));
 
       await _adapter.requestConnection(
         _currentIdentity.toJson(),
@@ -339,7 +329,7 @@ class NearbyConnectionManager {
   }
 
   String getDisplayNameByUuid(String uuid) {
-    return _uuidToName[uuid] ?? uuid;
+    return _uuidToName[uuid] ?? 'دردشة';
   }
 
   void _onConnectionResult(String endpointId, Status status) {
@@ -367,23 +357,16 @@ class NearbyConnectionManager {
   }
 
   Future<void> stopAll() async {
-    if (_advertising) {
-      await _adapter.stopAdvertising();
-      _advertising = false;
-    }
-    if (_discovering) {
-      await stopDiscovery();
-    }
+    await _adapter.stopAdvertising();
+    await _adapter.stopDiscovery();
   }
 
   Future<void> stopAdvertising() async {
     await _adapter.stopAdvertising();
-    _advertising = false;
   }
 
   Future<void> stopDiscovery() async {
     await _adapter.stopDiscovery();
-    _discovering = false;
   }
 
   Future<void> disconnect(String endpointId) async {

@@ -38,3 +38,7 @@ class InternetException extends AppException {
         'حدث خطأ في الاتصال، تأكد من اتصالك بالانترنت وأعد المحاولة لاحقا',
   ]);
 }
+
+class AlreadyRunnedException extends AppException {
+  const AlreadyRunnedException(super.message);
+}

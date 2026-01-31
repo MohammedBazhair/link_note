@@ -71,13 +71,17 @@ class NetworkAvatar extends ConsumerWidget {
 }
 
 class PlaceholderAvatar extends StatelessWidget {
-  const PlaceholderAvatar({super.key});
-
+  const PlaceholderAvatar({super.key, this.radius});
+  final double? radius;
   @override
   Widget build(BuildContext context) {
-    return const CircleAvatar(
-      radius: 40,
-      backgroundImage: AssetImage(Assets.imagesBlankProfile),
+    return ClipOval(
+      child: CircleAvatar(
+        backgroundColor: Colors.white,
+        backgroundImage: const AssetImage(Assets.imagesBlankProfile),
+        radius: radius ?? 40,
+        
+      ),
     );
   }
 }

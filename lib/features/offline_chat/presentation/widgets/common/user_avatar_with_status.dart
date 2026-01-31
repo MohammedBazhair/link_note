@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../../user/presentation/widgets/user_avatar.dart';
+import '../../../../user/presentation/widgets/user_avatar.dart';
 
 class UserAvatarWithStatus extends StatelessWidget {
-  const UserAvatarWithStatus({super.key, required this.connected});
+  const UserAvatarWithStatus({super.key, required this.connected,  this.radius});
 
   final bool connected;
+  final double ?radius;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        const PlaceholderAvatar(),
+        PlaceholderAvatar(radius: radius,),
 
         if (connected)
           const Positioned(

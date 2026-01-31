@@ -1,0 +1,42 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../controllers/chat_providers.dart';
+import '../widgets/chat/chat_appbar.dart';
+import '../widgets/chat/chat_input.dart';
+import '../widgets/chat/message_list.dart';
+
+class ChatScreen extends ConsumerWidget {
+  const ChatScreen({
+    super.key,
+    required this.peerId,
+    required this.myId,
+  });
+
+  final String peerId;
+
+  final String myId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final messages = ref.watch(chatControllerProvider);
+    final manager = ref.watch(connectionManagerProvider);
+    final displayName = manager.getDisplayNameByUuid(peerId);
+
+    final chatAppbarParams = ChatAppbarParams(
+      personName: displayName,
+      isConnected: manager.isConnected(peerId),
+    );
+    return Scaffold(
+      body: Column(
+        children: [
+          SafeArea(child: ChatAppbar(chatAppbarParams)),
+          Expanded(
+            child: MessageList(messages: messages, myId: myId, peerId: peerId),
+          ),
+          ChatInput(peerId: peerId),
+        ],
+      ),
+    );
+  }
+}

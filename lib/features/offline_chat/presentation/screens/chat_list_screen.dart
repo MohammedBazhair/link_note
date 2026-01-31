@@ -5,7 +5,7 @@ import '../../../../core/extensions/extensions.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
 import '../controllers/chat_providers.dart';
-import '../widgets/user_avatar_with_status.dart';
+import '../widgets/common/user_avatar_with_status.dart';
 import 'chat_screen.dart';
 import 'nearby_devices_screen.dart';
 
@@ -15,26 +15,8 @@ class ChatListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myUserId = ref.read(getUserIdProvider);
-    if (myUserId == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('الدردشات')),
-        body: Column(
-          spacing: 10,
-          children: [
-            const Text(
-              'يجب أن تكون مسجل الدخول حتى تستطيع الدردشة',
-              textAlign: TextAlign.center,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                context.pushTo(const SignInScreen());
-              },
-              child: const Text('تسجيل الدخول'),
-            ),
-          ],
-        ),
-      );
-    }
+    if (myUserId == null) return const SignInRequiredWidget();
+
     final messages = ref.watch(chatControllerProvider);
 
     // قائمة جميع المستخدمين الذين تراسلناهم
@@ -50,7 +32,7 @@ class ChatListScreen extends ConsumerWidget {
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      appBar: AppBar(title: const Text('Chats')),
+      appBar: AppBar(title: const Text('الدردشات')),
       body: chatUserIds.isEmpty
           ? const Center(
               child: Text('لا يوجد لديك دردشات بعد. اضغط + لبدء الدردشة'),
@@ -58,21 +40,15 @@ class ChatListScreen extends ConsumerWidget {
           : ListView.builder(
               itemCount: chatUserIds.length,
               itemBuilder: (context, index) {
-                final peerUserId = chatUserIds[index];
-                final username = manager.getDisplayNameByUuid(peerUserId);
-                final isconnected = manager.isConnected(peerUserId);
+                final peerId = chatUserIds[index];
+                final username = manager.getDisplayNameByUuid(peerId);
+                final isconnected = manager.isConnected(peerId);
                 return ListTile(
                   leading: UserAvatarWithStatus(connected: isconnected),
                   title: Text(username),
                   subtitle: Text(isconnected ? 'متصل' : 'غير متصل'),
                   onTap: () {
-                    context.pushTo(
-                      ChatScreen(
-                        myId: myUserId,
-                        peerUserId: peerUserId,
-                        peerId: peerUserId,
-                      ),
-                    );
+                    context.pushTo(ChatScreen(myId: myUserId, peerId: peerId));
                   },
                 );
               },
@@ -82,7 +58,7 @@ class ChatListScreen extends ConsumerWidget {
         shape: const CircleBorder(),
         child: const Icon(Icons.person_add),
         onPressed: () {
-          context.pushTo(NearbyDevicesScreen(myUserId: myUserId));
+          context.pushTo(const NearbyDevicesScreen());
         },
       ),
     );
@@ -92,5 +68,35 @@ class ChatListScreen extends ConsumerWidget {
     final parts = chatId.split('_');
     if (parts.length != 2) return chatId;
     return parts[0] == myUserId ? parts[1] : parts[0];
+  }
+}
+
+class SignInRequiredWidget extends StatelessWidget {
+  const SignInRequiredWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('الدردشات')),
+      body: Center(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(24),
+          children: [
+            const Text(
+              'يجب أن تكون مسجل الدخول حتى تستطيع الدردشة',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                context.pushTo(const SignInScreen());
+              },
+              child: const Text('تسجيل الدخول'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

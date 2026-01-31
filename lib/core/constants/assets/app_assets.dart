@@ -15,4 +15,5 @@ class Assets {
 
   static const String imagesBlankProfile = "assets/images/blank_profile.png";
   static const String imagesBackground = "assets/images/background.jpg";
+  static const String soundsBell = "sounds/bell.mp3";
 }

@@ -48,3 +48,15 @@ extension QrDataMinpulation on String {
     return bytes.length <= ExternalConsts.qrSafeLimitBytes;
   }
 }
+
+extension DateTimeFormats on DateTime {
+  String get formatedChatTime {
+    final localDate = toLocal();
+
+    final hour = localDate.hour;
+    final minute = localDate.minute;
+    final ampm = hour >= 12 ? 'PM' : 'AM';
+    final hourFormatted = hour > 12 ? hour - 12 : hour;
+    return '$hourFormatted:$minute $ampm';
+  }
+}
