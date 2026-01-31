@@ -23,6 +23,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
         .sendText(peerId: widget.peerId, text: text);
 
     controller.clear();
+    FocusScope.of(context).unfocus();
   }
 
   Future<void> pickImage() async {

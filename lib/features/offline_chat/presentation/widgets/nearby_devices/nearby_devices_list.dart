@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/colors/colors.dart';
 import '../../../data/models/nearby_identity_model.dart';
 import '../../controllers/chat_providers.dart';
 import 'nearby_device_card.dart';
@@ -11,7 +12,6 @@ class NearbyDevicesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(nearbyEndpointsProvider, (_, state) {});
     final endpointsAsync = ref.watch(nearbyEndpointsProvider);
 
     final isDiscovering = ref
@@ -23,7 +23,17 @@ class NearbyDevicesList extends ConsumerWidget {
 
     return endpointsAsync.when(
       loading: () => const SliverFillRemaining(
-        child: Center(child: CircularProgressIndicator()),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 12,
+          children: [
+            CircularProgressIndicator(),
+            Text(
+              'جاري البحث عن الأجهزة القريبة...',
+              style: TextStyle(color: DarkColors.secondFont, fontSize: 11),
+            ),
+          ],
+        ),
       ),
       error: (err, _) =>
           SliverFillRemaining(child: Center(child: Text('خطأ: $err'))),
@@ -45,8 +55,7 @@ class _DevicesListWidget extends StatelessWidget {
     }
 
     return SliverPadding(
-        padding: const EdgeInsets.all(24),
-
+      padding: const EdgeInsets.all(24),
 
       sliver: SliverList.separated(
         itemCount: endpoints.length,
@@ -54,9 +63,9 @@ class _DevicesListWidget extends StatelessWidget {
         itemBuilder: (context, index) {
           final endpointId = endpoints.keys.elementAt(index);
           final rawName = endpoints[endpointId] ?? endpointId;
-      
+
           final identityModel = NearbyIdentityModel.fromJson(rawName);
-      
+
           return NearbyDeviceCard(
             endpointId: endpointId,
             identity: identityModel,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/internal_constants/log.dart';
@@ -27,14 +28,14 @@ class MessageWidget extends StatelessWidget {
         painter: TailMessagePaint(isMe: isMe, color: backgroundColor),
 
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          padding: EdgeInsets.all(message.type == MessageType.image ? 5 : 12),
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadiusDirectional.only(
-              topStart: const Radius.circular(10),
-              topEnd: const Radius.circular(10),
-              bottomStart: isMe ? Radius.zero : const Radius.circular(10),
-              bottomEnd: !isMe ? Radius.zero : const Radius.circular(10),
+              topStart: const Radius.circular(13),
+              topEnd: const Radius.circular(13),
+              bottomStart: isMe ? Radius.zero : const Radius.circular(13),
+              bottomEnd: !isMe ? Radius.zero : const Radius.circular(13),
             ),
           ),
           child: MessageContnetWidget(message: message, isMe: isMe),
@@ -78,14 +79,40 @@ class MessageImage extends StatelessWidget {
     Logger.log(message: message.toString());
     return ConditionalBuilder(
       condition: message.imagePath != null,
-      builder: (_) =>
-          Image.file(File(message.imagePath!), width: 250),
+      builder: (_) => Container(
+        clipBehavior: Clip.antiAlias,
+        width: 250,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(7.5)),
+        child: Stack(
+          children: [
+            Image.file(File(message.imagePath!), width: 250),
+
+            PositionedDirectional(
+              bottom: 8,
+              end: 9,
+              child: Text(
+                message.time.formatedChatTime,
+                style: const TextStyle(
+                  shadows: [
+                    Shadow(blurRadius: 35, color: Color(0x993A3A3A)),
+                    Shadow(blurRadius: 1, color: Color(0xAB000000)),
+                  ],
+                  fontSize: 9,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       fallback: (_) => const Text('صورة'),
     );
   }
 }
 
-class MessageText extends StatelessWidget {
+class MessageText extends StatefulWidget {
   const MessageText({
     super.key,
     required this.text,
@@ -97,24 +124,74 @@ class MessageText extends StatelessWidget {
   final bool isMe;
 
   @override
+  State<MessageText> createState() => _MessageTextState();
+}
+
+class _MessageTextState extends State<MessageText> {
+  bool _isExpanded = false;
+  bool get isLongText => widget.text.length > 1000;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = !isLongText;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 7,
-      crossAxisAlignment: WrapCrossAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.end,
       alignment: WrapAlignment.end,
       children: [
-        Text(
-          text,
-          style: TextStyle(
-            color: isMe ? const Color(0xFFFFFFFF) : const Color(0xFFF1F0F4),
+        ConditionalBuilder(
+          condition: _isExpanded,
+          builder: (_) => Text(
+            widget.text,
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w500,
+              color: widget.isMe
+                  ? const Color(0xFFFFFFFF)
+                  : const Color(0xFFF1F0F4),
+            ),
+          ),
+          fallback: (_) => Text.rich(
+            TextSpan(
+              text: '${widget.text.substring(0, 1000)}...  ',
+
+              children: [
+                TextSpan(
+                  text: 'اقرأ المزيد',
+                  style: const TextStyle(
+                    fontSize: 11,
+
+                    fontWeight: FontWeight.bold,
+                    color: Colors.lightBlueAccent,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => setState(() => _isExpanded = true),
+                ),
+              ],
+            ),
+
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w500,
+              color: widget.isMe
+                  ? const Color(0xFFFFFFFF)
+                  : const Color(0xFFF1F0F4),
+            ),
           ),
         ),
+
         Text(
-          time.formatedChatTime,
+          widget.time.formatedChatTime,
           style: TextStyle(
             fontSize: 9,
-            color: Colors.grey.shade100.withOpacity(0.75),
+            color: Colors.white.withOpacity(0.8),
             letterSpacing: -0.3,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

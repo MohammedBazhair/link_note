@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/entities/message.dart';
 import '../controllers/chat_providers.dart';
 import '../widgets/chat/chat_appbar.dart';
 import '../widgets/chat/chat_input.dart';
@@ -32,7 +33,7 @@ class ChatScreen extends ConsumerWidget {
         children: [
           SafeArea(child: ChatAppbar(chatAppbarParams)),
           Expanded(
-            child: MessageList(messages: messages, myId: myId, peerId: peerId),
+            child: MessageList(messages: messages, chatId: Message.buildChatId(myId, peerId),),
           ),
           ChatInput(peerId: peerId),
         ],
