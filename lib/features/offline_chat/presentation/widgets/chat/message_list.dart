@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/message.dart';
-import '../../controllers/chat_providers.dart';
 import 'message_content.dart';
 
 class MessageList extends ConsumerStatefulWidget {
