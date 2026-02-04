@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/presentation/providers/core_providers.dart';
 
-final getAvatarFileProvider = FutureProvider.autoDispose.family<File, String>((
+final getAvatarFileProvider = FutureProvider.family<File, String>((
   ref,
   avatarUrl,
 ) {

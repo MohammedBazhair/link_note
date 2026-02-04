@@ -8,11 +8,7 @@ import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_list.dart';
 
 class ChatScreen extends ConsumerWidget {
-  const ChatScreen({
-    super.key,
-    required this.peerId,
-    required this.myId,
-  });
+  const ChatScreen({super.key, required this.peerId, required this.myId});
 
   final String peerId;
 
@@ -22,7 +18,7 @@ class ChatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(chatControllerProvider);
     final manager = ref.watch(connectionManagerProvider);
-    final displayName = manager.getDisplayNameByUuid(peerId);
+    final displayName = manager.getDisplayNameByUserId(peerId);
 
     final chatAppbarParams = ChatAppbarParams(
       personName: displayName,
@@ -33,7 +29,10 @@ class ChatScreen extends ConsumerWidget {
         children: [
           SafeArea(child: ChatAppbar(chatAppbarParams)),
           Expanded(
-            child: MessageList(messages: messages, chatId: Message.buildChatId(myId, peerId),),
+            child: MessageList(
+              messages: messages,
+              chatId: Message.buildChatId(myId, peerId),
+            ),
           ),
           ChatInput(peerId: peerId),
         ],

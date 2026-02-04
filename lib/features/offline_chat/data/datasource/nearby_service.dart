@@ -9,145 +9,260 @@ import '../di_heplers.dart';
 import '../models/incoming_frame.dart';
 import '../models/nearby_identity_model.dart';
 
-/// Manages Nearby advertising/discovery, connections, and payload I/O.
-class NearbyConnectionManager {
-  NearbyConnectionManager(this._adapter, this._currentIdentity);
+typedef IdentityMap = Map<String, NearbyIdentityModel>;
+
+/// Handles Nearby Connections (advertising, discovery, connections, payloads)
+class NearbyConnectionService {
+  NearbyConnectionService(this._adapter, this._localIdentity);
 
   final Nearby _adapter;
-  NearbyIdentityModel _currentIdentity;
+  NearbyIdentityModel _localIdentity;
 
-  void updateLocalUserName(String newName) {
-    _currentIdentity = _currentIdentity.copyWith(displayName: newName);
+  NearbyIdentityModel get localIdentity => _localIdentity;
+
+  final IdentityMap _endpoints = {};
+  final Set<String> _connectedEndpointIds = {};
+  final Map<int, String> _payloadPaths = {};
+
+  final _incomingStreamController = StreamController<IncomingFrame>.broadcast();
+  Stream<IncomingFrame> get incomingFrames => _incomingStreamController.stream;
+
+  final _discoveredStreamController = StreamController<IdentityMap>.broadcast();
+  Stream<IdentityMap> get discoveredEndpoints =>
+      _discoveredStreamController.stream;
+
+  final _connectedStreamController = StreamController<Set<String>>.broadcast();
+  Stream<Set<String>> get connectedEndpointsStream =>
+      _connectedStreamController.stream;
+
+  final _allKnownStreamController = StreamController<IdentityMap>.broadcast();
+  Stream<IdentityMap> get allKnownEndpoints => _allKnownStreamController.stream;
+
+  Iterable<String> get knownEndpointIds => _endpoints.keys;
+
+  void updateLocalName(String newName) {
+    _localIdentity = _localIdentity.copyWith(displayName: newName);
   }
 
-  final Map<String, NearbyIdentityModel> _endpointIdentities = {};
-  final Map<String, String> _uuidToName = {};
-  final Map<int, String> _payloadPaths = {};
-  final Set<String> _connectedEndpoints = {};
+  void updateAvatar(Uint8List avatarBytes) {
+    _localIdentity = _localIdentity.copyWith(avatarBytes: avatarBytes);
+  }
 
-  final StreamController<IncomingFrame> _incomingController =
-      StreamController<IncomingFrame>.broadcast();
-  Stream<IncomingFrame> get incoming => _incomingController.stream;
+  void updateUuidMapping({required String uuid, required String name}) {
+    for (final element in _endpoints.entries) {
+      if (element.value.uuid == uuid) {
+        _endpoints.update(
+          element.key,
+          (identity) => identity.copyWith(displayName: name),
+        );
+        return;
+      }
+    }
+  }
 
-  final StreamController<Map<String, NearbyIdentityModel>>
-  _discoveredController =
-      StreamController<Map<String, NearbyIdentityModel>>.broadcast();
-  Stream<Map<String, NearbyIdentityModel>> get discovered =>
-      _discoveredController.stream;
-
-  final StreamController<Set<String>> _connectedController =
-      StreamController<Set<String>>.broadcast();
-  Stream<Set<String>> get connectedStream => _connectedController.stream;
-
-  final StreamController<Map<String, NearbyIdentityModel>> _allKnownController =
-      StreamController<Map<String, NearbyIdentityModel>>.broadcast();
-  Stream<Map<String, NearbyIdentityModel>> get allKnownEndpoints =>
-      _allKnownController.stream;
-
-  /// Helper to get all endpoints that we know about (discovered or connection info)
-  Iterable<String> get discoveredEndpoints => _endpointIdentities.keys;
-
-  Future<Result<bool>> runDependencies() async {
-    final isPermissionGranted = await requestNearbyPermissions();
-
-    if (!isPermissionGranted) {
+  Future<Result<bool>> initializeDependencies() async {
+    if (!await requestNearbyPermissions()) {
       return Result.error('الصلاحيات غير كافية لتشغيل الشات القريب');
     }
 
-    final isLocationEnabled = await ensureLocationEnabled();
-
-    if (!isLocationEnabled) {
+    if (!await ensureLocationEnabled()) {
       return Result.error('يجب تفعيل الموقع لتشغيل الشات القريب');
     }
 
-    final isBluetoothEnabled = await ensureBluetoothEnabled();
-
-    if (!isBluetoothEnabled) {
+    if (!await ensureBluetoothEnabled()) {
       return Result.error('يجب تفعيل البلوتوث لتشغيل الشات القريب');
     }
 
     return Result.ok(true);
   }
 
-  /// Start advertising to allow others to discover and connect.
   Future<bool> startAdvertising({
     required Strategy strategy,
     required String serviceId,
-  }) async {
-    try {
-      return await _adapter.startAdvertising(
-        _currentIdentity.toJson(),
-        strategy,
-        // عندما يطلب جهاز الاتصال
-        onConnectionInitiated: (endpointId, connectionInfo) async {
-          final model = NearbyIdentityModel.fromJson(
-            connectionInfo.endpointName,
-          );
-          _endpointIdentities[endpointId] = model;
-          updateUuidFromIdentity(connectionInfo.endpointName);
-          _notifyKnown();
-          await acceptConnection(endpointId);
-        },
-        // نتيجة محاولة الاتصال (نجاح/رفض/فشل).
-        onConnectionResult: _onConnectionResult,
-        //  عند انتهاء الاتصال
-        onDisconnected: _onDisconnected,
-        serviceId: serviceId,
-      );
-    } catch (e) {
-      Logger.log(error: e);
-      rethrow;
-    }
+  }) {
+    return _adapter.startAdvertising(
+      _localIdentity.toJson(),
+      strategy,
+      serviceId: serviceId,
+      // عندما يطلب جهاز الاتصال
+      onConnectionInitiated: _handleIncomingConnection,
+      // نتيجة محاولة الاتصال (نجاح/رفض/فشل).
+      onConnectionResult: _handleConnectionResult,
+      //  عند انتهاء الاتصال
+      onDisconnected: _handleDisconnection,
+    );
   }
 
-  /// Start discovery to find nearby advertisers.
   Future<bool> startDiscovery({
     required Strategy strategy,
     required String serviceId,
-  }) async {
+  }) {
+    return _adapter.startDiscovery(
+      _localIdentity.toJson(),
+      strategy,
+      serviceId: serviceId,
+      onEndpointFound: _handleEndpointFound,
+
+      onEndpointLost: _handleEndpointLost,
+    );
+  }
+
+  Future<void> stopAdvertising() => _adapter.stopAdvertising();
+
+  Future<void> stopDiscovery() => _adapter.stopDiscovery();
+
+  Future<void> stopAll() async {
+    await stopAdvertising();
+    await stopDiscovery();
+  }
+
+  bool isConnected(String endpointId) =>
+      _connectedEndpointIds.contains(endpointId);
+
+  Future<void> connect(String endpointId) async {
+    if (isConnected(endpointId)) return;
+
+    // PRO TIP: On some devices, stopping discovery before connecting improves reliability.
+    await stopDiscovery();
+
+    // Give the radio a moment to stabilize
+    await Future.delayed(const Duration(milliseconds: 500));
+
     try {
-      return await _adapter.startDiscovery(
-        _currentIdentity.toJson(),
-        strategy,
-        onEndpointFound: (endpointId, endpointName, serviceIdFound) {
-          final identity = NearbyIdentityModel.fromJson(endpointName);
-          _endpointIdentities[endpointId] = identity;
-          updateUuidFromIdentity(endpointName);
-          _notifyKnown();
-        },
-        onEndpointLost: (endpointId) {
-          // We don't necessarily remove from _endpointNames here
-          // because it might be a connected device that just stopped advertising.
-          _notifyKnown();
-        },
-        serviceId: serviceId,
+      await _adapter.requestConnection(
+        _localIdentity.toJson(),
+        endpointId,
+        onConnectionInitiated: _handleIncomingConnection,
+        onConnectionResult: _handleConnectionResult,
+        onDisconnected: _handleDisconnection,
       );
     } catch (e) {
-      rethrow;
+      Logger.log(error: 'Connection error to $endpointId: $e');
+      if (e.toString().contains('already connected')) {
+        _markConnected(endpointId);
+      }
     }
   }
 
-  void _onPayLoadRecieved(String id, Payload payload) {
+  void _markConnected(String endpointId) {
+    _connectedEndpointIds.add(endpointId);
+    _connectedStreamController.add(Set.from(_connectedEndpointIds));
+    _notifyKnownEndpoints();
+  }
+
+  Future<void> disconnect(String endpointId) async {
+    await _adapter.disconnectFromEndpoint(endpointId);
+    _connectedEndpointIds.remove(endpointId);
+  }
+
+  String? getEndpointIdByUserId(String userUuid) {
+    try {
+      final result = _endpoints.entries.firstWhere(
+        (e) => e.value.uuid == userUuid,
+      );
+
+      return result.key;
+    } on StateError catch (_) {
+      return null;
+    }
+  }
+
+  String getDisplayNameByEndpoint(String endpointId) {
+    final identity = _endpoints[endpointId];
+
+    return identity?.displayName ?? 'غير معروف';
+  }
+
+  String getDisplayNameByUserId(String userId) {
+    try {
+      final result = _endpoints.entries.firstWhere(
+        (e) => e.value.uuid == userId,
+      );
+
+      return result.key;
+    } on StateError catch (_) {
+      return '...';
+    }
+  }
+
+  Future<void> sendBytes(String endpointId, Uint8List bytes) async {
+    if (!isConnected(endpointId)) return;
+
+    await _adapter.sendBytesPayload(endpointId, bytes);
+  }
+
+  Future<int?> sendFile({
+    required String endpointId,
+    required String filePath,
+  }) {
+    if (!isConnected(endpointId)) return Future.value();
+
+    return _adapter.sendFilePayload(endpointId, filePath);
+  }
+
+  void _handleIncomingConnection(String endpointId, ConnectionInfo info) async {
+    final identity = NearbyIdentityModel.fromJson(info.endpointName);
+    _endpoints[endpointId] = identity;
+    _notifyKnownEndpoints();
+    await acceptConnection(endpointId);
+  }
+
+  Future<bool> acceptConnection(String endpointId) {
+    return _adapter.acceptConnection(
+      endpointId,
+      onPayLoadRecieved: _handlePayloadReceived,
+      onPayloadTransferUpdate: _handlePayloadTransfer,
+    );
+  }
+
+  void _handleConnectionResult(String endpointId, Status status) {
+    switch (status) {
+      case Status.CONNECTED:
+        _markConnected(endpointId);
+
+      case Status.REJECTED:
+      case Status.ERROR:
+        _removeEndpoint(endpointId);
+    }
+  }
+
+  Future<void> _handleDisconnection(String endpointId) async {
+    await _adapter.disconnectFromEndpoint(endpointId);
+
+    _removeEndpoint(endpointId);
+  }
+
+  void _handleEndpointFound(
+    String endpointId,
+    String endpointName,
+    String serviceId,
+  ) {
+    final identity = NearbyIdentityModel.fromJson(endpointName);
+    _endpoints[endpointId] = identity;
+    _notifyKnownEndpoints();
+  }
+
+  void _handleEndpointLost(String? endpointId) {
+    if (endpointId != null) _removeEndpoint(endpointId);
+  }
+
+  void _handlePayloadReceived(String endpointId, Payload payload) {
     if (payload.type == PayloadType.BYTES && payload.bytes == null) return;
 
     // HEAL STATE: If we got a payload, we must be connected
-    if (!_connectedEndpoints.contains(id)) {
-      _connectedEndpoints.add(id);
-      _connectedController.add(Set.from(_connectedEndpoints));
-      _notifyKnown();
+    if (!_connectedEndpointIds.contains(endpointId)) {
+      _markConnected(endpointId);
     }
 
     switch (payload.type) {
       case PayloadType.BYTES:
-        Logger.log(message: 'BYTES payload received: ${payload.id}');
-        _incomingController.add(
+        _incomingStreamController.add(
           IncomingFrame(
-            peerEndpointId: id,
+            peerEndpointId: endpointId,
             payloadId: payload.id,
             bytes: payload.bytes,
           ),
         );
-        break;
       case PayloadType.FILE:
         Logger.log(
           message:
@@ -155,234 +270,53 @@ class NearbyConnectionManager {
         );
         if (payload.filePath != null) {
           _payloadPaths[payload.id] = payload.filePath!;
-        } else {
-          Logger.log(
-            error: 'FILE payload has null filePath! id: ${payload.id}',
-          );
         }
-        break;
       case PayloadType.NONE:
       case PayloadType.STREAM:
-        break;
     }
   }
 
-  void _onPayloadTransferUpdate(
-    String endpointId,
-    PayloadTransferUpdate update,
-  ) {
+  void _handlePayloadTransfer(String endpointId, PayloadTransferUpdate update) {
     switch (update.status) {
+      case PayloadStatus.IN_PROGRESS:
+        break;
       case PayloadStatus.SUCCESS:
         final path = _payloadPaths.remove(update.id);
-        Logger.log(
-          message: 'Payload transfer SUCCESS: ${update.id} path: $path',
-        );
 
-        Logger.log(message: 'bytesTransferred: ${update.bytesTransferred}');
-        Logger.log(message: 'total bytes: ${update.totalBytes}');
-        _incomingController.add(
+        _incomingStreamController.add(
           IncomingFrame(
             peerEndpointId: endpointId,
             payloadId: update.id,
             filePath: path,
           ),
         );
-        break;
 
-      case PayloadStatus.IN_PROGRESS:
-        break;
       case PayloadStatus.FAILURE:
       case PayloadStatus.CANCELED:
-        Logger.log(
-          message:
-              'Payload transfer ${update.status.name.toUpperCase()}: ${update.id}',
-        );
         _payloadPaths.remove(update.id);
-        break;
 
       case PayloadStatus.NONE:
-        break;
     }
   }
 
-  Future<bool> acceptConnection(String endpointId) {
-    return _adapter.acceptConnection(
-      endpointId,
-      onPayLoadRecieved: _onPayLoadRecieved,
-      onPayloadTransferUpdate: _onPayloadTransferUpdate,
-    );
+  void _removeEndpoint(String endpointId) {
+    _connectedEndpointIds.remove(endpointId);
+    _endpoints.remove(endpointId);
+    _connectedStreamController.add(Set.from(_connectedEndpointIds));
+    _notifyKnownEndpoints();
   }
 
-  /// Connect to a discovered endpoint.
-  Future<void> connect(String endpointId) async {
-    if (isConnected(endpointId)) return;
-
-    Logger.log(
-      message:
-          'Requesting connection to $endpointId (Identity: $_currentIdentity)',
-    );
-
-    try {
-      // PRO TIP: On some devices, stopping discovery before connecting improves reliability.
-      await stopDiscovery();
-      // Give the radio a moment to stabilize
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      await _adapter.requestConnection(
-        _currentIdentity.toJson(),
-        endpointId,
-        onConnectionInitiated: (id, connectionInfo) async {
-          Logger.log(message: 'Connection initiated with $id');
-          final model = NearbyIdentityModel.fromJson(
-            connectionInfo.endpointName,
-          );
-          _endpointIdentities[id] = model;
-          updateUuidFromIdentity(connectionInfo.endpointName);
-          _discoveredController.add(Map.from(_endpointIdentities));
-          await acceptConnection(id);
-        },
-        onConnectionResult: (id, status) {
-          Logger.log(message: 'Connection result for $id: ${status.name}');
-          _onConnectionResult(id, status);
-        },
-        onDisconnected: (id) {
-          Logger.log(message: 'Disconnected from $id');
-          _onDisconnected(id);
-        },
-      );
-    } catch (e) {
-      Logger.log(error: 'Connection error to $endpointId: $e');
-      if (e.toString().contains('already connected')) {
-        // Heal state
-        _connectedEndpoints.add(endpointId);
-        _connectedController.add(Set.from(_connectedEndpoints));
-        _notifyKnown();
-        return;
-      }
-      rethrow;
-    }
-  }
-
-  bool isConnected(String endpointId) =>
-      _connectedEndpoints.contains(endpointId);
-
-  Future<void> sendBytes(String endpointId, Uint8List bytes) async {
-    try {
-      if (!isConnected(endpointId)) {
-        Logger.log(
-          error: 'Attempt to send to disconnected endpoint $endpointId',
-        );
-        return;
-      }
-
-      await _adapter.sendBytesPayload(endpointId, bytes);
-    } catch (e) {
-      Logger.log(error: e);
-    }
-  }
-
-  Future<int?> sendFileBytes({
-    required String endpointId,
-    required String filePath,
-  }) async {
-    try {
-      if (!isConnected(endpointId)) {
-        Logger.log(
-          error: 'Attempt to send to disconnected endpoint $endpointId',
-        );
-        return null;
-      }
-
-      return await _adapter.sendFilePayload(endpointId, filePath);
-    } catch (e) {
-      Logger.log(error: e);
-      return null;
-    }
-  }
-
-  void _notifyKnown() {
-    _discoveredController.add(
-      Map<String, NearbyIdentityModel>.from(_endpointIdentities),
-    );
-    _allKnownController.add(Map.from(_endpointIdentities));
-  }
-
-  void updateUuidFromIdentity(String identity) {
-    final model = NearbyIdentityModel.fromJson(identity);
-    _uuidToName[model.uuid] = model.displayName;
-  }
-
-  void updateUuidMapping({required String uuid, required String name}) {
-    _uuidToName[uuid] = name;
-  }
-
-  /// Find an endpoint ID associated with a specific user UUID
-  String? getEndpointIdByUserId(String userUuid) {
-    for (final identity in _endpointIdentities.entries) {
-      if (identity.value.uuid == userUuid) return identity.key;
-    }
-    return null;
-  }
-
-  /// Get the display name of an endpoint (extracts from "UUID|Name" if needed)
-  String getDisplayName(String endpointId) {
-    final identity = _endpointIdentities[endpointId];
-
-    return identity?.displayName ?? _uuidToName[endpointId] ?? 'غير معروف';
-  }
-
-  String getDisplayNameByUuid(String uuid) {
-    return _uuidToName[uuid] ?? 'دردشة';
-  }
-
-  void _onConnectionResult(String endpointId, Status status) {
-    /// منطق نتيجة الاتصال هل مرفوضة ام مسموحة
-    switch (status) {
-      case Status.CONNECTED:
-        _connectedEndpoints.add(endpointId);
-        _connectedController.add(Set.from(_connectedEndpoints));
-
-      case Status.REJECTED:
-      case Status.ERROR:
-        _connectedEndpoints.remove(endpointId);
-        _endpointIdentities.remove(endpointId);
-        _connectedController.add(Set.from(_connectedEndpoints));
-        _notifyKnown();
-    }
-  }
-
-  Future<void> _onDisconnected(String endpointId) async {
-    await _adapter.disconnectFromEndpoint(endpointId);
-    _connectedEndpoints.remove(endpointId);
-    _endpointIdentities.remove(endpointId);
-
-    _connectedController.add(Set.from(_connectedEndpoints));
-    _notifyKnown();
-  }
-
-  Future<void> stopAll() async {
-    await _adapter.stopAdvertising();
-    await _adapter.stopDiscovery();
-  }
-
-  Future<void> stopAdvertising() async {
-    await _adapter.stopAdvertising();
-  }
-
-  Future<void> stopDiscovery() async {
-    await _adapter.stopDiscovery();
-  }
-
-  Future<void> disconnect(String endpointId) async {
-    await _adapter.disconnectFromEndpoint(endpointId);
-    _connectedEndpoints.remove(endpointId);
+  void _notifyKnownEndpoints() {
+    final copy = IdentityMap.from(_endpoints);
+    _discoveredStreamController.add(copy);
+    _allKnownStreamController.add(Map.from(_endpoints));
   }
 
   Future<void> dispose() async {
     await stopAll();
-    await _incomingController.close();
-    await _discoveredController.close();
-    await _connectedController.close();
-    await _allKnownController.close();
+    await _incomingStreamController.close();
+    await _discoveredStreamController.close();
+    await _connectedStreamController.close();
+    await _allKnownStreamController.close();
   }
 }

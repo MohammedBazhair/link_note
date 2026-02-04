@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 
 import '../../../../core/presentation/providers/core_providers.dart';
+import '../../../user/presentation/controllers/user_providers.dart';
 import '../../data/datasource/nearby_service.dart';
 import '../../data/models/nearby_identity_model.dart';
 import '../../data/repositories/chat_repository_impl.dart';
@@ -37,20 +38,27 @@ final nearbyProvider = Provider<Nearby>((ref) {
   return raw;
 });
 
-final connectionManagerProvider = Provider.autoDispose<NearbyConnectionManager>(
+final connectionManagerProvider = Provider.autoDispose<NearbyConnectionService>(
   (ref) {
     final adapter = ref.watch(nearbyProvider);
     final displayName = ref.watch(nearbyDisplayNameProvider);
-    final userRepo = ref.watch(userRepositoryProvider);
-    final currentUser = userRepo.currentUser;
 
-    // We encode identity as JSON to ensure stable data handling
+    final profile = ref.watch(userControllerProvider).profile;
+
     final identity = NearbyIdentityModel(
-      uuid: currentUser?.id ?? 'unknown',
+      uuid: profile.userId,
       displayName: displayName,
     );
 
-    final manager = NearbyConnectionManager(adapter, identity);
+    final manager = NearbyConnectionService(adapter, identity);
+
+    if (profile.avatarUrl != null) {
+      final asyncFile = ref.read((getAvatarFileProvider(profile.avatarUrl!)));
+      asyncFile.whenData((file) async {
+        final bytes = await file.readAsBytes();
+        manager.updateAvatar(bytes);
+      });
+    }
 
     ref.onDispose(manager.dispose);
     return manager;
@@ -62,14 +70,15 @@ final nearbyDiscoveryControllerProvider =
       return NearbyDiscoveryController();
     });
 
-final nearbyEndpointsProvider = StreamProvider<Map<String, NearbyIdentityModel>>((ref) {
-  final manager = ref.watch(connectionManagerProvider);
-  return manager.allKnownEndpoints;
-});
+final nearbyEndpointsProvider =
+    StreamProvider<Map<String, NearbyIdentityModel>>((ref) {
+      final manager = ref.watch(connectionManagerProvider);
+      return manager.allKnownEndpoints;
+    });
 
 final nearbyConnectedEndpointsProvider = StreamProvider<Set<String>>((ref) {
   final manager = ref.watch(connectionManagerProvider);
-  return manager.connectedStream;
+  return manager.connectedEndpointsStream;
 });
 
 final chatRepository = Provider((ref) {

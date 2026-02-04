@@ -26,7 +26,7 @@ class FormLocalName extends StatelessWidget {
             return ElevatedButton(
               onPressed: () {
                 final controller = ref.read(connectionManagerProvider);
-                controller.updateLocalUserName(nameController.text);
+                controller.updateLocalName(nameController.text);
                 Navigator.pop(context);
               },
               child: const Text('حفظ'),

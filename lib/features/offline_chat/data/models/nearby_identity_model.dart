@@ -1,52 +1,45 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/nearby_identity.dart';
 
 class NearbyIdentityModel extends NearbyIdentity {
-  NearbyIdentityModel({required super.uuid, required super.displayName});
+  NearbyIdentityModel({
+    required super.uuid,
+    required super.displayName,
+     super.avatarBytes,
+  });
 
   factory NearbyIdentityModel.fromMap(Map<String, dynamic> map) {
+    final imageBytes =map['a'] != null? base64Decode(map['a']):null;
     return NearbyIdentityModel(
       uuid: map['u'] ?? 'unknown',
       displayName: map['n'] ?? 'غير معروف',
+      avatarBytes: imageBytes,
     );
   }
 
   factory NearbyIdentityModel.fromJson(String source) {
-    try {
-      if (source.isEmpty) {
-        return NearbyIdentityModel(uuid: 'unknown', displayName: 'غير معروف');
-      }
-      final map = json.decode(source);
-      if (map is Map<String, dynamic>) {
-        return NearbyIdentityModel.fromMap(map);
-      }
-    } catch (e) {
-      // Fallback for non-JSON or malformed strings
-      // If it contains our old separator, use it
-      if (source.contains('---')) {
-        final parts = source.split('---');
-        return NearbyIdentityModel(
-          uuid: parts[0],
-          displayName: parts.length > 1 ? parts[1] : parts[0],
-        );
-      }
-    }
-    // Final fallback: use the source itself as the UUID/Name
-    return NearbyIdentityModel(
-      uuid: source,
-      displayName: 'جهاز قديم ($source)',
-    );
+    final map = json.decode(source);
+    return NearbyIdentityModel.fromMap(map);
   }
 
-  NearbyIdentityModel copyWith({String? uuid, String? displayName}) {
+  NearbyIdentityModel copyWith({
+    String? uuid,
+    String? displayName,
+    Uint8List? avatarBytes,
+  }) {
     return NearbyIdentityModel(
       uuid: uuid ?? this.uuid,
       displayName: displayName ?? this.displayName,
+      avatarBytes: avatarBytes ?? this.avatarBytes,
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'u': uuid, 'n': displayName};
+    final imageEncoded = avatarBytes != null? base64Encode(avatarBytes!): null;
+
+    return {'u': uuid, 'n': displayName, 'a': imageEncoded};
   }
 
   String toJson() => json.encode(toMap());

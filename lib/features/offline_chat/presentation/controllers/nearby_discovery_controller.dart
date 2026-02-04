@@ -10,9 +10,10 @@ import 'nearby_state.dart';
 
 /// Controller to manage Nearby Connections discovery and advertising.
 class NearbyDiscoveryController extends Notifier<NearbyState> {
-  late final NearbyConnectionManager _nearbyManager;
+  late final NearbyConnectionService _nearbyManager;
 
- Stream<Map<String, NearbyIdentity>>  get endpoints => _nearbyManager.allKnownEndpoints;
+  Stream<Map<String, NearbyIdentity>> get endpoints =>
+      _nearbyManager.allKnownEndpoints;
 
   @override
   NearbyState build() {
@@ -24,7 +25,7 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
   }
 
   Future<void> runDependencies() async {
-    final result = await _nearbyManager.runDependencies();
+    final result = await _nearbyManager.initializeDependencies();
 
     if (!result.hasError) return;
 

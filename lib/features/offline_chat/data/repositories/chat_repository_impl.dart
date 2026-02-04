@@ -20,14 +20,14 @@ class ChatRepositoryImpl implements ChatRepository {
     required String myDisplayName,
   }) : _myUserId = myUserId,
        _myDisplayName = myDisplayName {
-    _incomingSub = _connectionManager.incoming.listen(_handleIncoming);
-    _connectedSub = _connectionManager.connectedStream.listen(
+    _incomingSub = _connectionManager.incomingFrames.listen(_handleIncoming);
+    _connectedSub = _connectionManager.connectedEndpointsStream.listen(
       _handleConnectedChange,
     );
 
     // Trigger handshake for any pre-existing connections
     Future.delayed(const Duration(milliseconds: 500), () {
-      for (final endpointId in _connectionManager.discoveredEndpoints) {
+      for (final endpointId in _connectionManager.knownEndpointIds) {
         if (_connectionManager.isConnected(endpointId)) {
           _handleConnectedChange({endpointId});
         }
@@ -35,7 +35,7 @@ class ChatRepositoryImpl implements ChatRepository {
     });
   }
 
-  final NearbyConnectionManager _connectionManager;
+  final NearbyConnectionService _connectionManager;
   final ChatSessionManager _sessionManager;
   final String _myUserId;
   final String _myDisplayName;
@@ -273,7 +273,7 @@ class ChatRepositoryImpl implements ChatRepository {
       return;
     }
 
-    final payloadId = await _connectionManager.sendFileBytes(
+    final payloadId = await _connectionManager.sendFile(
       endpointId: session.peerAddress,
       filePath: filePath,
     );
