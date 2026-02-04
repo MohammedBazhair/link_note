@@ -62,7 +62,7 @@ final nearbyDiscoveryControllerProvider =
       return NearbyDiscoveryController();
     });
 
-final nearbyEndpointsProvider = StreamProvider<Map<String, String>>((ref) {
+final nearbyEndpointsProvider = StreamProvider<Map<String, NearbyIdentityModel>>((ref) {
   final manager = ref.watch(connectionManagerProvider);
   return manager.allKnownEndpoints;
 });

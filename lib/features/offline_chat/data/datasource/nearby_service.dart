@@ -20,7 +20,7 @@ class NearbyConnectionManager {
     _currentIdentity = _currentIdentity.copyWith(displayName: newName);
   }
 
-  final Map<String, String> _endpointNames = {};
+  final Map<String, NearbyIdentityModel> _endpointIdentities = {};
   final Map<String, String> _uuidToName = {};
   final Map<int, String> _payloadPaths = {};
   final Set<String> _connectedEndpoints = {};
@@ -29,23 +29,25 @@ class NearbyConnectionManager {
       StreamController<IncomingFrame>.broadcast();
   Stream<IncomingFrame> get incoming => _incomingController.stream;
 
-  final StreamController<Map<String, String>> _discoveredController =
-      StreamController<Map<String, String>>.broadcast();
-  Stream<Map<String, String>> get discovered => _discoveredController.stream;
+  final StreamController<Map<String, NearbyIdentityModel>>
+  _discoveredController =
+      StreamController<Map<String, NearbyIdentityModel>>.broadcast();
+  Stream<Map<String, NearbyIdentityModel>> get discovered =>
+      _discoveredController.stream;
 
   final StreamController<Set<String>> _connectedController =
       StreamController<Set<String>>.broadcast();
   Stream<Set<String>> get connectedStream => _connectedController.stream;
 
-  final StreamController<Map<String, String>> _allKnownController =
-      StreamController<Map<String, String>>.broadcast();
-  Stream<Map<String, String>> get allKnownEndpoints =>
+  final StreamController<Map<String, NearbyIdentityModel>> _allKnownController =
+      StreamController<Map<String, NearbyIdentityModel>>.broadcast();
+  Stream<Map<String, NearbyIdentityModel>> get allKnownEndpoints =>
       _allKnownController.stream;
 
   /// Helper to get all endpoints that we know about (discovered or connection info)
-  Iterable<String> get discoveredEndpoints => _endpointNames.keys;
+  Iterable<String> get discoveredEndpoints => _endpointIdentities.keys;
 
-   Future<Result<bool>> runDependencies() async {
+  Future<Result<bool>> runDependencies() async {
     final isPermissionGranted = await requestNearbyPermissions();
 
     if (!isPermissionGranted) {
@@ -78,7 +80,10 @@ class NearbyConnectionManager {
         strategy,
         // عندما يطلب جهاز الاتصال
         onConnectionInitiated: (endpointId, connectionInfo) async {
-          _endpointNames[endpointId] = connectionInfo.endpointName;
+          final model = NearbyIdentityModel.fromJson(
+            connectionInfo.endpointName,
+          );
+          _endpointIdentities[endpointId] = model;
           updateUuidFromIdentity(connectionInfo.endpointName);
           _notifyKnown();
           await acceptConnection(endpointId);
@@ -105,7 +110,8 @@ class NearbyConnectionManager {
         _currentIdentity.toJson(),
         strategy,
         onEndpointFound: (endpointId, endpointName, serviceIdFound) {
-          _endpointNames[endpointId] = endpointName;
+          final identity = NearbyIdentityModel.fromJson(endpointName);
+          _endpointIdentities[endpointId] = identity;
           updateUuidFromIdentity(endpointName);
           _notifyKnown();
         },
@@ -227,9 +233,12 @@ class NearbyConnectionManager {
         endpointId,
         onConnectionInitiated: (id, connectionInfo) async {
           Logger.log(message: 'Connection initiated with $id');
-          _endpointNames[id] = connectionInfo.endpointName;
+          final model = NearbyIdentityModel.fromJson(
+            connectionInfo.endpointName,
+          );
+          _endpointIdentities[id] = model;
           updateUuidFromIdentity(connectionInfo.endpointName);
-          _discoveredController.add(Map<String, String>.from(_endpointNames));
+          _discoveredController.add(Map.from(_endpointIdentities));
           await acceptConnection(id);
         },
         onConnectionResult: (id, status) {
@@ -256,8 +265,6 @@ class NearbyConnectionManager {
 
   bool isConnected(String endpointId) =>
       _connectedEndpoints.contains(endpointId);
-
-  String? endpointName(String endpointId) => _endpointNames[endpointId];
 
   Future<void> sendBytes(String endpointId, Uint8List bytes) async {
     try {
@@ -294,8 +301,10 @@ class NearbyConnectionManager {
   }
 
   void _notifyKnown() {
-    _discoveredController.add(Map<String, String>.from(_endpointNames));
-    _allKnownController.add(Map<String, String>.from(_endpointNames));
+    _discoveredController.add(
+      Map<String, NearbyIdentityModel>.from(_endpointIdentities),
+    );
+    _allKnownController.add(Map.from(_endpointIdentities));
   }
 
   void updateUuidFromIdentity(String identity) {
@@ -308,24 +317,18 @@ class NearbyConnectionManager {
   }
 
   /// Find an endpoint ID associated with a specific user UUID
-  String? getEndpointIdByUserName(String userUuid) {
-    for (var entry in _endpointNames.entries) {
-      final identity = entry.value;
-      final model = NearbyIdentityModel.fromJson(identity);
-      if (model.uuid == userUuid) return entry.key;
+  String? getEndpointIdByUserId(String userUuid) {
+    for (final identity in _endpointIdentities.entries) {
+      if (identity.value.uuid == userUuid) return identity.key;
     }
     return null;
   }
 
   /// Get the display name of an endpoint (extracts from "UUID|Name" if needed)
   String getDisplayName(String endpointId) {
-    final raw = _endpointNames[endpointId];
-    if (raw != null) {
-      final model = NearbyIdentityModel.fromJson(raw);
-      return model.displayName;
-    }
-    // Fallback to searching by UUID if the input looks like one
-    return _uuidToName[endpointId] ?? endpointId;
+    final identity = _endpointIdentities[endpointId];
+
+    return identity?.displayName ?? _uuidToName[endpointId] ?? 'غير معروف';
   }
 
   String getDisplayNameByUuid(String uuid) {
@@ -342,7 +345,7 @@ class NearbyConnectionManager {
       case Status.REJECTED:
       case Status.ERROR:
         _connectedEndpoints.remove(endpointId);
-        _endpointNames.remove(endpointId);
+        _endpointIdentities.remove(endpointId);
         _connectedController.add(Set.from(_connectedEndpoints));
         _notifyKnown();
     }
@@ -351,7 +354,8 @@ class NearbyConnectionManager {
   Future<void> _onDisconnected(String endpointId) async {
     await _adapter.disconnectFromEndpoint(endpointId);
     _connectedEndpoints.remove(endpointId);
-    _endpointNames.remove(endpointId);
+    _endpointIdentities.remove(endpointId);
+
     _connectedController.add(Set.from(_connectedEndpoints));
     _notifyKnown();
   }

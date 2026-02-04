@@ -73,7 +73,7 @@ class ChatRepositoryImpl implements ChatRepository {
     final packet = Protocol.buildPacket(
       senderUserId: _myUserId,
       type: MessageType.handshake,
-      payload: Uint8List.fromList(utf8.encode(_myDisplayName)),
+      payload: utf8.encode(_myDisplayName),
     );
     _connectionManager.sendBytes(endpointId, packet);
   }
@@ -118,12 +118,12 @@ class ChatRepositoryImpl implements ChatRepository {
             message:
                 'Handshake successful from ${packet.senderUserId} (Name: $peerName)',
           );
-          if (peerName.isNotEmpty) {
-            _connectionManager.updateUuidMapping(
-              uuid: packet.senderUserId,
-              name: peerName,
-            );
-          }
+          if (peerName.isEmpty) return;
+
+          _connectionManager.updateUuidMapping(
+            uuid: packet.senderUserId,
+            name: peerName,
+          );
           return;
 
         case MessageType.image:
@@ -209,7 +209,7 @@ class ChatRepositoryImpl implements ChatRepository {
       Logger.log(
         message: 'Session NULL for $peerUserId. Attempting recovery...',
       );
-      final endpointId = _connectionManager.getEndpointIdByUserName(peerUserId);
+      final endpointId = _connectionManager.getEndpointIdByUserId(peerUserId);
       if (endpointId != null && _connectionManager.isConnected(endpointId)) {
         Logger.log(
           message: 'Recovering missing session for $peerUserId at $endpointId',

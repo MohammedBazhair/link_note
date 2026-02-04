@@ -7,10 +7,11 @@ import 'packet.dart';
 /// Protocol-level encoder/decoder for chat packets.
 ///
 /// Wire format (big-endian):
-/// [36 bytes] UTF8 senderUserId (UUID v4)
+/// [1 byte ]  senderUserIdLength
+/// [n bytes] UTF8 senderUserId (UUID v4)
 /// [1 byte ]  messageType
 /// [4 bytes]  payloadLength (uint32)
-/// [N bytes]  payload
+/// [n bytes]  payload (uint32)
 class Protocol {
   static const _userIdLength = 36; // (UUID v4 utf8)
   static const _lengthFieldBytes = 4;
@@ -35,7 +36,7 @@ class Protocol {
     buffer.add(userIdBytes); // [N bytes] userId
     buffer.addByte(type.typeCode); // [1 byte] type
     buffer.add(lengthBytes.buffer.asUint8List()); // [4 bytes] payload length
-    buffer.add(payload); // [N bytes] payload
+    buffer.add(payload);
 
     return buffer.toBytes();
   }
@@ -68,15 +69,10 @@ class Protocol {
       offset + _lengthFieldBytes,
     );
     final payloadLength = lengthView.getUint32(0);
+
     offset += _lengthFieldBytes;
-
-    if (data.length < offset + payloadLength) {
-      throw Exception(
-        'Incomplete packet payload: expected $payloadLength more bytes',
-      );
-    }
-
-    final payload = data.sublist(offset, offset + payloadLength);
+    
+    final payload = data.sublist(offset, payloadLength);
 
     return Packet(
       senderUserId: senderUserId,

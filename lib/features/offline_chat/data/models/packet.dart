@@ -9,7 +9,6 @@ class Packet {
     required this.senderUserId,
   });
 
-
   final MessageType messageType;
   final Uint8List payload;
   final String senderUserId;

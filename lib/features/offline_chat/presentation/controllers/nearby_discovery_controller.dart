@@ -4,6 +4,7 @@ import 'package:nearby_connections/nearby_connections.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../data/datasource/nearby_service.dart';
+import '../../domain/entities/nearby_identity.dart';
 import 'chat_providers.dart';
 import 'nearby_state.dart';
 
@@ -11,7 +12,7 @@ import 'nearby_state.dart';
 class NearbyDiscoveryController extends Notifier<NearbyState> {
   late final NearbyConnectionManager _nearbyManager;
 
- Stream<Map<String, String>>  get endpoints => _nearbyManager.allKnownEndpoints;
+ Stream<Map<String, NearbyIdentity>>  get endpoints => _nearbyManager.allKnownEndpoints;
 
   @override
   NearbyState build() {
