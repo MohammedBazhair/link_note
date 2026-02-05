@@ -90,3 +90,10 @@ final allKnownEndpointsProvider = StreamProvider<IdentityMap>((ref) async* {
   final manager = ref.watch(nearbyConnectionManagerProvider);
   yield* manager.allKnownEndpoints;
 });
+
+final isPeerConnectedProvider = Provider.family<bool, String>((ref, peerId) {
+  // Watch only for changes in the connected endpoints stream
+  ref.watch(connectedEndpointsProvider);
+  final manager = ref.read(nearbyConnectionManagerProvider);
+  return manager.isUserIdConnected(peerId);
+});

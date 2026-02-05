@@ -7,9 +7,7 @@ import '../../../../core/extensions/extensions.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
 import '../controllers/chat_providers.dart';
-import '../controllers/nearby_providers.dart';
-import '../widgets/common/user_avatar_with_status.dart';
-import 'chat_screen.dart';
+import '../widgets/chat/chat_user_tile.dart';
 import 'nearby_devices_screen.dart';
 
 class ChatListScreen extends ConsumerWidget {
@@ -31,7 +29,6 @@ class ChatListScreen extends ConsumerWidget {
         )
         .toSet()
         .toList();
-    final manager = ref.watch(nearbyConnectionManagerProvider);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
@@ -44,22 +41,9 @@ class ChatListScreen extends ConsumerWidget {
               itemCount: chatUserIds.length,
               itemBuilder: (context, index) {
                 final peerId = chatUserIds[index];
-                final username = manager.getDisplayNameByUserId(peerId);
-                // Watch for reactivity
-                ref.watch(connectedEndpointsProvider);
-                final isconnected = manager.isUserIdConnected(peerId);
-
-                return ListTile(
-                  leading: UserAvatarWithStatus(connected: isconnected),
-                  title: Text(username),
-                  subtitle: Text(isconnected ? 'متصل' : 'غير متصل'),
-                  onTap: () {
-                    context.pushTo(ChatScreen(myId: myUserId, peerId: peerId));
-                  },
-                );
+                return ChatUserTile(peerId: peerId, myUserId: myUserId);
               },
             ),
-
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
         child: const Icon(Icons.person_add),

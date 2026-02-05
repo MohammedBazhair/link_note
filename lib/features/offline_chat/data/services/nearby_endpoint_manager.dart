@@ -67,6 +67,18 @@ class NearbyEndpointManager {
     }
   }
 
+  NearbyIdentityModel? getIdentityByUserId(String userId) {
+    try {
+      final result = _endpoints.entries.firstWhere(
+        (e) => e.value.uuid == userId,
+      );
+
+      return result.value;
+    } on StateError catch (_) {
+      return null;
+    }
+  }
+
   String? getEndpointIdByUserId(String userUuid) {
     try {
       final result = _endpoints.entries.firstWhere(

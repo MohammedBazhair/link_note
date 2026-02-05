@@ -8,6 +8,7 @@ import '../../../domain/entities/nearby_identity.dart';
 import '../../controllers/chat_providers.dart';
 import '../../controllers/nearby_providers.dart';
 import '../../screens/chat_screen.dart';
+import '../chat/chat_appbar.dart';
 import '../common/user_avatar_with_status.dart';
 
 class NearbyDeviceCard extends ConsumerWidget {
@@ -32,7 +33,7 @@ class NearbyDeviceCard extends ConsumerWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
       title: Text(identity.displayName),
-      leading: UserAvatarWithStatus(connected: connected),
+      leading: UserAvatarWithStatus(params: ChatParams(identity: identity, isConnected: connected),),
       subtitle: Text(connected ? 'متصل' : 'اضغط للاتصال'),
       onTap: () async {
         if (!connected) {
