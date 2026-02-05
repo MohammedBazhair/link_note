@@ -17,6 +17,7 @@ class ChatHandshakeHandler {
       senderUserId: _identityManager.localIdentity.uuid,
       type: MessageType.handshake,
       payload: utf8.encode(_identityManager.localIdentity.displayName),
+      messageId: ''
     );
     _connectionManager.sendBytes(endpointId, packet);
   }

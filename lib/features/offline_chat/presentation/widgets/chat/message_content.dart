@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../domain/entities/message.dart';
+import 'message_text.dart';
 import 'tail_message_paint.dart';
 
 class MessageWidget extends StatelessWidget {
@@ -108,93 +108,6 @@ class MessageImage extends StatelessWidget {
         ),
       ),
       fallback: (_) => const Text('صورة'),
-    );
-  }
-}
-
-class MessageText extends StatefulWidget {
-  const MessageText({
-    super.key,
-    required this.text,
-    required this.time,
-    required this.isMe,
-  });
-  final String text;
-  final DateTime time;
-  final bool isMe;
-
-  @override
-  State<MessageText> createState() => _MessageTextState();
-}
-
-class _MessageTextState extends State<MessageText> {
-  bool _isExpanded = false;
-  bool get isLongText => widget.text.length > 1000;
-
-  @override
-  void initState() {
-    super.initState();
-    _isExpanded = !isLongText;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 7,
-      crossAxisAlignment: WrapCrossAlignment.end,
-      alignment: WrapAlignment.end,
-      children: [
-        ConditionalBuilder(
-          condition: _isExpanded,
-          builder: (_) => Text(
-            widget.text,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: widget.isMe
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFFF1F0F4),
-            ),
-          ),
-          fallback: (_) => Text.rich(
-            TextSpan(
-              text: '${widget.text.substring(0, 1000)}...  ',
-
-              children: [
-                TextSpan(
-                  text: 'اقرأ المزيد',
-                  style: const TextStyle(
-                    fontSize: 11,
-
-                    fontWeight: FontWeight.bold,
-                    color: Colors.lightBlueAccent,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => setState(() => _isExpanded = true),
-                ),
-              ],
-            ),
-
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: widget.isMe
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFFF1F0F4),
-            ),
-          ),
-        ),
-
-        Text(
-          widget.time.formatedChatTime,
-          style: TextStyle(
-            fontSize: 9,
-            color: Colors.white.withOpacity(0.8),
-            letterSpacing: -0.3,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 }

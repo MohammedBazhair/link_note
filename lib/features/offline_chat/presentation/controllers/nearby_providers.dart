@@ -11,47 +11,45 @@ import '../../data/services/nearby_identity_manager.dart';
 import '../../data/services/nearby_streams_notifier.dart';
 import '../../data/services/payload_handler.dart';
 
-/// Low-level Nearby adapter + connection manager (Android only).
 final nearbyProvider = Provider<Nearby>((ref) {
   final raw = Nearby();
   return raw;
 });
 
-//=== مزود الهوية المحلية
 final nearbyIdentityManagerProvider = Provider<NearbyIdentityManager>((ref) {
   final profile = ref.watch(userControllerProvider).profile;
-  final manager = NearbyIdentityManager(
-    NearbyIdentityModel(uuid: profile.userId, displayName: profile.username),
+  final cache = ref.read(memoryCacheProvider);
+  final model = NearbyIdentityModel(
+    uuid: profile.userId,
+    displayName: profile.username,
   );
+  cache.set('profileJson', model.toJson());
+  final manager = NearbyIdentityManager(model, cache);
 
   if (profile.avatarUrl != null) {
     final asyncFile = ref.read((getAvatarFileProvider(profile.avatarUrl!)));
     asyncFile.whenData((file) async {
       final bytes = await file.readAsBytes();
       manager.updateAvatar(bytes);
+      cache.set('profileJson', model.toJson());
     });
   }
 
   return manager;
-
 });
 
-//=== مزود مدير النقاط
 final nearbyEndpointManagerProvider = Provider<NearbyEndpointManager>(
   (ref) => NearbyEndpointManager(),
 );
 
-//=== مزود مدير البيانات
 final nearbyPayloadManagerProvider = Provider<NearbyPayloadManager>(
   (ref) => NearbyPayloadManager(),
 );
 
-//=== مزود الـ Streams
 final nearbyStreamNotifierProvider = Provider<NearbyStreamNotifier>(
   (ref) => NearbyStreamNotifier(),
 );
 
-//=== مزود الخدمة الأساسية
 final nearbyConnectionManagerProvider =
     Provider.autoDispose<NearbyConnectionManager>((ref) {
       final adapter = ref.read(nearbyProvider);
@@ -73,7 +71,6 @@ final nearbyConnectionManagerProvider =
       return service;
     });
 
-//=== Stream Providers (لمراقبة التغييرات)
 final incomingFramesProvider = StreamProvider<IncomingFrame>((ref) async* {
   final manager = ref.watch(nearbyConnectionManagerProvider);
   yield* manager.incomingFrames;

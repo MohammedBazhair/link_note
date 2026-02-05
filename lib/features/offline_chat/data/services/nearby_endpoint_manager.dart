@@ -64,7 +64,7 @@ class NearbyEndpointManager {
         (e) => e.value.uuid == userId,
       );
 
-      return result.key;
+      return result.value.displayName;
     } on StateError catch (_) {
       return '...';
     }

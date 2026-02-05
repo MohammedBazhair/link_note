@@ -4,6 +4,7 @@ import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/message.dart';
 import '../models/incoming_frame.dart';
 import '../models/packet.dart';
+import '../services/chat_session_manager.dart';
 import '../services/nearby_identity_manager.dart';
 import 'image_transfer_handler.dart';
 
@@ -27,21 +28,21 @@ class IncomingMessageHandler {
 
     _sessionManager.addSession(session);
 
-    if (packet.messageType == MessageType.text) {
-      return Message.fromPacket(
-        packet: packet,
-        myId: _identityManager.localIdentity.uuid,
-        senderId: packet.senderUserId,
-      );
+    switch (packet.messageType) {
+      case MessageType.handshake:
+        return null;
+      case MessageType.text:
+        return Message.fromPacket(
+          packet: packet,
+          myId: _identityManager.localIdentity.uuid,
+          senderId: packet.senderUserId,
+        );
+      case MessageType.image:
+        final payloadId = int.tryParse(utf8.decode(packet.payload));
+        if (payloadId != null) {
+          _imageHandler.registerIncomingImage(payloadId, packet.senderUserId);
+        }
+        return null;
     }
-
-    if (packet.messageType == MessageType.image) {
-      final payloadId = int.tryParse(utf8.decode(packet.payload));
-      if (payloadId != null) {
-        _imageHandler.registerIncomingImage(payloadId, packet.senderUserId);
-      }
-    }
-
-    return null;
   }
 }

@@ -41,10 +41,11 @@ class _NearbyDevicesScreenState extends ConsumerState<NearbyDevicesScreen> {
   }
 
   Future<void> _refresh() async {
-    await nearbyController.restartNearbyCommunication(
+     await nearbyController.restartNearbyCommunication(
       strategy: _strategy,
       serviceId: _serviceId,
     );
+
   }
 
   @override

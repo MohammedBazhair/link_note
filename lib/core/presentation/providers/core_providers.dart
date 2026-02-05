@@ -20,6 +20,7 @@ import '../../features/database/local/cache_service.dart';
 import '../../features/database/remote/remote_database_service.dart';
 import '../../features/database/remote/remote_storage_service.dart';
 import '../../features/init_local_data_base.dart';
+import '../../features/memory_cache/memory_cache.dart';
 import '../../features/network/connectivity_service.dart';
 import '../../features/network/network_clinet.dart';
 
@@ -55,7 +56,7 @@ final aiCilientProvider = Provider((ref) {
 final authRemoteDataSourceProvider = Provider((ref) {
   final auth = ref.read(supabaseAuthProvider);
   final userRemote = ref.read(userRemoteDataSourceProvider);
-  return AuthRemoteDataSourceImpl(auth,userRemote);
+  return AuthRemoteDataSourceImpl(auth, userRemote);
 });
 
 final userLocalDataSourceProvider = Provider((ref) {
@@ -153,3 +154,5 @@ Future<List<Override>> getOverrides() async {
   final dbOverride = await getOverrideDatabase();
   return [sharedPreferencesProvider.overrideWithValue(prefs), dbOverride];
 }
+
+final memoryCacheProvider = Provider((ref)=> MemoryCache());

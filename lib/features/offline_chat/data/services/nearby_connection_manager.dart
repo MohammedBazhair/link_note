@@ -17,7 +17,13 @@ typedef IdentityMap = Map<String, NearbyIdentityModel>;
 
 /// Main service orchestrating all nearby connection operations
 class NearbyConnectionManager {
-  NearbyConnectionManager(this._adapter,  this._identityManager, this._endpointManager, this._payloadManager, this._streamNotifier);
+  NearbyConnectionManager(
+    this._adapter,
+    this._identityManager,
+    this._endpointManager,
+    this._payloadManager,
+    this._streamNotifier,
+  );
 
   final Nearby _adapter;
   final NearbyIdentityManager _identityManager;
@@ -39,10 +45,6 @@ class NearbyConnectionManager {
       _streamNotifier.allKnownEndpoints;
 
   Iterable<String> get knownEndpointIds => _endpointManager.knownEndpointIds;
-
-  void updateLocalName(String newName) {
-    _identityManager.updateLocalName(newName);
-  }
 
   void updateAvatar(Uint8List avatarBytes) {
     _identityManager.updateAvatar(avatarBytes);
@@ -72,8 +74,9 @@ class NearbyConnectionManager {
     required Strategy strategy,
     required String serviceId,
   }) {
+    final identity = _identityManager.localIdentityJson;
     return _adapter.startAdvertising(
-      _identityManager.localIdentity.toJson(),
+      identity,
       strategy,
       serviceId: serviceId,
       onConnectionInitiated: _handleIncomingConnection,
@@ -86,8 +89,10 @@ class NearbyConnectionManager {
     required Strategy strategy,
     required String serviceId,
   }) {
+    final identity = _identityManager.localIdentityJson;
+
     return _adapter.startDiscovery(
-      _identityManager.localIdentity.toJson(),
+      identity,
       strategy,
       serviceId: serviceId,
       onEndpointFound: _handleEndpointFound,
@@ -115,8 +120,10 @@ class NearbyConnectionManager {
     await Future.delayed(const Duration(milliseconds: 500));
 
     try {
+    final identity = _identityManager.localIdentityJson;
+      
       await _adapter.requestConnection(
-        _identityManager.localIdentity.toJson(),
+        identity,
         endpointId,
         onConnectionInitiated: _handleIncomingConnection,
         onConnectionResult: _handleConnectionResult,
@@ -204,10 +211,10 @@ class NearbyConnectionManager {
 
   void _handleEndpointFound(
     String endpointId,
-    String endpointName,
+    String identityJson,
     String serviceId,
   ) {
-    final identity = NearbyIdentityModel.fromJson(endpointName);
+    final identity = NearbyIdentityModel.fromJson(identityJson);
     _endpointManager.addEndpoint(endpointId, identity);
     _notifyKnownEndpoints();
   }

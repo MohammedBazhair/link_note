@@ -4,7 +4,7 @@ import '../../data/handlers/chat_sending_handler.dart';
 import '../../data/handlers/image_transfer_handler.dart';
 import '../../data/handlers/incoming_message_handler.dart';
 import '../../data/repositories/chat_repository_impl.dart';
-import '../../domain/entities/chat_session.dart';
+import '../../data/services/chat_session_manager.dart';
 import '../../domain/entities/message.dart';
 import 'chat_controller.dart';
 import 'nearby_discovery_controller.dart';

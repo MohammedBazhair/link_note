@@ -1,7 +1,4 @@
 import 'dart:io';
-
-import 'package:uuid/uuid.dart';
-
 import '../../domain/entities/message.dart';
 
 class ImageTransferHandler {
@@ -15,6 +12,7 @@ class ImageTransferHandler {
   Message? tryBuildImageMessage({
     required int payloadId,
     required String myUserId,
+    required String messageId,
   }) {
     final path = _completedPaths[payloadId];
     final senderId = _pendingSenders[payloadId];
@@ -25,13 +23,17 @@ class ImageTransferHandler {
     final file = File(path);
 
     if (!file.existsSync()) return null;
-    file.renameSync(finalPath);
-
-    _pendingSenders.remove(payloadId);
-    _completedPaths.remove(payloadId);
+    try {
+      file.renameSync(finalPath);
+    } catch (e) {
+      return null;
+    } finally {
+      _pendingSenders.remove(payloadId);
+      _completedPaths.remove(payloadId);
+    }
 
     return Message(
-      id: const Uuid().v4(),
+      id: messageId,
       senderUserId: senderId,
       type: MessageType.image,
       imagePath: finalPath,

@@ -7,33 +7,37 @@ import 'packet.dart';
 /// Protocol-level encoder/decoder for chat packets.
 ///
 /// Wire format (big-endian):
-/// [1 byte ]  senderUserIdLength
+/// [1 byte ]  idLength
 /// [n bytes] UTF8 senderUserId (UUID v4)
+/// [n bytes] UTF8 messageId (UUID v4)
 /// [1 byte ]  messageType
 /// [4 bytes]  payloadLength (uint32)
 /// [n bytes]  payload (uint32)
 class Protocol {
-  static const _userIdLength = 36; // (UUID v4 utf8)
-  static const _lengthFieldBytes = 4;
+  static const _IdLength = 36; // (UUID v4 utf8)
+  static const _idLengthFieldBytes = 4;
 
   static Uint8List buildPacket({
     required String senderUserId,
     required MessageType type,
     required Uint8List payload,
+    required String messageId,
   }) {
     final userIdBytes = utf8.encode(senderUserId);
+    final messageIdBytes = utf8.encode(messageId);
     final userIdLength = userIdBytes.length;
 
     if (userIdLength > 255) {
       throw Exception('UserId too long');
     }
 
-    final lengthBytes = ByteData(_lengthFieldBytes)
+    final lengthBytes = ByteData(_idLengthFieldBytes)
       ..setUint32(0, payload.length);
 
     final buffer = BytesBuilder();
     buffer.addByte(userIdLength); // [1 byte] userId length
     buffer.add(userIdBytes); // [N bytes] userId
+    buffer.add(messageIdBytes); // [N bytes] messageId
     buffer.addByte(type.typeCode); // [1 byte] type
     buffer.add(lengthBytes.buffer.asUint8List()); // [4 bytes] payload length
     buffer.add(payload);
@@ -49,16 +53,20 @@ class Protocol {
 
     var offset = 0;
 
-    final userIdLength = data[offset];
+    final idLength = data[offset];
     offset += 1;
 
-    if (data.length < offset + userIdLength + 1 + _lengthFieldBytes) {
+    if (data.length < offset + idLength + 1 + _idLengthFieldBytes) {
       throw Exception('Packet too short for header');
     }
 
-    final userIdBytes = data.sublist(offset, offset + userIdLength);
+    final userIdBytes = data.sublist(offset, offset + idLength);
     final senderUserId = utf8.decode(userIdBytes);
-    offset += userIdLength;
+    offset += idLength;
+
+    final messageIdBytes = data.sublist(offset, offset + idLength);
+    final messageId = utf8.decode(messageIdBytes);
+    offset += idLength;
 
     final typeValue = data[offset];
     offset += 1;
@@ -66,18 +74,19 @@ class Protocol {
     final lengthView = ByteData.sublistView(
       data,
       offset,
-      offset + _lengthFieldBytes,
+      offset + _idLengthFieldBytes,
     );
     final payloadLength = lengthView.getUint32(0);
 
-    offset += _lengthFieldBytes;
-    
-    final payload = data.sublist(offset, payloadLength);
+    offset += _idLengthFieldBytes;
+
+    final payload = data.sublist(offset, offset + payloadLength);
 
     return Packet(
       senderUserId: senderUserId,
       messageType: MessageType.fromValue(typeValue),
       payload: payload,
+      messageId: messageId
     );
   }
 }

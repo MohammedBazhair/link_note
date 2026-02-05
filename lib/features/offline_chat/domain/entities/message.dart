@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:uuid/uuid.dart';
-
 import '../../data/models/packet.dart';
 
 enum MessageType {
@@ -36,7 +34,7 @@ class Message {
     required String senderId,
     required String myId,
   }) {
-    final messageId = const Uuid().v4();
+    final messageId = packet.messageId;
     final chatId = buildChatId(myId, senderId);
     final timeNow = DateTime.now().toUtc();
     return switch (packet.messageType) {

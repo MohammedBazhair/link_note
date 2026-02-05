@@ -47,7 +47,7 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
         serviceId: serviceId,
       );
 
-      Future.delayed(const Duration(seconds: 5), () async {
+      Future.delayed(const Duration(seconds: 7), () async {
         if (!isDiscovering) return;
 
         await stopDiscovery();
@@ -56,6 +56,7 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
         );
       });
     } catch (e) {
+      Logger.log(error: e);
       state = NearbyeErrorState(nearby: state.nearby, message: e.toString());
     }
   }
@@ -147,9 +148,13 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
     required Strategy strategy,
     required String serviceId,
   }) async {
-    await stopAll();
-    // Give the radio a full second to reset
-    await Future.delayed(const Duration(seconds: 1));
-    await beginNearbyCommunication(strategy: strategy, serviceId: serviceId);
+    try {
+      await stopAll();
+      // Give the radio a full second to reset
+      await Future.delayed(const Duration(seconds: 1));
+      await beginNearbyCommunication(strategy: strategy, serviceId: serviceId);
+    } catch (e) {
+      Logger.log(error: e);
+    }
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:async';
+
 import '../../../../core/constants/internal_constants/log.dart';
-import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../handlers/chat_handshake_handler.dart';
@@ -9,6 +9,7 @@ import '../handlers/image_transfer_handler.dart';
 import '../handlers/incoming_message_handler.dart';
 import '../models/incoming_frame.dart';
 import '../models/protocol.dart';
+import '../services/chat_session_manager.dart';
 import '../services/nearby_connection_manager.dart';
 import '../services/nearby_identity_manager.dart';
 
@@ -29,13 +30,7 @@ class ChatRepositoryImpl implements ChatRepository {
     );
 
     // Handshake recovery for already-connected peers
-    Future.delayed(const Duration(milliseconds: 500), () {
-      for (final endpointId in _connectionManager.knownEndpointIds) {
-        if (_connectionManager.isConnected(endpointId)) {
-          _handleConnectedChange({endpointId});
-        }
-      }
-    });
+    _recoverHandshakes();
   }
 
   final NearbyConnectionManager _connectionManager;
@@ -54,6 +49,7 @@ class ChatRepositoryImpl implements ChatRepository {
   late final StreamSubscription<Set<String>> _connectedSub;
 
   final Set<String> _handshakedEndpoints = {};
+  final Map<String, Timer?> _handshakeTimers = {};
 
   @override
   Stream<Message> get messages => _controller.stream;
@@ -61,21 +57,42 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   List<Message> get messageHistory => List.unmodifiable(_history);
 
+  Future<void> _recoverHandshakes() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    for (final endpointId in _connectionManager.knownEndpointIds) {
+      if (_connectionManager.isConnected(endpointId)) {
+        _handleConnectedChange({endpointId});
+      }
+    }
+  }
+
   void _handleConnectedChange(Set<String> connectedIds) {
     for (final endpointId in connectedIds) {
       if (_handshakedEndpoints.contains(endpointId)) continue;
+      if (_handshakeTimers.containsKey(endpointId)) continue;
 
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        if (_connectionManager.isConnected(endpointId)) {
-          Logger.log(message: 'Sending handshake to $endpointId');
-          _handshakeHandler.sendHandshake(endpointId);
-        }
-      });
-
-      _handshakedEndpoints.add(endpointId);
+      _handshakeTimers[endpointId] = Timer(
+        const Duration(milliseconds: 1500),
+        () {
+          if (_connectionManager.isConnected(endpointId)) {
+            _handshakeHandler.sendHandshake(endpointId);
+            _handshakedEndpoints.add(endpointId);
+          }
+          _handshakeTimers.remove(endpointId);
+        },
+      );
     }
 
-    _handshakedEndpoints.retainAll(connectedIds);
+    // Cancel timers for disconnected endpoints
+    final disconnected = _handshakeTimers.keys
+        .where((id) => !connectedIds.contains(id))
+        .toList();
+
+    for (final id in disconnected) {
+      _handshakeTimers[id]?.cancel();
+      _handshakeTimers.remove(id);
+      _handshakedEndpoints.remove(id);
+    }
   }
 
   void _handleIncoming(IncomingFrame frame) {
@@ -86,6 +103,7 @@ class ChatRepositoryImpl implements ChatRepository {
       final imageMessage = _imageHandler.tryBuildImageMessage(
         payloadId: frame.payloadId!,
         myUserId: _identityManager.localIdentity.uuid,
+        messageId: frame.messageId,
       );
 
       if (imageMessage != null) {
@@ -100,12 +118,6 @@ class ChatRepositoryImpl implements ChatRepository {
 
     try {
       final packet = Protocol.parsePacket(frame.bytes!);
-
-      Logger.log(
-        message:
-            'Incoming packet: ${packet.messageType} '
-            'from ${packet.senderUserId}',
-      );
 
       // Handshake packets are handled separately
       if (packet.messageType == MessageType.handshake) {

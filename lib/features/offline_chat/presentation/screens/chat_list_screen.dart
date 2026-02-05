@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +18,7 @@ class ChatListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myUserId = ref.read(getUserIdProvider);
-    if (myUserId == null) return const SignInRequiredWidget();
+    if (myUserId == null) return const AuthenticationRequiredScreen();
 
     final messages = ref.watch(chatControllerProvider);
 
@@ -72,31 +74,33 @@ class ChatListScreen extends ConsumerWidget {
   }
 }
 
-class SignInRequiredWidget extends StatelessWidget {
-  const SignInRequiredWidget({super.key});
+class AuthenticationRequiredScreen extends StatelessWidget {
+  const AuthenticationRequiredScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('الدردشات')),
       body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(24),
-          children: [
-            const Text(
-              'يجب أن تكون مسجل الدخول حتى تستطيع الدردشة',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                context.pushTo(const SignInScreen());
-              },
-              child: const Text('تسجيل الدخول'),
-            ),
-          ],
-        ),
+        child: !Platform.isAndroid
+            ? const Text('هذه الميزة متاحة فقط على أندرويد')
+            : ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(24),
+                children: [
+                  const Text(
+                    'يجب أن تكون مسجل الدخول حتى تستطيع الدردشة',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.pushTo(const SignInScreen());
+                    },
+                    child: const Text('تسجيل الدخول'),
+                  ),
+                ],
+              ),
       ),
     );
   }

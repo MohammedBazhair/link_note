@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:uuid/uuid.dart';
 
-import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/message.dart';
 import '../models/protocol.dart';
+import '../services/chat_session_manager.dart';
 import '../services/nearby_connection_manager.dart';
 import '../services/nearby_identity_manager.dart';
 
@@ -27,14 +27,6 @@ class ChatSendingHandler {
     final session = _sessionManager.resolveSession(peerUserId);
     if (session == null) return null;
 
-    final packet = Protocol.buildPacket(
-      senderUserId: _identityManager.localIdentity.uuid,
-      type: MessageType.text,
-      payload: Uint8List.fromList(utf8.encode(text)),
-    );
-
-    await _connectionManager.sendBytes(session.peerAddress, packet);
-
     final message = Message(
       id: const Uuid().v4(),
       senderUserId: _identityManager.localIdentity.uuid,
@@ -46,6 +38,15 @@ class ChatSendingHandler {
         peerUserId,
       ),
     );
+
+    final packet = Protocol.buildPacket(
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.text,
+      payload: Uint8List.fromList(utf8.encode(text)),
+      messageId: message.id,
+    );
+
+    await _connectionManager.sendBytes(session.peerAddress, packet);
 
     return message;
   }
@@ -64,14 +65,6 @@ class ChatSendingHandler {
 
     if (payloadId == null) return null;
 
-    final metadataPacket = Protocol.buildPacket(
-      senderUserId: _identityManager.localIdentity.uuid,
-      type: MessageType.image,
-      payload: Uint8List.fromList(utf8.encode('$payloadId')),
-    );
-
-    await _connectionManager.sendBytes(session.peerAddress, metadataPacket);
-
     final message = Message(
       id: const Uuid().v4(),
       senderUserId: _identityManager.localIdentity.uuid,
@@ -83,6 +76,15 @@ class ChatSendingHandler {
         peerUserId,
       ),
     );
+
+    final metadataPacket = Protocol.buildPacket(
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.image,
+      payload: Uint8List.fromList(utf8.encode('$payloadId')),
+      messageId: message.id,
+    );
+
+    await _connectionManager.sendBytes(session.peerAddress, metadataPacket);
 
     return message;
   }
