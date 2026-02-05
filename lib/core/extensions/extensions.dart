@@ -50,13 +50,16 @@ extension QrDataMinpulation on String {
 }
 
 extension DateTimeFormats on DateTime {
-  String get formatedChatTime {
+ String get formattedChatTime {
     final localDate = toLocal();
-
     final hour = localDate.hour;
     final minute = localDate.minute;
+
     final ampm = hour >= 12 ? 'PM' : 'AM';
-    final hourFormatted = hour > 12 ? hour - 12 : hour;
-    return '$hourFormatted:$minute $ampm';
+    final hourFormatted = hour % 12 == 0 ? 12 : hour % 12;
+    final minuteFormatted = minute.toString().padLeft(2, '0');
+
+    return '$hourFormatted:$minuteFormatted $ampm';
   }
+
 }

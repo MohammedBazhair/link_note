@@ -6,11 +6,7 @@ import '../../../../user/presentation/widgets/user_avatar.dart';
 import '../chat/chat_appbar.dart';
 
 class UserAvatarWithStatus extends StatelessWidget {
-  const UserAvatarWithStatus({
-    super.key,
-    required this.params,
-    this.radius,
-  });
+  const UserAvatarWithStatus({super.key, required this.params, this.radius});
 
   final ChatParams params;
   final double? radius;
@@ -23,9 +19,9 @@ class UserAvatarWithStatus extends StatelessWidget {
 
         if (params.isConnected)
           const Positioned(
-            left: 7,
+            left: 3,
             bottom: 2,
-            child: Icon(Icons.circle, color: Colors.green, size: 16),
+            child: Icon(Icons.circle, color: Colors.green, size: 13),
           ),
       ],
     );

@@ -21,8 +21,6 @@ class ChatUserTile extends ConsumerWidget {
     // This tile will ONLY rebuild when this specific user's connection status changes
     final isConnected = ref.watch(isPeerConnectedProvider(peerId));
 
-    if (identity == null) return const SizedBox.shrink();
-
     final params = ChatParams(identity: identity, isConnected: isConnected);
 
     return ListTile(

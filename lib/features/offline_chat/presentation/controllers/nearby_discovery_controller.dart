@@ -106,8 +106,7 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
         nearby: state.nearby.copyWith(isAdvertising: true),
       );
       return true;
-    } on AlreadyRunnedException catch (e) {
-      state = NearbyeErrorState(nearby: state.nearby, message: e.message);
+    } on AlreadyRunnedException catch (_) {
       return true;
     } catch (e) {
       state = NearbyeErrorState(nearby: state.nearby, message: e.toString());
@@ -118,8 +117,8 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
 
   /// Stop discovery and advertising, clean up resources.
   Future<void> stopAll() async {
-    await _nearbyManager.stopDiscovery();
-    await _nearbyManager.stopAdvertising();
+    await stopDiscovery();
+    await stopAdvertising();
   }
 
   Future<void> stopAdvertising() async {

@@ -10,10 +10,16 @@ import 'message_text.dart';
 import 'tail_message_paint.dart';
 
 class MessageWidget extends StatelessWidget {
-  const MessageWidget({super.key, required this.isMe, required this.message});
+  const MessageWidget({
+    super.key,
+    required this.isMe,
+    required this.message,
+    required this.hasTail,
+  });
 
   final bool isMe;
   final Message message;
+  final bool hasTail;
 
   @override
   Widget build(BuildContext context) {
@@ -25,18 +31,22 @@ class MessageWidget extends StatelessWidget {
           ? AlignmentDirectional.centerStart
           : AlignmentDirectional.centerEnd,
       child: CustomPaint(
-        painter: TailMessagePaint(isMe: isMe, color: backgroundColor),
+        painter: hasTail
+            ? TailMessagePaint(isMe: isMe, color: backgroundColor)
+            : null,
 
         child: Container(
-          padding: EdgeInsets.all(message.type == MessageType.image ? 5 : 12),
+          padding: EdgeInsets.all(message.type == MessageType.image ? 3 : 12),
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadiusDirectional.only(
-              topStart: const Radius.circular(13),
-              topEnd: const Radius.circular(13),
-              bottomStart: isMe ? Radius.zero : const Radius.circular(13),
-              bottomEnd: !isMe ? Radius.zero : const Radius.circular(13),
-            ),
+            borderRadius: !hasTail
+                ? BorderRadius.circular(13)
+                : BorderRadiusDirectional.only(
+                    topStart: const Radius.circular(13),
+                    topEnd: const Radius.circular(13),
+                    bottomStart: isMe ? Radius.zero : const Radius.circular(13),
+                    bottomEnd: !isMe ? Radius.zero : const Radius.circular(13),
+                  ),
           ),
           child: MessageContnetWidget(message: message, isMe: isMe),
         ),
@@ -85,13 +95,20 @@ class MessageImage extends StatelessWidget {
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(7.5)),
         child: Stack(
           children: [
-            Image.file(File(message.imagePath!), width: 250),
+            AspectRatio(
+              aspectRatio: 4 / 5,
+              child: Image.file(
+                File(message.imagePath!),
+                width: 250,
+                fit: BoxFit.cover,
+              ),
+            ),
 
             PositionedDirectional(
               bottom: 8,
               end: 9,
               child: Text(
-                message.time.formatedChatTime,
+                message.time.formattedChatTime,
                 style: const TextStyle(
                   shadows: [
                     Shadow(blurRadius: 35, color: Color(0x993A3A3A)),

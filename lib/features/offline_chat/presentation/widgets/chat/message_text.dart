@@ -86,7 +86,7 @@ class _MessageTextState extends State<MessageText> {
         ),
 
         Text(
-          widget.time.formatedChatTime,
+          widget.time.formattedChatTime,
           style: TextStyle(
             fontSize: 9,
             color: Colors.white.withOpacity(0.8),

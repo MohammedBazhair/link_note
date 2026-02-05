@@ -25,6 +25,7 @@ class Protocol {
   }) {
     final userIdBytes = utf8.encode(senderUserId);
     final messageIdBytes = utf8.encode(messageId);
+    final messageIdLength = messageIdBytes.length;
     final userIdLength = userIdBytes.length;
 
     if (userIdLength > 255) {
@@ -37,6 +38,7 @@ class Protocol {
     final buffer = BytesBuilder();
     buffer.addByte(userIdLength); // [1 byte] userId length
     buffer.add(userIdBytes); // [N bytes] userId
+    buffer.addByte(messageIdLength); // [1 byte] messageId length
     buffer.add(messageIdBytes); // [N bytes] messageId
     buffer.addByte(type.typeCode); // [1 byte] type
     buffer.add(lengthBytes.buffer.asUint8List()); // [4 bytes] payload length
@@ -53,20 +55,19 @@ class Protocol {
 
     var offset = 0;
 
-    final idLength = data[offset];
-    offset += 1;
+    final userIdLength  = data[offset++];
 
-    if (data.length < offset + idLength + 1 + _idLengthFieldBytes) {
-      throw Exception('Packet too short for header');
-    }
+    
 
-    final userIdBytes = data.sublist(offset, offset + idLength);
+    final userIdBytes = data.sublist(offset, offset + userIdLength);
     final senderUserId = utf8.decode(userIdBytes);
-    offset += idLength;
+    offset +=userIdLength;
 
-    final messageIdBytes = data.sublist(offset, offset + idLength);
+    final messageIdLength = data[offset++];
+
+    final messageIdBytes = data.sublist(offset, offset + messageIdLength);
     final messageId = utf8.decode(messageIdBytes);
-    offset += idLength;
+    offset += messageIdLength;
 
     final typeValue = data[offset];
     offset += 1;

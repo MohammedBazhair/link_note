@@ -19,10 +19,12 @@ class ChatScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(chatControllerProvider);
     final manager = ref.watch(nearbyConnectionManagerProvider);
+    final isConnected = ref.watch(isPeerConnectedProvider(peerId));
+    final identity = manager.getIdentityByUserId(peerId);
 
     final chatAppbarParams = ChatParams(
-      identity: manager.getIdentityByUserId(peerId)!,
-      isConnected: manager.isConnected(peerId),
+      identity: identity,
+      isConnected: isConnected,
     );
     return Scaffold(
       body: Column(

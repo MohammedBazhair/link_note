@@ -153,8 +153,12 @@ class NearbyConnectionManager {
     _endpointManager.markDisconnected(endpointId);
   }
 
-  NearbyIdentityModel? getIdentityByUserId(String userId) {
-    return _endpointManager.getIdentityByUserId(userId);
+  NearbyIdentityModel getIdentityByUserId(String userId) {
+    return _endpointManager.getIdentityByUserId(userId) ??
+        NearbyIdentityModel(
+          uuid: userId,
+          displayName: getDisplayNameByUserId(userId),
+        );
   }
 
   String? getEndpointIdByUserId(String userUuid) {
