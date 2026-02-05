@@ -112,6 +112,9 @@ class NearbyConnectionManager {
   bool isConnected(String endpointId) =>
       _endpointManager.isConnected(endpointId);
 
+  bool isUserIdConnected(String userId) =>
+      _endpointManager.isUserIdConnected(userId);
+
   Future<void> connect(String endpointId) async {
     if (isConnected(endpointId)) return;
 
@@ -120,8 +123,8 @@ class NearbyConnectionManager {
     await Future.delayed(const Duration(milliseconds: 500));
 
     try {
-    final identity = _identityManager.localIdentityJson;
-      
+      final identity = _identityManager.localIdentityJson;
+
       await _adapter.requestConnection(
         identity,
         endpointId,

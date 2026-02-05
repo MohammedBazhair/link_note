@@ -11,7 +11,34 @@ class NearbyEndpointManager {
   bool isConnected(String endpointId) =>
       _connectedEndpointIds.contains(endpointId);
 
+  bool isUserIdConnected(String userId) {
+    return _endpoints.entries.any(
+      (e) => e.value.uuid == userId && _connectedEndpointIds.contains(e.key),
+    );
+  }
+
   void addEndpoint(String endpointId, NearbyIdentityModel identity) {
+    // Check if we already have a CONNECTED session with this user UUID
+    final activeId = _endpoints.entries
+        .where(
+          (e) =>
+              e.value.uuid == identity.uuid &&
+              _connectedEndpointIds.contains(e.key),
+        )
+        .map((e) => e.key)
+        .firstOrNull;
+
+    if (activeId != null && activeId != endpointId) {
+      // Keep the active connection, ignore new discovery for same UUID
+      return;
+    }
+
+    // Remove any existing disconnected entries for same UUID to prevent duplicates
+    _endpoints.removeWhere(
+      (id, existingIdentity) =>
+          existingIdentity.uuid == identity.uuid && id != endpointId,
+    );
+
     _endpoints[endpointId] = identity;
   }
 

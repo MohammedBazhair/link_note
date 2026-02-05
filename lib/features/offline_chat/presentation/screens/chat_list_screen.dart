@@ -45,7 +45,10 @@ class ChatListScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final peerId = chatUserIds[index];
                 final username = manager.getDisplayNameByUserId(peerId);
-                final isconnected = manager.isConnected(peerId);
+                // Watch for reactivity
+                ref.watch(connectedEndpointsProvider);
+                final isconnected = manager.isUserIdConnected(peerId);
+
                 return ListTile(
                   leading: UserAvatarWithStatus(connected: isconnected),
                   title: Text(username),

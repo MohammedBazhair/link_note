@@ -49,7 +49,7 @@ class ChatAppbar extends StatelessWidget {
               spacing: 3,
               children: [
                 Text(
-                  params.personName * 10,
+                  params.personName ,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

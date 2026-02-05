@@ -22,9 +22,11 @@ class NearbyDeviceCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connected = ref
-        .watch(nearbyConnectionManagerProvider)
-        .isConnected(endpointId);
+    // REFIX: Watch the stream provider to make the UI reactive to connection changes
+    final connectedEndpoints =
+        ref.watch(connectedEndpointsProvider).value ?? {};
+    final connected = connectedEndpoints.contains(endpointId);
+
     final myUserId = ref.read(getUserIdProvider)!;
 
     return ListTile(
@@ -52,12 +54,7 @@ class NearbyDeviceCard extends ConsumerWidget {
         );
         sessionManager.addSession(session);
 
-        await context.pushTo(
-          ChatScreen(
-            peerId: identity.uuid,
-            myId: myUserId,
-          ),
-        );
+        await context.pushTo(ChatScreen(peerId: identity.uuid, myId: myUserId));
       },
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -19,25 +21,35 @@ class MessageText extends StatefulWidget {
 }
 
 class _MessageTextState extends State<MessageText> {
-  bool get isShowMore => widget.text.length != showedText.length;
+  TapGestureRecognizer? _gestureRecognizer;
 
   String showedText = '';
   int offset = 0;
+
+  bool get isShowMore => widget.text.length != showedText.length;
+
   @override
   void initState() {
     super.initState();
-    showedText += widget.text.substring(0, 1000);
+    _gestureRecognizer = TapGestureRecognizer()..onTap = addMoreText;
+
+    offset = min(1000, widget.text.length);
+    showedText += widget.text.substring(0, offset);
   }
 
   void addMoreText() {
     final nextOffset = offset + 1000;
-    final endOffset = nextOffset > widget.text.length
-        ? widget.text.length
-        : nextOffset;
+    final endOffset = min(nextOffset, widget.text.length);
     setState(() {
-      offset = endOffset;
       showedText += widget.text.substring(offset, endOffset);
+      offset = endOffset;
     });
+  }
+
+  @override
+  void dispose() {
+    _gestureRecognizer?.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,7 +79,7 @@ class _MessageTextState extends State<MessageText> {
                     fontWeight: FontWeight.bold,
                     color: Colors.lightBlueAccent,
                   ),
-                  recognizer: TapGestureRecognizer()..onTap = addMoreText,
+                  recognizer: _gestureRecognizer,
                 ),
             ],
           ),
