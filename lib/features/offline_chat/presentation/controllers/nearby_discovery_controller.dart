@@ -3,21 +3,21 @@ import 'package:nearby_connections/nearby_connections.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../../data/datasource/nearby_service.dart';
+import '../../data/services/nearby_connection_manager.dart';
 import '../../domain/entities/nearby_identity.dart';
-import 'chat_providers.dart';
+import 'nearby_providers.dart';
 import 'nearby_state.dart';
 
 /// Controller to manage Nearby Connections discovery and advertising.
 class NearbyDiscoveryController extends Notifier<NearbyState> {
-  late final NearbyConnectionService _nearbyManager;
+  late final NearbyConnectionManager _nearbyManager;
 
   Stream<Map<String, NearbyIdentity>> get endpoints =>
       _nearbyManager.allKnownEndpoints;
 
   @override
   NearbyState build() {
-    _nearbyManager = ref.read(connectionManagerProvider);
+    _nearbyManager = ref.read(nearbyConnectionManagerProvider);
 
     ref.onDispose(stopAll);
 
@@ -40,18 +40,14 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
     required String serviceId,
   }) async {
     try {
-      print('1');
       await startAdvertising(strategy: strategy, serviceId: serviceId);
 
-      print('2');
       final isDiscovering = await startDiscovery(
         strategy: strategy,
         serviceId: serviceId,
       );
 
-      print('3');
       Future.delayed(const Duration(seconds: 5), () async {
-        print('مرت 5 ث');
         if (!isDiscovering) return;
 
         await stopDiscovery();

@@ -8,56 +8,48 @@ import '../../../../core/errors/result.dart';
 import '../di_heplers.dart';
 import '../models/incoming_frame.dart';
 import '../models/nearby_identity_model.dart';
+import 'nearby_endpoint_manager.dart';
+import 'nearby_identity_manager.dart';
+import 'nearby_streams_notifier.dart';
+import 'payload_handler.dart';
 
 typedef IdentityMap = Map<String, NearbyIdentityModel>;
 
-/// Handles Nearby Connections (advertising, discovery, connections, payloads)
-class NearbyConnectionService {
-  NearbyConnectionService(this._adapter, this._localIdentity);
+/// Main service orchestrating all nearby connection operations
+class NearbyConnectionManager {
+  NearbyConnectionManager(this._adapter,  this._identityManager, this._endpointManager, this._payloadManager, this._streamNotifier);
 
   final Nearby _adapter;
-  NearbyIdentityModel _localIdentity;
+  final NearbyIdentityManager _identityManager;
+  final NearbyEndpointManager _endpointManager;
+  final NearbyPayloadManager _payloadManager;
+  final NearbyStreamNotifier _streamNotifier;
 
-  NearbyIdentityModel get localIdentity => _localIdentity;
+  NearbyIdentityModel get localIdentity => _identityManager.localIdentity;
 
-  final IdentityMap _endpoints = {};
-  final Set<String> _connectedEndpointIds = {};
-  final Map<int, String> _payloadPaths = {};
+  Stream<IncomingFrame> get incomingFrames => _payloadManager.incomingFrames;
 
-  final _incomingStreamController = StreamController<IncomingFrame>.broadcast();
-  Stream<IncomingFrame> get incomingFrames => _incomingStreamController.stream;
-
-  final _discoveredStreamController = StreamController<IdentityMap>.broadcast();
   Stream<IdentityMap> get discoveredEndpoints =>
-      _discoveredStreamController.stream;
+      _streamNotifier.discoveredEndpoints;
 
-  final _connectedStreamController = StreamController<Set<String>>.broadcast();
   Stream<Set<String>> get connectedEndpointsStream =>
-      _connectedStreamController.stream;
+      _streamNotifier.connectedEndpointsStream;
 
-  final _allKnownStreamController = StreamController<IdentityMap>.broadcast();
-  Stream<IdentityMap> get allKnownEndpoints => _allKnownStreamController.stream;
+  Stream<IdentityMap> get allKnownEndpoints =>
+      _streamNotifier.allKnownEndpoints;
 
-  Iterable<String> get knownEndpointIds => _endpoints.keys;
+  Iterable<String> get knownEndpointIds => _endpointManager.knownEndpointIds;
 
   void updateLocalName(String newName) {
-    _localIdentity = _localIdentity.copyWith(displayName: newName);
+    _identityManager.updateLocalName(newName);
   }
 
   void updateAvatar(Uint8List avatarBytes) {
-    _localIdentity = _localIdentity.copyWith(avatarBytes: avatarBytes);
+    _identityManager.updateAvatar(avatarBytes);
   }
 
   void updateUuidMapping({required String uuid, required String name}) {
-    for (final element in _endpoints.entries) {
-      if (element.value.uuid == uuid) {
-        _endpoints.update(
-          element.key,
-          (identity) => identity.copyWith(displayName: name),
-        );
-        return;
-      }
-    }
+    _endpointManager.updateUuidMapping(uuid: uuid, name: name);
   }
 
   Future<Result<bool>> initializeDependencies() async {
@@ -81,14 +73,11 @@ class NearbyConnectionService {
     required String serviceId,
   }) {
     return _adapter.startAdvertising(
-      _localIdentity.toJson(),
+      _identityManager.localIdentity.toJson(),
       strategy,
       serviceId: serviceId,
-      // عندما يطلب جهاز الاتصال
       onConnectionInitiated: _handleIncomingConnection,
-      // نتيجة محاولة الاتصال (نجاح/رفض/فشل).
       onConnectionResult: _handleConnectionResult,
-      //  عند انتهاء الاتصال
       onDisconnected: _handleDisconnection,
     );
   }
@@ -98,11 +87,10 @@ class NearbyConnectionService {
     required String serviceId,
   }) {
     return _adapter.startDiscovery(
-      _localIdentity.toJson(),
+      _identityManager.localIdentity.toJson(),
       strategy,
       serviceId: serviceId,
       onEndpointFound: _handleEndpointFound,
-
       onEndpointLost: _handleEndpointLost,
     );
   }
@@ -117,20 +105,18 @@ class NearbyConnectionService {
   }
 
   bool isConnected(String endpointId) =>
-      _connectedEndpointIds.contains(endpointId);
+      _endpointManager.isConnected(endpointId);
 
   Future<void> connect(String endpointId) async {
     if (isConnected(endpointId)) return;
 
-    // PRO TIP: On some devices, stopping discovery before connecting improves reliability.
     await stopDiscovery();
 
-    // Give the radio a moment to stabilize
     await Future.delayed(const Duration(milliseconds: 500));
 
     try {
       await _adapter.requestConnection(
-        _localIdentity.toJson(),
+        _identityManager.localIdentity.toJson(),
         endpointId,
         onConnectionInitiated: _handleIncomingConnection,
         onConnectionResult: _handleConnectionResult,
@@ -145,44 +131,28 @@ class NearbyConnectionService {
   }
 
   void _markConnected(String endpointId) {
-    _connectedEndpointIds.add(endpointId);
-    _connectedStreamController.add(Set.from(_connectedEndpointIds));
+    _endpointManager.markConnected(endpointId);
+    _streamNotifier.notifyConnectedEndpoints(
+      _endpointManager.getConnectedEndpointsCopy(),
+    );
     _notifyKnownEndpoints();
   }
 
   Future<void> disconnect(String endpointId) async {
     await _adapter.disconnectFromEndpoint(endpointId);
-    _connectedEndpointIds.remove(endpointId);
+    _endpointManager.markDisconnected(endpointId);
   }
 
   String? getEndpointIdByUserId(String userUuid) {
-    try {
-      final result = _endpoints.entries.firstWhere(
-        (e) => e.value.uuid == userUuid,
-      );
-
-      return result.key;
-    } on StateError catch (_) {
-      return null;
-    }
+    return _endpointManager.getEndpointIdByUserId(userUuid);
   }
 
   String getDisplayNameByEndpoint(String endpointId) {
-    final identity = _endpoints[endpointId];
-
-    return identity?.displayName ?? 'غير معروف';
+    return _endpointManager.getDisplayNameByEndpoint(endpointId);
   }
 
   String getDisplayNameByUserId(String userId) {
-    try {
-      final result = _endpoints.entries.firstWhere(
-        (e) => e.value.uuid == userId,
-      );
-
-      return result.key;
-    } on StateError catch (_) {
-      return '...';
-    }
+    return _endpointManager.getDisplayNameByUserId(userId);
   }
 
   Future<void> sendBytes(String endpointId, Uint8List bytes) async {
@@ -202,7 +172,7 @@ class NearbyConnectionService {
 
   void _handleIncomingConnection(String endpointId, ConnectionInfo info) async {
     final identity = NearbyIdentityModel.fromJson(info.endpointName);
-    _endpoints[endpointId] = identity;
+    _endpointManager.addEndpoint(endpointId, identity);
     _notifyKnownEndpoints();
     await acceptConnection(endpointId);
   }
@@ -238,7 +208,7 @@ class NearbyConnectionService {
     String serviceId,
   ) {
     final identity = NearbyIdentityModel.fromJson(endpointName);
-    _endpoints[endpointId] = identity;
+    _endpointManager.addEndpoint(endpointId, identity);
     _notifyKnownEndpoints();
   }
 
@@ -249,74 +219,36 @@ class NearbyConnectionService {
   void _handlePayloadReceived(String endpointId, Payload payload) {
     if (payload.type == PayloadType.BYTES && payload.bytes == null) return;
 
-    // HEAL STATE: If we got a payload, we must be connected
-    if (!_connectedEndpointIds.contains(endpointId)) {
+    if (!_endpointManager.isConnected(endpointId)) {
       _markConnected(endpointId);
     }
 
-    switch (payload.type) {
-      case PayloadType.BYTES:
-        _incomingStreamController.add(
-          IncomingFrame(
-            peerEndpointId: endpointId,
-            payloadId: payload.id,
-            bytes: payload.bytes,
-          ),
-        );
-      case PayloadType.FILE:
-        Logger.log(
-          message:
-              'FILE payload received: ${payload.id} path: ${payload.filePath}',
-        );
-        if (payload.filePath != null) {
-          _payloadPaths[payload.id] = payload.filePath!;
-        }
-      case PayloadType.NONE:
-      case PayloadType.STREAM:
-    }
+    _payloadManager.handlePayloadReceived(endpointId, payload);
   }
 
   void _handlePayloadTransfer(String endpointId, PayloadTransferUpdate update) {
-    switch (update.status) {
-      case PayloadStatus.IN_PROGRESS:
-        break;
-      case PayloadStatus.SUCCESS:
-        final path = _payloadPaths.remove(update.id);
-
-        _incomingStreamController.add(
-          IncomingFrame(
-            peerEndpointId: endpointId,
-            payloadId: update.id,
-            filePath: path,
-          ),
-        );
-
-      case PayloadStatus.FAILURE:
-      case PayloadStatus.CANCELED:
-        _payloadPaths.remove(update.id);
-
-      case PayloadStatus.NONE:
-    }
+    _payloadManager.handlePayloadTransfer(endpointId, update);
   }
 
   void _removeEndpoint(String endpointId) {
-    _connectedEndpointIds.remove(endpointId);
-    _endpoints.remove(endpointId);
-    _connectedStreamController.add(Set.from(_connectedEndpointIds));
+    _endpointManager.removeEndpoint(endpointId);
+    _streamNotifier.notifyConnectedEndpoints(
+      _endpointManager.getConnectedEndpointsCopy(),
+    );
     _notifyKnownEndpoints();
   }
 
   void _notifyKnownEndpoints() {
-    final copy = IdentityMap.from(_endpoints);
-    _discoveredStreamController.add(copy);
-    _allKnownStreamController.add(Map.from(_endpoints));
+    final copy = _endpointManager.getEndpointsCopy();
+    _streamNotifier.notifyDiscoveredEndpoints(copy);
+    _streamNotifier.notifyAllKnownEndpoints(
+      _endpointManager.getEndpointsCopy(),
+    );
   }
 
   Future<void> dispose() async {
     await stopAll();
-    await _incomingStreamController.close();
-    await _discoveredStreamController.close();
-    await _connectedStreamController.close();
-    await _allKnownStreamController.close();
+    await _payloadManager.dispose();
+    await _streamNotifier.dispose();
   }
 }

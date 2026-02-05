@@ -5,6 +5,7 @@ import '../../../../core/extensions/extensions.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
 import '../controllers/chat_providers.dart';
+import '../controllers/nearby_providers.dart';
 import '../widgets/common/user_avatar_with_status.dart';
 import 'chat_screen.dart';
 import 'nearby_devices_screen.dart';
@@ -28,7 +29,7 @@ class ChatListScreen extends ConsumerWidget {
         )
         .toSet()
         .toList();
-    final manager = ref.watch(connectionManagerProvider);
+    final manager = ref.watch(nearbyConnectionManagerProvider);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/message.dart';
 import '../controllers/chat_providers.dart';
+import '../controllers/nearby_providers.dart';
 import '../widgets/chat/chat_appbar.dart';
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_list.dart';
@@ -17,7 +18,7 @@ class ChatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(chatControllerProvider);
-    final manager = ref.watch(connectionManagerProvider);
+    final manager = ref.watch(nearbyConnectionManagerProvider);
     final displayName = manager.getDisplayNameByUserId(peerId);
 
     final chatAppbarParams = ChatAppbarParams(

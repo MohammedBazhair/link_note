@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/colors/colors.dart';
 import '../../../domain/entities/nearby_identity.dart';
 import '../../controllers/chat_providers.dart';
+import '../../controllers/nearby_providers.dart';
 import 'nearby_device_card.dart';
 import 'no_device_widget.dart';
 
@@ -12,7 +13,7 @@ class NearbyDevicesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final endpointsAsync = ref.watch(nearbyEndpointsProvider);
+    final endpointsAsync = ref.watch(allKnownEndpointsProvider);
 
     final isDiscovering = ref
         .watch(nearbyDiscoveryControllerProvider)

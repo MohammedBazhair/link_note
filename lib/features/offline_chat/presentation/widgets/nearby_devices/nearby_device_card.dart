@@ -6,6 +6,7 @@ import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/chat_session.dart';
 import '../../../domain/entities/nearby_identity.dart';
 import '../../controllers/chat_providers.dart';
+import '../../controllers/nearby_providers.dart';
 import '../../screens/chat_screen.dart';
 import '../common/user_avatar_with_status.dart';
 
@@ -22,7 +23,7 @@ class NearbyDeviceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connected = ref
-        .watch(connectionManagerProvider)
+        .watch(nearbyConnectionManagerProvider)
         .isConnected(endpointId);
     final myUserId = ref.read(getUserIdProvider)!;
 
@@ -34,7 +35,7 @@ class NearbyDeviceCard extends ConsumerWidget {
       onTap: () async {
         if (!connected) {
           try {
-            await ref.read(connectionManagerProvider).connect(endpointId);
+            await ref.read(nearbyConnectionManagerProvider).connect(endpointId);
           } catch (e) {
             context.showSnakbar('فشل الاتصال');
             return;

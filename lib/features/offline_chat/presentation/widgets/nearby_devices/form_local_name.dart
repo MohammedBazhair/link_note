@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../controllers/chat_providers.dart';
+import '../../controllers/nearby_providers.dart';
 
 class FormLocalName extends StatelessWidget {
   const FormLocalName({super.key, required this.nameController});
@@ -25,7 +24,7 @@ class FormLocalName extends StatelessWidget {
           builder: (context, ref, child) {
             return ElevatedButton(
               onPressed: () {
-                final controller = ref.read(connectionManagerProvider);
+                final controller = ref.read(nearbyConnectionManagerProvider);
                 controller.updateLocalName(nameController.text);
                 Navigator.pop(context);
               },
