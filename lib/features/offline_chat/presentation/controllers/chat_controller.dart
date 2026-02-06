@@ -3,25 +3,32 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../audio/presentation/controller/audio_provider.dart';
-import '../../domain/entities/message.dart';
+import '../../../user/presentation/controllers/user_providers.dart';
 import 'chat_providers.dart';
+import 'chat_state.dart';
 
 /// Presentation-layer controller that exposes a flat list of all messages
 /// across active chat sessions. UI widgets are responsible for filtering
 /// by `chatId` where needed.
-class ChatController extends Notifier<List<Message>> {
+class ChatController extends Notifier<ChatState> {
   @override
-  List<Message> build() {
+  ChatState build() {
     final repo = ref.watch(chatRepository);
+    final myUserId = ref.watch(getUserIdProvider);
     Timer? timer;
     // Initial history
-    final history = repo.messageHistory;
-    final seenIds = <String>{for (final m in history) m.id};
+    final history = repo.chatsHistory;
+    final myChatFriendsIds = repo.myChatFriendsIds(myUserId);
 
-    final sub = repo.messages.listen((msg) async {
-      if (seenIds.contains(msg.id)) return;
-      seenIds.add(msg.id);
-      state = [...state, msg];
+    final sub = repo.messages.listen((message) async {
+      final isNewChatRoom = state.isNewChatRoom(message.chatId);
+      final myFriendsIds = isNewChatRoom
+          ? [...state.myChatFriendsIds, message.senderUserId]
+          : state.myChatFriendsIds;
+      state = state.copyWith(
+        chatRooms: state.chatRooms,
+        myChatFriendsIds: myFriendsIds,
+      );
       if (timer?.isActive ?? false) return;
 
       timer = Timer(const Duration(seconds: 3), () {});
@@ -33,11 +40,16 @@ class ChatController extends Notifier<List<Message>> {
       timer?.cancel();
     });
 
-    return history;
+    return ChatState(
+      chatRooms: history,
+      myChatFriendsIds: myChatFriendsIds.toList(),
+    );
   }
 
-  void sendText({required String peerId, required String text,
-     String? replyToMessageId,
+  void sendText({
+    required String peerId,
+    required String text,
+    String? replyToMessageId,
   }) {
     ref.read(chatRepository).sendText(peerUserId: peerId, text: text);
   }

@@ -18,17 +18,7 @@ class ChatListScreen extends ConsumerWidget {
     final myUserId = ref.read(getUserIdProvider);
     if (myUserId == null) return const AuthenticationRequiredScreen();
 
-    final messages = ref.watch(chatControllerProvider);
-
-    // قائمة جميع المستخدمين الذين تراسلناهم
-    final chatUserIds = messages
-        .map(
-          (m) => m.senderUserId == myUserId
-              ? _getOtherId(chatId: m.chatId, myUserId: myUserId)
-              : m.senderUserId,
-        )
-        .toSet()
-        .toList();
+    final chatUserIds = ref.watch(getMyFriendsIdsProvider);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
@@ -54,11 +44,7 @@ class ChatListScreen extends ConsumerWidget {
     );
   }
 
-  String _getOtherId({required String chatId, required String myUserId}) {
-    final parts = chatId.split('_');
-    if (parts.length != 2) return chatId;
-    return parts[0] == myUserId ? parts[1] : parts[0];
-  }
+ 
 }
 
 class AuthenticationRequiredScreen extends StatelessWidget {

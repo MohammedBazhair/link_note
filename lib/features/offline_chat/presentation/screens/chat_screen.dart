@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/message.dart';
-import '../controllers/chat_providers.dart';
 import '../controllers/nearby_providers.dart';
 import '../widgets/chat/chat_appbar.dart';
 import '../widgets/chat/chat_input.dart';
@@ -17,7 +16,6 @@ class ChatScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messages = ref.watch(chatControllerProvider);
     final manager = ref.watch(nearbyConnectionManagerProvider);
     final isConnected = ref.watch(isPeerConnectedProvider(peerId));
     final identity = manager.getIdentityByUserId(peerId);
@@ -32,7 +30,6 @@ class ChatScreen extends ConsumerWidget {
           SafeArea(child: ChatAppbar(chatAppbarParams)),
           Expanded(
             child: MessageList(
-              messages: messages,
               chatId: Message.buildChatId(myId, peerId),
             ),
           ),

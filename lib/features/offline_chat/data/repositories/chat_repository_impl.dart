@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/repositories/chat_repository.dart';
+import '../../presentation/controllers/chat_state.dart';
 import '../handlers/chat_handshake_handler.dart';
 import '../handlers/chat_sending_handler.dart';
 import '../handlers/image_transfer_handler.dart';
@@ -43,7 +44,8 @@ class ChatRepositoryImpl implements ChatRepository {
   final IncomingMessageHandler _incomingHandler;
 
   final _controller = StreamController<Message>.broadcast();
-  final List<Message> _history = [];
+  final Map<String, ChatRoom> _history = {};
+  final Set<String> _myChatFriendsIds = {};
 
   late final StreamSubscription<IncomingFrame> _incomingSub;
   late final StreamSubscription<Set<String>> _connectedSub;
@@ -55,7 +57,12 @@ class ChatRepositoryImpl implements ChatRepository {
   Stream<Message> get messages => _controller.stream;
 
   @override
-  List<Message> get messageHistory => List.unmodifiable(_history);
+  Map<String, ChatRoom> get chatsHistory => Map.unmodifiable(_history);
+
+  @override
+  Set<String>  myChatFriendsIds(String? myUserId) {
+    return _myChatFriendsIds..remove(myUserId);
+  }
 
   Future<void> _recoverHandshakes() async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -104,11 +111,12 @@ class ChatRepositoryImpl implements ChatRepository {
         payloadId: frame.payloadId!,
         myUserId: _identityManager.localIdentity.uuid,
         messageId: frame.messageId,
-        replyToMessageId: frame.replyToMessageId
+        replyToMessageId: frame.replyToMessageId,
       );
 
       if (imageMessage != null) {
-        _history.add(imageMessage);
+        _addMessageToHistory(imageMessage);
+
         _controller.add(imageMessage);
       }
       return;
@@ -130,12 +138,27 @@ class ChatRepositoryImpl implements ChatRepository {
       final message = _incomingHandler.handlePacket(frame, packet);
 
       if (message != null) {
-        _history.add(message);
+        _addMessageToHistory(message);
+
         _controller.add(message);
       }
     } catch (e, st) {
       Logger.log(error: 'Failed to handle incoming frame: $e', stackTrace: st);
     }
+  }
+
+  void _addMessageToHistory(Message message) {
+
+    _history.update(
+      message.chatId,
+      (chatRoom) => chatRoom.copyWith(
+        messages: {...chatRoom.messages, message.id: message},
+        lastUpdated: message.time,
+      ),
+      ifAbsent: () =>
+          ChatRoom(messages: {message.id: message}, lastUpdated: message.time),
+    );
+    _myChatFriendsIds.add(message.senderUserId);
   }
 
   @override
@@ -151,7 +174,8 @@ class ChatRepositoryImpl implements ChatRepository {
 
     if (message == null) return;
 
-    _history.add(message);
+    _addMessageToHistory(message);
+
     _controller.add(message);
   }
 
@@ -168,7 +192,7 @@ class ChatRepositoryImpl implements ChatRepository {
 
     if (message == null) return;
 
-    _history.add(message);
+    _addMessageToHistory(message);
     _controller.add(message);
   }
 

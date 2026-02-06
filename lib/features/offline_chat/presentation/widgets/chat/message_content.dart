@@ -35,20 +35,25 @@ class MessageWidget extends StatelessWidget {
             ? TailMessagePaint(isMe: isMe, color: backgroundColor)
             : null,
 
-        child: Container(
-          padding: EdgeInsets.all(message.type == MessageType.image ? 3 : 12),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: !hasTail
-                ? BorderRadius.circular(13)
-                : BorderRadiusDirectional.only(
-                    topStart: const Radius.circular(13),
-                    topEnd: const Radius.circular(13),
-                    bottomStart: isMe ? Radius.zero : const Radius.circular(13),
-                    bottomEnd: !isMe ? Radius.zero : const Radius.circular(13),
-                  ),
+        child: Dismissible(
+          key: ValueKey(message.id),
+          direction: DismissDirection.startToEnd,
+
+          child: Container(
+            padding: EdgeInsets.all(message.type == MessageType.image ? 3 : 12),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: !hasTail
+                  ? BorderRadius.circular(13)
+                  : BorderRadiusDirectional.only(
+                      topStart: const Radius.circular(13),
+                      topEnd: const Radius.circular(13),
+                      bottomStart: isMe ? Radius.zero : const Radius.circular(13),
+                      bottomEnd: !isMe ? Radius.zero : const Radius.circular(13),
+                    ),
+            ),
+            child: MessageContnetWidget(message: message, isMe: isMe),
           ),
-          child: MessageContnetWidget(message: message, isMe: isMe),
         ),
       ),
     );

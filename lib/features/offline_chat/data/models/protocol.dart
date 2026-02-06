@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/message.dart';
@@ -30,6 +30,7 @@ class Protocol {
     required String messageId,
     String? replyToMessageId,
   }) {
+    final writer = WriteBuffer();
     // Encode variable-length string fields as UTF-8
     final userIdBytes = utf8.encode(senderUserId);
     final messageIdBytes = utf8.encode(messageId);
@@ -39,32 +40,29 @@ class Protocol {
       throw Exception('UserId too long');
     }
 
-    // Payload length is encoded as a fixed uint32
-    final payloadLengthBytes = ByteData(_idLengthFieldBytes)
-      ..setUint32(0, payload.length);
-
-    final buffer = BytesBuilder();
+    // final buffer = BytesBuilder();
 
     // senderUserId
-    buffer.addByte(userIdBytes.length);
-    buffer.add(userIdBytes);
+
+    writer.putUint8(userIdBytes.length);
+    writer.putUint8List(userIdBytes);
 
     // messageId
-    buffer.addByte(messageIdBytes.length);
-    buffer.add(messageIdBytes);
+    writer.putUint8(messageIdBytes.length);
+    writer.putUint8List(messageIdBytes);
 
     // replyToMessageId (optional)
-    buffer.addByte(replyBytes.length);
-    buffer.add(replyBytes);
+    writer.putUint8(replyBytes.length);
+    writer.putUint8List(replyBytes);
 
     // message metadata
-    buffer.addByte(type.typeCode);
-    buffer.add(payloadLengthBytes.buffer.asUint8List());
+    writer.putUint8(type.typeCode);
+    writer.putUint32(payload.length);
 
     // payload
-    buffer.add(payload);
+    writer.putUint8List(payload);
 
-    return buffer.toBytes();
+    return writer.done().buffer.asUint8List();
   }
 
   /// Deserializes a binary packet into a [Packet] object.
@@ -75,42 +73,30 @@ class Protocol {
       if (data.isEmpty) {
         throw Exception('Empty packet');
       }
-
-      var offset = 0;
+      final reader = ReadBuffer(data.buffer.asByteData());
 
       // senderUserId
-      final userIdLength = data[offset++];
-      final senderUserId = utf8.decode(
-        data.sublist(offset, offset + userIdLength),
-      );
-      offset += userIdLength;
+
+      final userIdLength = reader.getUint8();
+      final senderUserId = utf8.decode(reader.getUint8List(userIdLength));
 
       // messageId
-      final messageIdLength = data[offset++];
-      final messageId = utf8.decode(
-        data.sublist(offset, offset + messageIdLength),
-      );
-      offset += messageIdLength;
+      final messageIdLength = reader.getUint8();
+      final messageId = utf8.decode(reader.getUint8List(messageIdLength));
 
       // replyToMessageId (optional)
-      final replyLength = data[offset++];
+      final replyLength = reader.getUint8();
       final replyToMessageId = replyLength == 0
           ? null
-          : utf8.decode(data.sublist(offset, offset + replyLength));
-      offset += replyLength;
+          : utf8.decode(reader.getUint8List(replyLength));
 
       // message type
-      final typeValue = data[offset++];
+      final typeValue = reader.getUint8();
 
       // payload
-      final payloadLength = ByteData.sublistView(
-        data,
-        offset,
-        offset + _idLengthFieldBytes,
-      ).getUint32(0);
-      offset += _idLengthFieldBytes;
+      final payloadLength = reader.getUint32();
 
-      final payload = data.sublist(offset, offset + payloadLength);
+      final payload = reader.getUint8List(payloadLength);
 
       return Packet(
         senderUserId: senderUserId,
