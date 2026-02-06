@@ -36,7 +36,9 @@ class ChatController extends Notifier<List<Message>> {
     return history;
   }
 
-  void sendText({required String peerId, required String text}) {
+  void sendText({required String peerId, required String text,
+     String? replyToMessageId,
+  }) {
     ref.read(chatRepository).sendText(peerUserId: peerId, text: text);
   }
 

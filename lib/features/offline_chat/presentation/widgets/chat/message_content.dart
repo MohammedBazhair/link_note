@@ -88,7 +88,7 @@ class MessageImage extends StatelessWidget {
   Widget build(BuildContext context) {
     Logger.log(message: message.toString());
     return ConditionalBuilder(
-      condition: message.imagePath != null,
+      condition: message.filePath != null,
       builder: (_) => Container(
         clipBehavior: Clip.antiAlias,
         width: 250,
@@ -98,7 +98,7 @@ class MessageImage extends StatelessWidget {
             AspectRatio(
               aspectRatio: 4 / 5,
               child: Image.file(
-                File(message.imagePath!),
+                File(message.filePath!),
                 width: 250,
                 fit: BoxFit.cover,
               ),

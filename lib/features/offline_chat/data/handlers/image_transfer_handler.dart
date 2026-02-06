@@ -13,6 +13,7 @@ class ImageTransferHandler {
     required int payloadId,
     required String myUserId,
     required String messageId,
+    String? replyToMessageId,
   }) {
     final path = _completedPaths[payloadId];
     final senderId = _pendingSenders[payloadId];
@@ -36,9 +37,10 @@ class ImageTransferHandler {
       id: messageId,
       senderUserId: senderId,
       type: MessageType.image,
-      imagePath: finalPath,
+      filePath: finalPath,
       time: DateTime.now().toUtc(),
       chatId: Message.buildChatId(myUserId, senderId),
+      replyToMessageId: replyToMessageId,
     );
   }
 

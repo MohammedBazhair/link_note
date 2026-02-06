@@ -14,10 +14,15 @@ abstract class ChatRepository {
   List<Message> get messageHistory;
 
   /// Sends a text message to the peer identified by their user id.
-  void sendText({required String peerUserId, required String text});
+  void sendText({
+    required String peerUserId,
+    required String text,
+    String? replyToMessageId,
+  });
 
   /// Sends an image payload to the peer identified by their user id.
-  void sendImage({required String peerUserId, required String filePath});
+  void sendImage({required String peerUserId, required String filePath, String? replyToMessageId,
+  });
 
   /// Disposes any resources held by the repository.
   void dispose();

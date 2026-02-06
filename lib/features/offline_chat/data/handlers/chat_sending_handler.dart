@@ -69,7 +69,7 @@ class ChatSendingHandler {
       id: const Uuid().v4(),
       senderUserId: _identityManager.localIdentity.uuid,
       type: MessageType.image,
-      imagePath: filePath,
+      filePath: filePath,
       time: DateTime.now().toUtc(),
       chatId: Message.buildChatId(
         _identityManager.localIdentity.uuid,

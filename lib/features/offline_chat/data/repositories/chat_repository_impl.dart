@@ -104,6 +104,7 @@ class ChatRepositoryImpl implements ChatRepository {
         payloadId: frame.payloadId!,
         myUserId: _identityManager.localIdentity.uuid,
         messageId: frame.messageId,
+        replyToMessageId: frame.replyToMessageId
       );
 
       if (imageMessage != null) {
@@ -141,6 +142,7 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<void> sendText({
     required String peerUserId,
     required String text,
+    String? replyToMessageId,
   }) async {
     final message = await _sendingHandler.sendText(
       peerUserId: peerUserId,
@@ -157,6 +159,7 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<void> sendImage({
     required String peerUserId,
     required String filePath,
+    String? replyToMessageId,
   }) async {
     final message = await _sendingHandler.sendImage(
       peerUserId: peerUserId,

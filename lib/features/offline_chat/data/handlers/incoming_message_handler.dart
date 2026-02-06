@@ -36,6 +36,7 @@ class IncomingMessageHandler {
           packet: packet,
           myId: _identityManager.localIdentity.uuid,
           senderId: packet.senderUserId,
+          
         );
       case MessageType.image:
         final payloadId = int.tryParse(utf8.decode(packet.payload));
