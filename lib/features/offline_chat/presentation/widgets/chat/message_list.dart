@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 import '../../screens/test_chat_screen.dart';
 import 'message_content.dart';
 
 class MessageList extends ConsumerStatefulWidget {
-  const MessageList({super.key, required this.chatId});
+  const MessageList({super.key, required this.chatId, required this.myId});
   final String chatId;
+  final String myId;
 
   @override
   ConsumerState<MessageList> createState() => _MessageListState();
@@ -56,11 +56,10 @@ class _MessageListState extends ConsumerState<MessageList> {
       return const Center(child: Text('لا توجد رسائل بعد'));
     }
 
-    final myId = ref.read(getUserIdProvider);
 
     return _ChatMessages(
       scrollController: _scrollController,
-      myId: myId,
+      myId:widget.myId,
       chatMessages: chatMessages,
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/message.dart';
+import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_list.dart';
+import '../widgets/chat/reply_message_widget.dart';
 
 final mockMessages = [
   Message(
@@ -38,7 +40,18 @@ class TestChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('تجربة الدردشة')),
-      body: const MessageList(chatId: ''),
+      body: const Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+
+        children: [
+          Expanded(
+            child: MessageList(chatId: '', myId: 'user_1'),
+          ),
+          ReplyMessageWidget(),
+
+          ChatInput(peerId: ''),
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../data/handlers/chat_handshake_handler.dart';
 import '../../data/handlers/chat_sending_handler.dart';
 import '../../data/handlers/image_transfer_handler.dart';
@@ -38,6 +39,10 @@ final getMyFriendsIdsProvider = Provider((ref) {
   );
 
   return chatFriendsIds;
+});
+
+final replyToMessageProvider = StateProvider.autoDispose<Message?>((ref) {
+  return null;
 });
 
 final chatRepository = Provider((ref) {

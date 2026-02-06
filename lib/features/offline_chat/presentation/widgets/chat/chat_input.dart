@@ -45,11 +45,10 @@ class _ChatInputState extends ConsumerState<ChatInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        border: BoxBorder.fromSTEB(
-          top: const BorderSide(color: Color(0x6E083141), width: .8),
-        ),
+        color: Colors.blueGrey.shade400.withOpacity(0.1),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(5)),
       ),
       child: Row(
         spacing: 4,

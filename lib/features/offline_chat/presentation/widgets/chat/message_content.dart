@@ -1,15 +1,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../domain/entities/message.dart';
+import '../../controllers/chat_providers.dart';
 import 'message_text.dart';
 import 'tail_message_paint.dart';
 
-class MessageWidget extends StatelessWidget {
+class MessageWidget extends ConsumerWidget {
   const MessageWidget({
     super.key,
     required this.isMe,
@@ -22,7 +24,7 @@ class MessageWidget extends StatelessWidget {
   final bool hasTail;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final backgroundColor = isMe
         ? const Color(0xFF1976D2)
         : const Color(0xFF343147);
@@ -30,15 +32,19 @@ class MessageWidget extends StatelessWidget {
       alignment: isMe
           ? AlignmentDirectional.centerStart
           : AlignmentDirectional.centerEnd,
-      child: CustomPaint(
-        painter: hasTail
-            ? TailMessagePaint(isMe: isMe, color: backgroundColor)
-            : null,
+      child: Dismissible(
+        key: ValueKey(message.id),
+        direction: DismissDirection.endToStart,
+        confirmDismiss: (direction) {
+          ref.read(replyToMessageProvider.notifier).state = message;
 
-        child: Dismissible(
-          key: ValueKey(message.id),
-          direction: DismissDirection.startToEnd,
+          return Future.value(false);
+        },
 
+        child: CustomPaint(
+          painter: hasTail
+              ? TailMessagePaint(isMe: isMe, color: backgroundColor)
+              : null,
           child: Container(
             padding: EdgeInsets.all(message.type == MessageType.image ? 3 : 12),
             decoration: BoxDecoration(
@@ -48,8 +54,12 @@ class MessageWidget extends StatelessWidget {
                   : BorderRadiusDirectional.only(
                       topStart: const Radius.circular(13),
                       topEnd: const Radius.circular(13),
-                      bottomStart: isMe ? Radius.zero : const Radius.circular(13),
-                      bottomEnd: !isMe ? Radius.zero : const Radius.circular(13),
+                      bottomStart: isMe
+                          ? Radius.zero
+                          : const Radius.circular(13),
+                      bottomEnd: !isMe
+                          ? Radius.zero
+                          : const Radius.circular(13),
                     ),
             ),
             child: MessageContnetWidget(message: message, isMe: isMe),

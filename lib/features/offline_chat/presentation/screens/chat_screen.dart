@@ -6,6 +6,7 @@ import '../controllers/nearby_providers.dart';
 import '../widgets/chat/chat_appbar.dart';
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_list.dart';
+import '../widgets/chat/reply_message_widget.dart';
 
 class ChatScreen extends ConsumerWidget {
   const ChatScreen({super.key, required this.peerId, required this.myId});
@@ -26,13 +27,16 @@ class ChatScreen extends ConsumerWidget {
     );
     return Scaffold(
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SafeArea(child: ChatAppbar(chatAppbarParams)),
           Expanded(
             child: MessageList(
               chatId: Message.buildChatId(myId, peerId),
+              myId: myId,
             ),
           ),
+          const ReplyMessageWidget(),
           ChatInput(peerId: peerId),
         ],
       ),
