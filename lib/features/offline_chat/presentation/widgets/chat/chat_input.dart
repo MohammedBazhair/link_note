@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../audio/presentation/controller/audio_provider.dart';
+import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
 import '../../../../image/presentation/controllers/image_providers.dart';
 import '../../controllers/chat_providers.dart';
 import 'reply_message_widget.dart';
@@ -26,7 +28,9 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     FocusScope.of(context).unfocus();
   }
 
-  void record() {}
+  Future<void> record() async {
+    await ref.read(voiceRecordControllerProvider.notifier).startRecording();
+  }
 
   Future<void> pickImage() async {
     final imagePath = await ref
@@ -46,6 +50,9 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
   @override
   Widget build(BuildContext context) {
+    final isRecordingVoice = ref.watch(
+      voiceRecordControllerProvider.select((s) => s.isRecording),
+    );
     return Padding(
       padding: const EdgeInsets.all(7.0),
       child: Row(
@@ -86,54 +93,62 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                     },
                   ),
 
-                  Row(
-                    spacing: 4,
-                    children: [
-                      ValueListenableBuilder(
-                        valueListenable: controller,
-                        builder: (context, value, pickerImageIcon) {
-                          final isWriting = value.text.trim().isNotEmpty;
-
-                          return AnimatedCrossFade(
-                            firstChild: pickerImageIcon!,
-                            secondChild: const SizedBox.shrink(),
-                            firstCurve: Curves.bounceOut,
-                            secondCurve: Curves.fastLinearToSlowEaseIn,
-                            crossFadeState: isWriting
-                                ? CrossFadeState.showSecond
-                                : CrossFadeState.showFirst,
-                            duration: const Duration(milliseconds: 300),
-                          );
-                        },
-                        child: IconButton(
-                          onPressed: pickImage,
-                          icon: const Icon(
-                            Icons.image_outlined,
-                            color: Colors.white,
-                          ),
-                          tooltip: 'إرسال صورة',
-                        ),
+                  if (isRecordingVoice)
+                    VoiceMessageBubble(
+                      path: ref.watch(
+                        voiceRecordControllerProvider.select((s) => s.path!),
                       ),
-                      Expanded(
-                        child: TextField(
-                          controller: controller,
-                          maxLines: 6,
-                          minLines: 1,
+                    ),
 
-                          decoration: const InputDecoration(
-                            hintText: 'اكتب رسالة...',
-                            filled: false,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 13.2,
-                            height: 1.6,
-                            color: Colors.white,
+                  if (!isRecordingVoice)
+                    Row(
+                      spacing: 4,
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: controller,
+                          builder: (context, value, pickerImageIcon) {
+                            final isWriting = value.text.trim().isNotEmpty;
+
+                            return AnimatedCrossFade(
+                              firstChild: pickerImageIcon!,
+                              secondChild: const SizedBox.shrink(),
+                              firstCurve: Curves.bounceOut,
+                              secondCurve: Curves.fastLinearToSlowEaseIn,
+                              crossFadeState: isWriting
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
+                              duration: const Duration(milliseconds: 300),
+                            );
+                          },
+                          child: IconButton(
+                            onPressed: pickImage,
+                            icon: const Icon(
+                              Icons.image_outlined,
+                              color: Colors.white,
+                            ),
+                            tooltip: 'إرسال صورة',
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                        Expanded(
+                          child: TextField(
+                            controller: controller,
+                            maxLines: 6,
+                            minLines: 1,
+
+                            decoration: const InputDecoration(
+                              hintText: 'اكتب رسالة...',
+                              filled: false,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 13.2,
+                              height: 1.6,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

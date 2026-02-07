@@ -20,7 +20,7 @@ class VoiceRecordController extends Notifier<VoiceRecordState> {
     return VoiceRecordState();
   }
 
-  Future<void> start() async {
+  Future<void> startRecording() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
       final now = DateTime.now();
@@ -49,7 +49,7 @@ class VoiceRecordController extends Notifier<VoiceRecordState> {
     }
   }
 
-  Future<void> stop() async {
+  Future<void> stopRecording() async {
     try {
       _recordTimer?.cancel();
 
@@ -59,4 +59,3 @@ class VoiceRecordController extends Notifier<VoiceRecordState> {
     }
   }
 }
-
