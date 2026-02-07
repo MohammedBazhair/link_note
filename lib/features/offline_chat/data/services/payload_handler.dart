@@ -52,6 +52,7 @@ class NearbyPayloadManager {
       case PayloadStatus.SUCCESS:
         final path = _payloadPaths.remove(update.id);
         final messageId = _payloadMessagesIds.remove(update.id);
+        
         _incomingStreamController.add(
           IncomingFrame(
             peerEndpointId: endpointId,

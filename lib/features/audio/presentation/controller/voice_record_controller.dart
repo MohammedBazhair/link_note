@@ -53,7 +53,13 @@ class VoiceRecordController extends Notifier<VoiceRecordState> {
     try {
       _recordTimer?.cancel();
 
-      await _repo.stopRecording();
+      final outputPath = await _repo.stopRecording();
+
+      state = state.copyWith(
+        isRecording: false,
+        path: outputPath ?? state.path,
+        duration: Duration.zero,
+      );
     } catch (e) {
       Logger.log(error: e);
     }

@@ -89,7 +89,7 @@ final chatRepository = Provider((ref) {
     _sessionManager,
     _identityManager,
     _imageHandler,
-    _voiceHandler
+    _voiceHandler,
   );
   final repo = ChatRepositoryImpl(
     _connectionManager,
@@ -98,6 +98,7 @@ final chatRepository = Provider((ref) {
     _sendingHandler,
     _handshakeHandler,
     _imageHandler,
+    _voiceHandler,
     _incomingHandler,
   );
   ref.onDispose(repo.dispose);

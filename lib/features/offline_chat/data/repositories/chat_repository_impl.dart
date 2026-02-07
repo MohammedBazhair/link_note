@@ -8,6 +8,7 @@ import '../handlers/chat_handshake_handler.dart';
 import '../handlers/chat_sending_handler.dart';
 import '../handlers/image_transfer_handler.dart';
 import '../handlers/incoming_message_handler.dart';
+import '../handlers/voice_transfer_handler.dart';
 import '../models/incoming_frame.dart';
 import '../models/protocol.dart';
 import '../services/chat_session_manager.dart';
@@ -22,6 +23,7 @@ class ChatRepositoryImpl implements ChatRepository {
     this._sendingHandler,
     this._handshakeHandler,
     this._imageHandler,
+    this._voiceHandler,
     this._incomingHandler,
   ) {
     _incomingSub = _connectionManager.incomingFrames.listen(_handleIncoming);
@@ -41,6 +43,7 @@ class ChatRepositoryImpl implements ChatRepository {
 
   final ChatHandshakeHandler _handshakeHandler;
   final ImageTransferHandler _imageHandler;
+  final VoiceTransferHandler _voiceHandler;
   final IncomingMessageHandler _incomingHandler;
 
   final _controller = StreamController<Message>.broadcast();
@@ -60,7 +63,7 @@ class ChatRepositoryImpl implements ChatRepository {
   Map<String, ChatRoom> get chatsHistory => Map.unmodifiable(_history);
 
   @override
-  Set<String>  myChatFriendsIds(String? myUserId) {
+  Set<String> myChatFriendsIds(String? myUserId) {
     return _myChatFriendsIds..remove(myUserId);
   }
 
@@ -105,7 +108,10 @@ class ChatRepositoryImpl implements ChatRepository {
   void _handleIncoming(IncomingFrame frame) {
     // 1️⃣ File payload completion
     if (frame.payloadId != null && frame.filePath != null) {
+      // mark completion for both image and voice handlers; the correct
+      // handler will build the message if this payload corresponds to it.
       _imageHandler.markFileCompleted(frame.payloadId!, frame.filePath!);
+      _voiceHandler.markFileCompleted(frame.payloadId!, frame.filePath!);
 
       final imageMessage = _imageHandler.tryBuildImageMessage(
         payloadId: frame.payloadId!,
@@ -116,8 +122,21 @@ class ChatRepositoryImpl implements ChatRepository {
 
       if (imageMessage != null) {
         _addMessageToHistory(imageMessage);
-
         _controller.add(imageMessage);
+        return;
+      }
+
+      final voiceMessage = _voiceHandler.tryBuildVoiceMessage(
+        payloadId: frame.payloadId!,
+        myUserId: _identityManager.localIdentity.uuid,
+        messageId: frame.messageId,
+        replyToMessageId: frame.replyToMessageId,
+      );
+
+      if (voiceMessage != null) {
+        _addMessageToHistory(voiceMessage);
+        _controller.add(voiceMessage);
+        return;
       }
       return;
     }
@@ -147,8 +166,7 @@ class ChatRepositoryImpl implements ChatRepository {
     }
   }
 
-  void _addMessageToHistory(Message message ) {
-
+  void _addMessageToHistory(Message message) {
     _history.update(
       message.chatId,
       (chatRoom) => chatRoom.copyWith(
@@ -156,8 +174,7 @@ class ChatRepositoryImpl implements ChatRepository {
         lastUpdated: message.time,
       ),
       ifAbsent: () =>
-          ChatRoom(messages: {message.id: message}, lastUpdated: message.time,
-      ),
+          ChatRoom(messages: {message.id: message}, lastUpdated: message.time),
     );
     _myChatFriendsIds.add(message.senderUserId);
   }
@@ -187,6 +204,23 @@ class ChatRepositoryImpl implements ChatRepository {
     String? replyToMessageId,
   }) async {
     final message = await _sendingHandler.sendImage(
+      peerUserId: peerUserId,
+      filePath: filePath,
+    );
+
+    if (message == null) return;
+
+    _addMessageToHistory(message);
+    _controller.add(message);
+  }
+
+  @override
+  void sendVoiceRecord({
+    required String peerUserId,
+    required String filePath,
+    String? replyToMessageId,
+  }) async {
+    final message = await _sendingHandler.sendVoiceRecord(
       peerUserId: peerUserId,
       filePath: filePath,
     );

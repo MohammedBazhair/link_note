@@ -88,4 +88,44 @@ class ChatSendingHandler {
 
     return message;
   }
+
+  
+  Future<Message?> sendVoiceRecord({
+    required String peerUserId,
+    required String filePath,
+  }) async {
+    final session = _sessionManager.resolveSession(peerUserId);
+    if (session == null) return null;
+
+    final payloadId = await _connectionManager.sendFile(
+      endpointId: session.peerAddress,
+      filePath: filePath,
+    );
+
+    if (payloadId == null) return null;
+
+    final message = Message(
+      id: const Uuid().v4(),
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.voice,
+      filePath: filePath,
+      time: DateTime.now().toUtc(),
+      chatId: Message.buildChatId(
+        _identityManager.localIdentity.uuid,
+        peerUserId,
+      ),
+    );
+
+    final metadataPacket = Protocol.buildPacket(
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.voice,
+      payload: Uint8List.fromList(utf8.encode('$payloadId')),
+      messageId: message.id,
+    );
+
+    await _connectionManager.sendBytes(session.peerAddress, metadataPacket);
+
+    return message;
+  }
+
 }

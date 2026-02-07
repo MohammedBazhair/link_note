@@ -29,6 +29,12 @@ abstract class ChatRepository {
     String? replyToMessageId,
   });
 
+  void sendVoiceRecord({
+    required String peerUserId,
+    required String filePath,
+    String? replyToMessageId,
+  });
+
   /// Disposes any resources held by the repository.
   void dispose();
 }

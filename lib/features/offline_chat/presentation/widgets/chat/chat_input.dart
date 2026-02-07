@@ -1,7 +1,9 @@
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/controller/audio_provider.dart';
-import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
+import '../../../../audio/presentation/widgets/recording_waveform.dart';
 import '../../../../image/presentation/controllers/image_providers.dart';
 import '../../controllers/chat_providers.dart';
 import 'reply_message_widget.dart';
@@ -14,22 +16,40 @@ class ChatInput extends ConsumerStatefulWidget {
 }
 
 class _ChatInputState extends ConsumerState<ChatInput> {
-  final controller = TextEditingController();
+  final textController = TextEditingController();
+  final recorderController = RecorderController();
 
   void send() {
-    final text = controller.text.trim();
+    final text = textController.text.trim();
     if (text.isEmpty) return;
 
     ref
         .read(chatControllerProvider.notifier)
         .sendText(peerId: widget.peerId, text: text);
 
-    controller.clear();
+    textController.clear();
     FocusScope.of(context).unfocus();
   }
 
-  Future<void> record() async {
-    await ref.read(voiceRecordControllerProvider.notifier).startRecording();
+  Future<void> recordOrStop() async {
+    final controller = ref.read(voiceRecordControllerProvider.notifier);
+    if (recorderController.isRecording) {
+      await controller.stopRecording();
+      await recorderController.stop();
+      final filePath = ref.read(
+        voiceRecordControllerProvider.select((s) => s.path),
+      );
+      if (filePath == null) {
+        return context.showSnakbar('لم يتم الحصول على ملف التسجيل بنجاح');
+      }
+      
+      ref
+          .read(chatControllerProvider.notifier)
+          .sendVoiceRecord(peerId: widget.peerId, filePath: filePath);
+    } else {
+      await controller.startRecording();
+      await recorderController.record();
+    }
   }
 
   Future<void> pickImage() async {
@@ -44,7 +64,8 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
   @override
   void dispose() {
-    controller.dispose();
+    textController.dispose();
+    recorderController.dispose();
     super.dispose();
   }
 
@@ -61,14 +82,14 @@ class _ChatInputState extends ConsumerState<ChatInput> {
         textDirection: TextDirection.rtl,
         children: [
           ValueListenableBuilder(
-            valueListenable: controller,
+            valueListenable: textController,
             builder: (context, value, child) {
               final isWriting = value.text.trim().isNotEmpty;
 
               return ChatInputButton(
                 isWriting: isWriting,
                 send: send,
-                record: record,
+                record: recordOrStop,
               );
             },
           ),
@@ -94,18 +115,14 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                   ),
 
                   if (isRecordingVoice)
-                    VoiceMessageBubble(
-                      path: ref.watch(
-                        voiceRecordControllerProvider.select((s) => s.path!),
-                      ),
-                    ),
+                    RecordingWaveform(recorderController: recorderController),
 
                   if (!isRecordingVoice)
                     Row(
                       spacing: 4,
                       children: [
                         ValueListenableBuilder(
-                          valueListenable: controller,
+                          valueListenable: textController,
                           builder: (context, value, pickerImageIcon) {
                             final isWriting = value.text.trim().isNotEmpty;
 
@@ -131,7 +148,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                         ),
                         Expanded(
                           child: TextField(
-                            controller: controller,
+                            controller: textController,
                             maxLines: 6,
                             minLines: 1,
 

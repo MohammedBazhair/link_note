@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../audio/presentation/controller/audio_provider.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
+import '../../domain/repositories/chat_repository.dart';
 import 'chat_providers.dart';
 import 'chat_state.dart';
 
@@ -11,16 +12,17 @@ import 'chat_state.dart';
 /// across active chat sessions. UI widgets are responsible for filtering
 /// by `chatId` where needed.
 class ChatController extends Notifier<ChatState> {
+  late ChatRepository _chatRepository;
   @override
   ChatState build() {
-    final repo = ref.watch(chatRepository);
+    _chatRepository = ref.read(chatRepository);
     final myUserId = ref.watch(getUserIdProvider);
     Timer? timer;
     // Initial history
-    final history = repo.chatsHistory;
-    final myChatFriendsIds = repo.myChatFriendsIds(myUserId);
+    final history = _chatRepository.chatsHistory;
+    final myChatFriendsIds = _chatRepository.myChatFriendsIds(myUserId!);
 
-    final sub = repo.messages.listen((message) async {
+    final sub = _chatRepository.messages.listen((message) async {
       final isNewChatRoom = state.isNewChatRoom(message.chatId);
       final myFriendsIds = isNewChatRoom
           ? [...state.myChatFriendsIds, message.senderUserId]
@@ -51,10 +53,14 @@ class ChatController extends Notifier<ChatState> {
     required String text,
     String? replyToMessageId,
   }) {
-    ref.read(chatRepository).sendText(peerUserId: peerId, text: text);
+    _chatRepository.sendText(peerUserId: peerId, text: text);
   }
 
   void sendImage({required String peerId, required String filePath}) {
-    ref.read(chatRepository).sendImage(peerUserId: peerId, filePath: filePath);
+    _chatRepository.sendImage(peerUserId: peerId, filePath: filePath);
+  }
+
+  void sendVoiceRecord({required String peerId, required String filePath}) {
+   _chatRepository.sendVoiceRecord(peerUserId: peerId, filePath: filePath);
   }
 }
