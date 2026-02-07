@@ -1,10 +1,10 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../data/handlers/chat_handshake_handler.dart';
 import '../../data/handlers/chat_sending_handler.dart';
 import '../../data/handlers/image_transfer_handler.dart';
 import '../../data/handlers/incoming_message_handler.dart';
+import '../../data/handlers/voice_transfer_handler.dart';
 import '../../data/repositories/chat_repository_impl.dart';
 import '../../data/services/chat_session_manager.dart';
 import '../../domain/entities/message.dart';
@@ -15,7 +15,7 @@ import 'nearby_discovery_controller.dart';
 import 'nearby_providers.dart';
 import 'nearby_state.dart';
 
-typedef ChatMessagesMap= Map<String, Message>;
+typedef ChatMessagesMap = Map<String, Message>;
 
 final chatControllerProvider = NotifierProvider<ChatController, ChatState>(() {
   return ChatController();
@@ -26,8 +26,7 @@ final nearbyDiscoveryControllerProvider =
       return NearbyDiscoveryController();
     });
 
-final getChatMessagesProvider = 
-Provider.family<ChatMessagesMap, String>((
+final getChatMessagesProvider = Provider.family<ChatMessagesMap, String>((
   ref,
   chatId,
 ) {
@@ -85,10 +84,12 @@ final chatRepository = Provider((ref) {
     _identityManager,
   );
   final _imageHandler = ImageTransferHandler();
+  final _voiceHandler = VoiceTransferHandler();
   final _incomingHandler = IncomingMessageHandler(
     _sessionManager,
     _identityManager,
     _imageHandler,
+    _voiceHandler
   );
   final repo = ChatRepositoryImpl(
     _connectionManager,

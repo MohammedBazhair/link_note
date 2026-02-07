@@ -7,17 +7,19 @@ import '../models/packet.dart';
 import '../services/chat_session_manager.dart';
 import '../services/nearby_identity_manager.dart';
 import 'image_transfer_handler.dart';
+import 'voice_transfer_handler.dart';
 
 class IncomingMessageHandler {
   IncomingMessageHandler(
     this._sessionManager,
     this._identityManager,
-    this._imageHandler,
+    this._imageHandler, this._voiceHandler,
   );
 
   final ChatSessionManager _sessionManager;
   final NearbyIdentityManager _identityManager;
   final ImageTransferHandler _imageHandler;
+  final VoiceTransferHandler _voiceHandler;
 
   Message? handlePacket(IncomingFrame frame, Packet packet) {
     final session = ChatSession.create(
@@ -42,6 +44,12 @@ class IncomingMessageHandler {
         final payloadId = int.tryParse(utf8.decode(packet.payload));
         if (payloadId != null) {
           _imageHandler.registerIncomingImage(payloadId, packet.senderUserId);
+        }
+        return null;
+      case MessageType.voice:
+      final payloadId = int.tryParse(utf8.decode(packet.payload));
+        if (payloadId != null) {
+          _voiceHandler.registerIncomingVoice(payloadId, packet.senderUserId);
         }
         return null;
     }

@@ -5,7 +5,8 @@ import '../../data/models/packet.dart';
 enum MessageType {
   handshake(1),
   text(2),
-  image(3);
+  image(3),
+  voice(4);
 
   const MessageType(this.typeCode);
   static MessageType fromValue(int v) {
@@ -64,6 +65,15 @@ class Message {
         type: MessageType.handshake,
         time: timeNow,
         chatId: chatId,
+      ),
+      MessageType.voice => Message(
+        id: messageId,
+        chatId: chatId,
+        senderUserId: senderId,
+        type: packet.messageType,
+        filePath: 'received_voice_${DateTime.now().millisecondsSinceEpoch}.ogg',
+        time: timeNow,
+        replyToMessageId: replyToMessageId,
       ),
     };
   }

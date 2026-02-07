@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../../core/presentation/widgets/conditional_builder.dart';
+import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
 import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 import 'message_text.dart';
@@ -111,6 +110,8 @@ class MessageContnetWidget extends StatelessWidget {
         );
       case MessageType.image:
         return MessageImage(message: message);
+      case MessageType.voice:
+        return VoiceMessageBubble(path: message.filePath!);
     }
   }
 }

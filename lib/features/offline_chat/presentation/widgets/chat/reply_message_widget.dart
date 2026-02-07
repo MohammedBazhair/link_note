@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/colors/colors.dart';
+import '../../../../audio/presentation/controller/audio_provider.dart';
 import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
@@ -173,6 +174,43 @@ class _RepliedContent extends StatelessWidget {
               style: style,
             ),
           ],
+        );
+      case MessageType.voice:
+        return Consumer(
+          builder: (_, ref, __) {
+            final durationAsync = ref.read(
+              getAudioDurationProfider(message.filePath),
+            );
+          return  durationAsync.when(
+              data: (duration) {
+                return const Row(
+                  spacing: 8,
+                  children: [
+                    Icon(Icons.mic),
+                    Text(
+                      'رسالة صوتية (0:30)',
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: style,
+                    ),
+                  ],
+                );
+              },
+              loading: LinearProgressIndicator.new,
+              error: (_, _) => const Row(
+                spacing: 8,
+                children: [
+                  Icon(Icons.mic),
+                  Text(
+                    'رسالة صوتية (0:00)',
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: style,
+                  ),
+                ],
+              ),
+            );
+          },
         );
     }
   }
