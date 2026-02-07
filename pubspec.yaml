@@ -38,6 +38,8 @@ dependencies:
   location: ^8.0.1
   device_info_plus: ^11.3.0
   audioplayers: ^6.5.1
+  record: ^6.2.0
+  audio_waveforms: ^2.0.2
 
 dev_dependencies:
   flutter_test:

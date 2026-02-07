@@ -40,8 +40,6 @@ class Protocol {
       throw Exception('UserId too long');
     }
 
-    // final buffer = BytesBuilder();
-
     // senderUserId
 
     writer.putUint8(userIdBytes.length);

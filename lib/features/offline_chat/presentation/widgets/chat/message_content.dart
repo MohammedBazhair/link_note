@@ -9,6 +9,7 @@ import '../../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 import 'message_text.dart';
+import 'reply_message_widget.dart';
 import 'tail_message_paint.dart';
 
 class MessageWidget extends ConsumerWidget {
@@ -17,16 +18,18 @@ class MessageWidget extends ConsumerWidget {
     required this.isMe,
     required this.message,
     required this.hasTail,
+    this.repliedMessage,
   });
 
   final bool isMe;
   final Message message;
+  final Message? repliedMessage;
   final bool hasTail;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final backgroundColor = isMe
-        ? const Color(0xFF1976D2)
+        ? Colors.blue.shade800
         : const Color(0xFF343147);
     return Align(
       alignment: isMe
@@ -43,26 +46,42 @@ class MessageWidget extends ConsumerWidget {
 
         child: CustomPaint(
           painter: hasTail
-              ? TailMessagePaint(isMe: isMe, color: backgroundColor)
+              ? TailMessagePaint(
+                  isMe: isMe,
+                  color: backgroundColor,
+                  textDirection: Directionality.of(context),
+                )
               : null,
-          child: Container(
-            padding: EdgeInsets.all(message.type == MessageType.image ? 3 : 12),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: !hasTail
-                  ? BorderRadius.circular(13)
-                  : BorderRadiusDirectional.only(
-                      topStart: const Radius.circular(13),
-                      topEnd: const Radius.circular(13),
-                      bottomStart: isMe
-                          ? Radius.zero
-                          : const Radius.circular(13),
-                      bottomEnd: !isMe
-                          ? Radius.zero
-                          : const Radius.circular(13),
-                    ),
+          child: IntrinsicWidth(
+            child: Container(
+              padding: EdgeInsets.all(
+                message.type == MessageType.image ? 3 : 12,
+              ),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: !hasTail
+                    ? BorderRadius.circular(13)
+                    : BorderRadiusDirectional.only(
+                        topStart: const Radius.circular(13),
+                        topEnd: const Radius.circular(13),
+                        bottomStart: isMe
+                            ? Radius.zero
+                            : const Radius.circular(13),
+                        bottomEnd: !isMe
+                            ? Radius.zero
+                            : const Radius.circular(13),
+                      ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ReplyMessageWidget(repliedMessage: repliedMessage),
+                  MessageContnetWidget(message: message, isMe: isMe),
+                ],
+              ),
             ),
-            child: MessageContnetWidget(message: message, isMe: isMe),
           ),
         ),
       ),
@@ -112,10 +131,14 @@ class MessageImage extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 4 / 5,
-              child: Image.file(
-                File(message.filePath!),
+              child: Image.asset(
+                message.filePath!,
                 width: 250,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.black45,
+                  child: const Center(child: Text('هذه الصورة غير متاحة')),
+                ),
               ),
             ),
 

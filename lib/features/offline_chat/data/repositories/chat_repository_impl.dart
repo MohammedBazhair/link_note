@@ -147,7 +147,7 @@ class ChatRepositoryImpl implements ChatRepository {
     }
   }
 
-  void _addMessageToHistory(Message message) {
+  void _addMessageToHistory(Message message ) {
 
     _history.update(
       message.chatId,
@@ -156,7 +156,8 @@ class ChatRepositoryImpl implements ChatRepository {
         lastUpdated: message.time,
       ),
       ifAbsent: () =>
-          ChatRoom(messages: {message.id: message}, lastUpdated: message.time),
+          ChatRoom(messages: {message.id: message}, lastUpdated: message.time,
+      ),
     );
     _myChatFriendsIds.add(message.senderUserId);
   }

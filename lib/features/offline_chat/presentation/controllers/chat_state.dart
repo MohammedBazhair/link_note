@@ -19,11 +19,12 @@ class ChatState {
 }
 
 class ChatRoom {
-  const ChatRoom({required this.messages, required this.lastUpdated});
+  const ChatRoom({required this.messages, required this.lastUpdated, });
   final Map<String, Message> messages; // {messageId: Message}
   final DateTime lastUpdated;
 
-  ChatRoom copyWith({Map<String, Message>? messages, DateTime? lastUpdated}) {
+  ChatRoom copyWith({Map<String, Message>? messages, DateTime? lastUpdated,
+  }) {
     return ChatRoom(
       messages: messages ?? this.messages,
       lastUpdated: lastUpdated ?? this.lastUpdated,

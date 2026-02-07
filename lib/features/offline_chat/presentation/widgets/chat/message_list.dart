@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 import '../../screens/test_chat_screen.dart';
 import 'message_content.dart';
@@ -56,10 +55,9 @@ class _MessageListState extends ConsumerState<MessageList> {
       return const Center(child: Text('لا توجد رسائل بعد'));
     }
 
-
     return _ChatMessages(
       scrollController: _scrollController,
-      myId:widget.myId,
+      myId: widget.myId,
       chatMessages: chatMessages,
     );
   }
@@ -73,7 +71,7 @@ class _ChatMessages extends StatelessWidget {
   }) : _scrollController = scrollController;
 
   final ScrollController _scrollController;
-  final List<Message> chatMessages;
+  final ChatMessagesMap chatMessages;
   final String? myId;
 
   @override
@@ -83,8 +81,8 @@ class _ChatMessages extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       itemCount: chatMessages.length,
       separatorBuilder: (context, index) {
-        final currentMessage = chatMessages[index];
-        final nextMessage = chatMessages[index + 1];
+        final currentMessage = chatMessages.values.elementAt(index);
+        final nextMessage = chatMessages.values.elementAt(index + 1);
         final isSameSender =
             currentMessage.senderUserId == nextMessage.senderUserId;
 
@@ -93,13 +91,19 @@ class _ChatMessages extends StatelessWidget {
             : const SizedBox(height: 20);
       },
       itemBuilder: (context, index) {
-        final msg = chatMessages[index];
+        final msg = chatMessages.values.elementAt(index);
         final isMe = msg.senderUserId == myId;
         final hasTail =
             index == 0 ||
-            chatMessages[index - 1].senderUserId != msg.senderUserId;
+            chatMessages.values.elementAt(index - 1).senderUserId !=
+                msg.senderUserId;
 
-        return MessageWidget(isMe: isMe, message: msg, hasTail: hasTail);
+        return MessageWidget(
+          isMe: isMe,
+          message: msg,
+          hasTail: hasTail,
+          repliedMessage: chatMessages[msg.replyToMessageId],
+        );
       },
     );
   }

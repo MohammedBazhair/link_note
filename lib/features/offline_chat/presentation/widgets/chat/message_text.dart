@@ -54,47 +54,52 @@ class _MessageTextState extends State<MessageText> {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 7,
-      crossAxisAlignment: WrapCrossAlignment.end,
-      alignment: WrapAlignment.end,
-      children: [
-        Text.rich(
-          TextSpan(
-            text: isShowMore ? '$showedText...' : showedText,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: widget.isMe
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFFF1F0F4),
-            ),
-            children: [
-              if (isShowMore)
-                TextSpan(
-                  text: 'اقرأ المزيد',
-                  style: const TextStyle(
-                    fontSize: 11,
+    return SizedBox(
+      child: Wrap(
+        runSpacing: 5,
+        children: [
+          Text.rich(
+            TextSpan(
+              text: isShowMore ? '$showedText ...  ' : showedText,
 
-                    fontWeight: FontWeight.bold,
-                    color: Colors.lightBlueAccent,
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.45,
+
+                color: widget.isMe
+                    ? const Color(0xFFFFFFFF)
+                    : const Color(0xFFF1F0F4),
+              ),
+              children: [
+                if (isShowMore)
+                  TextSpan(
+                    text: 'اقرأ المزيد',
+                    style: const TextStyle(
+                      fontSize: 11,
+
+                      fontWeight: FontWeight.bold,
+                      color: Colors.lightBlueAccent,
+                    ),
+                    recognizer: _gestureRecognizer,
                   ),
-                  recognizer: _gestureRecognizer,
-                ),
-            ],
-          ),
-        ),
 
-        Text(
-          widget.time.formattedChatTime,
-          style: TextStyle(
-            fontSize: 9,
-            color: Colors.white.withOpacity(0.8),
-            letterSpacing: -0.3,
-            fontWeight: FontWeight.w500,
+                const TextSpan(text: '  '),
+              ],
+            ),
           ),
-        ),
-      ],
+          Text(
+            widget.time.formattedChatTime,
+
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 9,
+              letterSpacing: -0.3,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

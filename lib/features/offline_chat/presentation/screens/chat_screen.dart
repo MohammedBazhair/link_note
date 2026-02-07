@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/message.dart';
+import '../controllers/chat_providers.dart';
 import '../controllers/nearby_providers.dart';
 import '../widgets/chat/chat_appbar.dart';
 import '../widgets/chat/chat_input.dart';
 import '../widgets/chat/message_list.dart';
-import '../widgets/chat/reply_message_widget.dart';
 
 class ChatScreen extends ConsumerWidget {
   const ChatScreen({super.key, required this.peerId, required this.myId});
@@ -17,9 +17,8 @@ class ChatScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final manager = ref.watch(nearbyConnectionManagerProvider);
     final isConnected = ref.watch(isPeerConnectedProvider(peerId));
-    final identity = manager.getIdentityByUserId(peerId);
+    final identity = ref.read(getIdentityByUserIdProvider(peerId));
 
     final chatAppbarParams = ChatParams(
       identity: identity,
@@ -36,7 +35,6 @@ class ChatScreen extends ConsumerWidget {
               myId: myId,
             ),
           ),
-          const ReplyMessageWidget(),
           ChatInput(peerId: peerId),
         ],
       ),
