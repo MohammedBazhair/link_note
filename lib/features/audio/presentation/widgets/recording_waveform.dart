@@ -1,30 +1,31 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../controller/audio_provider.dart';
-
-class RecordingWaveform extends ConsumerWidget {
+class RecordingWaveform extends StatelessWidget {
   const RecordingWaveform({super.key, required this.recorderController});
 
   final RecorderController recorderController;
 
   @override
-  Widget build(BuildContext context, ref) {
-    final isRecording = ref.watch(voiceRecordControllerProvider.select((s)=>s.isRecording));
+  Widget build(BuildContext context) {
+    const whatsappWaveStyle = WaveStyle(
+      waveColor: Color(0xFF2579D3), 
+      waveThickness: 2.2,
+      spacing: 4.0,
 
-    if (!isRecording) {
-      return const Text('جاري الان بدء التسجيل');
-    }
+      showMiddleLine: false,
+
+      extendWaveform: true,
+
+      backgroundColor: Colors.transparent,
+
+      scaleFactor: 18.0,
+    );
 
     return AudioWaveforms(
       recorderController: recorderController,
-      size: const Size(double.infinity, 60),
-      waveStyle: const WaveStyle(
-        waveColor: Colors.blue,
-        showMiddleLine: false,
-        extendWaveform: true,
-      ),
+      size: const Size(double.infinity, 47),
+      waveStyle: whatsappWaveStyle,
     );
   }
 }

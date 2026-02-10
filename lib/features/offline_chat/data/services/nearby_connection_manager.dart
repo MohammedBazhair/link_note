@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:nearby_connections/nearby_connections.dart';
@@ -182,10 +183,20 @@ class NearbyConnectionManager {
   Future<int?> sendFile({
     required String endpointId,
     required String filePath,
-  }) {
-    if (!isConnected(endpointId)) return Future.value();
+  }) async {
+    if (!isConnected(endpointId)) return null;
 
-    return _adapter.sendFilePayload(endpointId, filePath);
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        Logger.log(error: 'File does not exist: $filePath');
+        return null;
+      }
+      return await _adapter.sendFilePayload(endpointId, filePath);
+    } catch (e) {
+      Logger.log(error: 'Error sending file: $e');
+      return null;
+    }
   }
 
   void _handleIncomingConnection(String endpointId, ConnectionInfo info) async {

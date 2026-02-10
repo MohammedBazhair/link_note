@@ -1,6 +1,7 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/controller/audio_provider.dart';
 import '../../../../audio/presentation/widgets/recording_waveform.dart';
@@ -33,23 +34,31 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
   Future<void> recordOrStop() async {
     final controller = ref.read(voiceRecordControllerProvider.notifier);
-    if (recorderController.isRecording) {
-      await controller.stopRecording();
-      await recorderController.stop();
-      final filePath = ref.read(
-        voiceRecordControllerProvider.select((s) => s.path),
-      );
-      if (filePath == null) {
-        return context.showSnakbar('لم يتم الحصول على ملف التسجيل بنجاح');
+
+    if (!recorderController.isRecording) {
+      final hasPermission = await controller.startRecording();
+
+      if (!hasPermission) {
+        return context.showSnakbar('لا يمكن التسجيل بدون أذونات');
       }
-      
-      ref
-          .read(chatControllerProvider.notifier)
-          .sendVoiceRecord(peerId: widget.peerId, filePath: filePath);
-    } else {
-      await controller.startRecording();
       await recorderController.record();
+      return;
     }
+
+    await controller.stopRecording();
+    await recorderController.stop();
+
+    final filePath = ref.read(
+      voiceRecordControllerProvider.select((s) => s.path),
+    );
+
+    if (filePath == null) {
+      return context.showSnakbar('لم يتم الحصول على ملف التسجيل بنجاح');
+    }
+
+    ref
+        .read(chatControllerProvider.notifier)
+        .sendVoiceRecord(peerId: widget.peerId, filePath: filePath);
   }
 
   Future<void> pickImage() async {
@@ -88,6 +97,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
               return ChatInputButton(
                 isWriting: isWriting,
+                isRecordingVoice: isRecordingVoice,
                 send: send,
                 record: recordOrStop,
               );
@@ -182,9 +192,11 @@ class ChatInputButton extends StatelessWidget {
     required this.isWriting,
     required this.send,
     required this.record,
+    required this.isRecordingVoice,
   });
 
   final bool isWriting;
+  final bool isRecordingVoice;
   final VoidCallback send;
   final VoidCallback record;
 
@@ -211,6 +223,8 @@ class ChatInputButton extends StatelessWidget {
           },
           child: isWriting
               ? const Icon(key: ValueKey('send'), Icons.send)
+              : isRecordingVoice
+              ? const Icon(key: ValueKey('stop'), Icons.stop)
               : const Icon(key: ValueKey('mic'), Icons.mic),
         ),
       ),

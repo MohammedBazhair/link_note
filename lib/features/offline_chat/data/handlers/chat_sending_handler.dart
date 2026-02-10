@@ -89,13 +89,15 @@ class ChatSendingHandler {
     return message;
   }
 
-  
   Future<Message?> sendVoiceRecord({
     required String peerUserId,
     required String filePath,
   }) async {
     final session = _sessionManager.resolveSession(peerUserId);
     if (session == null) return null;
+
+    // A small delay to ensure the recorder has fully closed and released the file
+    await Future.delayed(const Duration(milliseconds: 200));
 
     final payloadId = await _connectionManager.sendFile(
       endpointId: session.peerAddress,
@@ -127,5 +129,4 @@ class ChatSendingHandler {
 
     return message;
   }
-
 }

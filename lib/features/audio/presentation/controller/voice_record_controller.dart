@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
+import '../../../../core/errors/exceptions.dart';
 import '../../domain/repositories/voice_record_repository.dart';
 import 'audio_provider.dart';
 import 'voice_record_state.dart';
@@ -20,8 +21,14 @@ class VoiceRecordController extends Notifier<VoiceRecordState> {
     return VoiceRecordState();
   }
 
-  Future<void> startRecording() async {
+  Future<bool> startRecording() async {
     try {
+      if (!await _repo.hasPermissions()) {
+        Logger.log(message: 'No permissions');
+        throw const PermissionsException('No permissions');
+      }
+      Logger.log(message: 'has permissions');
+
       final dir = await getApplicationDocumentsDirectory();
       final now = DateTime.now();
 
@@ -43,9 +50,13 @@ class VoiceRecordController extends Notifier<VoiceRecordState> {
 
         state = state.copyWith(duration: newDuration);
       });
+      return true;
+    } on PermissionsException catch (_) {
+      return false;
     } catch (e) {
       _recordTimer?.cancel();
       Logger.log(error: e);
+      return false;
     }
   }
 

@@ -42,3 +42,7 @@ class InternetException extends AppException {
 class AlreadyRunnedException extends AppException {
   const AlreadyRunnedException(super.message);
 }
+
+class PermissionsException extends AppException {
+  const PermissionsException(super.message);
+}

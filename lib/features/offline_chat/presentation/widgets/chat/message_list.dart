@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../controllers/chat_providers.dart';
-import '../../screens/test_chat_screen.dart';
 import 'message_content.dart';
 
 class MessageList extends ConsumerStatefulWidget {
@@ -23,20 +22,22 @@ class _MessageListState extends ConsumerState<MessageList> {
       oldMessages,
       newMessages,
     ) {
-      if (oldMessages == null || oldMessages.length != newMessages.length) {
+      if (oldMessages != null && newMessages.length <= oldMessages.length) {
         return;
       }
       if (!_scrollController.hasClients) return;
 
       FocusScope.of(context).unfocus();
 
-      final offset = _scrollController.position.maxScrollExtent;
-      _scrollController.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-      );
-      _scrollController.jumpTo(offset);
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!_scrollController.hasClients) return;
+        final offset = _scrollController.position.maxScrollExtent;
+        _scrollController.animateTo(
+          offset,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+        );
+      });
     });
   }
 
@@ -48,8 +49,7 @@ class _MessageListState extends ConsumerState<MessageList> {
 
   @override
   Widget build(BuildContext context) {
-    // final chatMessages = ref.watch(getChatMessagesProvider(widget.chatId));
-    final chatMessages = mockMessages;
+    final chatMessages = ref.watch(getChatMessagesProvider(widget.chatId));
 
     if (chatMessages.isEmpty) {
       return const Center(child: Text('لا توجد رسائل بعد'));

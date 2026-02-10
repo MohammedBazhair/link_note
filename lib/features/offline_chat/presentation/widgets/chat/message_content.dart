@@ -1,9 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
-import '../../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
 import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
@@ -30,6 +30,11 @@ class MessageWidget extends ConsumerWidget {
     final backgroundColor = isMe
         ? Colors.blue.shade800
         : const Color(0xFF343147);
+    final avatarBytes = ref.watch(
+      getIdentityByUserIdProvider(
+        message.senderUserId,
+      ).select((i) => i.avatarBytes),
+    );
     return Align(
       alignment: isMe
           ? AlignmentDirectional.centerStart
@@ -37,6 +42,7 @@ class MessageWidget extends ConsumerWidget {
       child: Dismissible(
         key: ValueKey(message.id),
         direction: DismissDirection.endToStart,
+        dismissThresholds: const {DismissDirection.endToStart: 0.5},
         confirmDismiss: (direction) {
           ref.read(replyToMessageProvider.notifier).state = message;
 
@@ -77,7 +83,11 @@ class MessageWidget extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ReplyMessageWidget(repliedMessage: repliedMessage),
-                  MessageContnetWidget(message: message, isMe: isMe),
+                  MessageContnetWidget(
+                    message: message,
+                    isMe: isMe,
+                    avatarImage: avatarBytes,
+                  ),
                 ],
               ),
             ),
@@ -93,9 +103,11 @@ class MessageContnetWidget extends StatelessWidget {
     super.key,
     required this.message,
     required this.isMe,
+    required this.avatarImage,
   });
   final Message message;
   final bool isMe;
+  final Uint8List? avatarImage;
   @override
   Widget build(BuildContext context) {
     switch (message.type) {
@@ -111,7 +123,11 @@ class MessageContnetWidget extends StatelessWidget {
       case MessageType.image:
         return MessageImage(message: message);
       case MessageType.voice:
-        return VoiceMessageBubble(path: message.filePath!);
+        return VoiceMessageBubble(
+          path: message.filePath!,
+          image: avatarImage,
+          time: message.time,
+        );
     }
   }
 }
@@ -121,49 +137,46 @@ class MessageImage extends StatelessWidget {
   final Message message;
   @override
   Widget build(BuildContext context) {
-    Logger.log(message: message.toString());
-    return ConditionalBuilder(
-      condition: message.filePath != null,
-      builder: (_) => Container(
-        clipBehavior: Clip.antiAlias,
-        width: 250,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(7.5)),
-        child: Stack(
-          children: [
-            AspectRatio(
-              aspectRatio: 4 / 5,
-              child: Image.asset(
-                message.filePath!,
-                width: 250,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.black45,
-                  child: const Center(child: Text('هذه الصورة غير متاحة')),
-                ),
-              ),
-            ),
+    if (message.filePath == null) return const Text('صورة');
 
-            PositionedDirectional(
-              bottom: 8,
-              end: 9,
-              child: Text(
-                message.time.formattedChatTime,
-                style: const TextStyle(
-                  shadows: [
-                    Shadow(blurRadius: 35, color: Color(0x993A3A3A)),
-                    Shadow(blurRadius: 1, color: Color(0xAB000000)),
-                  ],
-                  fontSize: 9,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.3,
-                ),
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      width: 250,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(7.5)),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 4 / 5,
+            child: Image.asset(
+              message.filePath!,
+              width: 250,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.black45,
+                child: const Center(child: Text('هذه الصورة غير متاحة')),
               ),
             ),
-          ],
-        ),
+          ),
+
+          PositionedDirectional(
+            bottom: 8,
+            end: 9,
+            child: Text(
+              message.time.formattedChatTime,
+              style: const TextStyle(
+                shadows: [
+                  Shadow(blurRadius: 35, color: Color(0x993A3A3A)),
+                  Shadow(blurRadius: 1, color: Color(0xAB000000)),
+                ],
+                fontSize: 9,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ),
+        ],
       ),
-      fallback: (_) => const Text('صورة'),
     );
   }
 }

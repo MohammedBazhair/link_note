@@ -1,3 +1,4 @@
+
 import 'package:record/record.dart';
 
 class VoiceRecordDataSource {
@@ -5,7 +6,8 @@ class VoiceRecordDataSource {
 
   final AudioRecorder _record;
 
-  Future<bool> hasPermissions([bool request = true]) {
+  Future<bool> hasPermissions([bool request = true])  {
+   
     return _record.hasPermission(request: request);
   }
 
