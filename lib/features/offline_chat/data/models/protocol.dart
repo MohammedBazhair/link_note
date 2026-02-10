@@ -71,7 +71,7 @@ class Protocol {
       if (data.isEmpty) {
         throw Exception('Empty packet');
       }
-      final reader = ReadBuffer(data.buffer.asByteData());
+      final reader = ReadBuffer(ByteData.sublistView(data));
 
       // senderUserId
 

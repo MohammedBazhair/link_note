@@ -1,7 +1,6 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/controller/audio_provider.dart';
 import '../../../../audio/presentation/widgets/recording_waveform.dart';
@@ -117,10 +116,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
                   Consumer(
                     builder: (context, ref, child) {
                       final repliedMessage = ref.watch(replyToMessageProvider);
-                      return ReplyMessageWidget(
-                        repliedMessage: repliedMessage,
-                        hasCloseIcon: true,
-                      );
+                      return ReplyMessageWidget(repliedMessage: repliedMessage);
                     },
                   ),
 

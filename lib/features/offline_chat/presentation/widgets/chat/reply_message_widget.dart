@@ -1,20 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/constants/colors/colors.dart';
 import '../../../../audio/presentation/controller/audio_provider.dart';
 import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 
 class ReplyMessageWidget extends StatelessWidget {
-  const ReplyMessageWidget({
-    super.key,
-    this.repliedMessage,
-    this.hasCloseIcon = false,
-  });
+  const ReplyMessageWidget({super.key, this.repliedMessage});
   final Message? repliedMessage;
-  final bool hasCloseIcon;
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
@@ -37,20 +34,14 @@ class ReplyMessageWidget extends StatelessWidget {
           : _OverlayMessage(
               key: ValueKey(repliedMessage!.id),
               message: repliedMessage!,
-              hasCloseIcon: hasCloseIcon,
             ),
     );
   }
 }
 
 class _OverlayMessage extends ConsumerWidget {
-  const _OverlayMessage({
-    required this.message,
-    super.key,
-    this.hasCloseIcon = false,
-  });
+  const _OverlayMessage({required this.message, super.key});
   final Message message;
-  final bool hasCloseIcon;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -61,76 +52,60 @@ class _OverlayMessage extends ConsumerWidget {
     final senderName = isMe
         ? 'أنت'
         : ref.watch(getUserNameByUserIdProvider(message.senderUserId));
-    return Stack(
-      children: [
-        Container(
-          clipBehavior: Clip.antiAlias,
-          width: double.infinity,
-          margin: const EdgeInsets.only(top: 7, bottom: 10, right: 3, left: 3),
-          padding: const EdgeInsetsDirectional.only(start: 10),
-          decoration: BoxDecoration(
-            color: primaryColor.withOpacity(0.15),
-            border: BoxBorder.fromSTEB(
-              start: BorderSide(color: primaryColor, width: 5),
-            ),
-            borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: () async {
+        ref.read(replyToMessageProvider.notifier).state = null;
+        await SystemSound.play(SystemSoundType.click);
+      },
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 7, bottom: 10, right: 3, left: 3),
+        padding: const EdgeInsetsDirectional.only(start: 10),
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.15),
+          border: BoxBorder.fromSTEB(
+            start: BorderSide(color: primaryColor, width: 5),
           ),
-          child: Row(
-            spacing: 10,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 7,
-                    children: [
-                      Text(
-                        isMe ? 'أنت' : senderName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: primaryColor..withAlpha(240),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      _RepliedContent(message),
-                    ],
-                  ),
-                ),
-              ),
-
-              if (message.type == MessageType.image)
-                Image.asset(
-                  message.filePath!,
-                  width: 70,
-                  height: 70,
-
-                  fit: BoxFit.cover,
-                ),
-            ],
-          ),
+          borderRadius: BorderRadius.circular(10),
         ),
-
-        if (hasCloseIcon)
-          PositionedDirectional(
-            end: 5,
-            top: 5,
-            child: CloseButton(
-              onPressed: () {
-                ref.read(replyToMessageProvider.notifier).state = null;
-              },
-              style: IconButton.styleFrom(
-                iconSize: 17,
-                foregroundColor: DarkColors.secondFont.withOpacity(0.5),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                overlayColor: Colors.transparent,
+        child: Row(
+          spacing: 10,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 7,
+                  children: [
+                    Text(
+                      isMe ? 'أنت' : senderName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: primaryColor..withAlpha(240),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    _RepliedContent(message),
+                  ],
+                ),
               ),
             ),
-          ),
-      ],
+
+            if (message.type == MessageType.image)
+              Image.file(
+                File(message.filePath!),
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -166,7 +141,7 @@ class _RepliedContent extends StatelessWidget {
         return const Row(
           spacing: 8,
           children: [
-            Icon(Icons.photo),
+            Icon(Icons.photo, color: Colors.white),
             Text(
               'صورة',
               maxLines: 3,
@@ -181,33 +156,51 @@ class _RepliedContent extends StatelessWidget {
             final durationAsync = ref.read(
               getAudioDurationProfider(message.filePath),
             );
-          return  durationAsync.when(
-              data: (duration) {
-                return const Row(
-                  spacing: 8,
+            return Theme(
+              data: ThemeData(
+                iconTheme: const IconThemeData(color: Colors.white, size: 16),
+              ),
+              child: durationAsync.when(
+                data: (duration) {
+                  return const Row(
+                    spacing: 5,
+                    children: [
+                      Icon(Icons.mic),
+                      Text(
+                        'رسالة صوتية (0:30)',
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: style,
+                      ),
+                    ],
+                  );
+                },
+                loading: () {
+                  return const Row(
+                    spacing: 5,
+                    children: [
+                      Icon(Icons.mic),
+                      Text(
+                        'رسالة صوتية',
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: style,
+                      ),
+                    ],
+                  );
+                },
+                error: (_, _) => const Row(
+                  spacing: 5,
                   children: [
                     Icon(Icons.mic),
                     Text(
-                      'رسالة صوتية (0:30)',
+                      'رسالة صوتية (0:00)',
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: style,
                     ),
                   ],
-                );
-              },
-              loading: LinearProgressIndicator.new,
-              error: (_, _) => const Row(
-                spacing: 8,
-                children: [
-                  Icon(Icons.mic),
-                  Text(
-                    'رسالة صوتية (0:00)',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: style,
-                  ),
-                ],
+                ),
               ),
             );
           },

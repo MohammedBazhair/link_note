@@ -174,10 +174,21 @@ class NearbyConnectionManager {
     return _endpointManager.getDisplayNameByUserId(userId);
   }
 
-  Future<void> sendBytes(String endpointId, Uint8List bytes) async {
-    if (!isConnected(endpointId)) return;
+  /// Sends bytes payload to the given endpoint.
+  /// Returns true when the adapter reports success, false otherwise.
+  Future<bool> sendBytes(String endpointId, Uint8List bytes) async {
+    if (!isConnected(endpointId)) return false;
 
-    await _adapter.sendBytesPayload(endpointId, bytes);
+    try {
+      await _adapter.sendBytesPayload(endpointId, bytes);
+      return true;
+    } catch (e, st) {
+      Logger.log(
+        error: 'Error sending bytes to $endpointId: $e',
+        stackTrace: st,
+      );
+      return false;
+    }
   }
 
   Future<int?> sendFile({

@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../offline_chat/presentation/widgets/common/user_avatar_with_status.dart';
 
@@ -73,7 +72,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
       textDirection: TextDirection.ltr,
       mainAxisSize: MainAxisSize.min,
       children: [
-        AvatarBytesWidget(image: widget.image, radius: 20),
+        AvatarBytesWidget(image: widget.image, radius: 20, icon: Icons.mic),
         StreamBuilder(
           stream: _playerController.onPlayerStateChanged,
           builder: (context, asyncSnapshot) {
@@ -100,12 +99,12 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
                 playerController: _playerController,
                 playerWaveStyle: whatsappPlayerWaveStyle,
                 waveformType: WaveformType.fitWidth,
-
               ),
               DefaultTextStyle.merge(
-                style: const TextStyle(
-                  color: DarkColors.secondFont,
-                  fontSize: 10,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w500,
                 ),
                 child: Row(
                   textDirection: TextDirection.ltr,
@@ -132,6 +131,7 @@ class _VoiceMessageBubbleState extends State<VoiceMessageBubble> {
                     Text(
                       widget.time.formattedChatTime,
                       textDirection: TextDirection.ltr,
+                      style: const TextStyle(letterSpacing: -0.3),
                     ),
                   ],
                 ),

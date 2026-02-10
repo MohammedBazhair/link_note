@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/message.dart';
 import '../models/protocol.dart';
 import '../services/chat_session_manager.dart';
@@ -46,7 +47,27 @@ class ChatSendingHandler {
       messageId: message.id,
     );
 
-    await _connectionManager.sendBytes(session.peerAddress, packet);
+    Logger.log(
+      message: 'Sending text to ${session.peerAddress} id=${message.id}',
+    );
+
+    final sent = await _connectionManager.sendBytes(
+      session.peerAddress,
+      packet,
+    );
+
+    if (!sent) {
+      Logger.log(
+        error:
+            'Failed to send bytes to ${session.peerAddress} for message ${message.id}',
+      );
+      // Sending failed - return null so repository won't mark message as sent
+      return null;
+    }
+
+    Logger.log(
+      message: 'Bytes sent to ${session.peerAddress} id=${message.id}',
+    );
 
     return message;
   }

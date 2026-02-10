@@ -26,6 +26,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
     super.initState();
     ref.read(tokenRefreshProvider);
     ref.read(syncNotesProvider);
+    ref.read(userControllerProvider.notifier).loadProfile();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // للتأكد من تجديد التوكن عند أول اتصال
       ref.read(isInNotesListScreen.notifier).update((_) => true);

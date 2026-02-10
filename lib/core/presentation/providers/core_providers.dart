@@ -112,7 +112,7 @@ final _userControllerProvider = Provider((ref) {
 final userControllerProvider = StateNotifierProvider<UserController, UserState>(
   (ref) {
     final controller = ref.read(_userControllerProvider);
-    return controller..loadProfile();
+    return controller;
   },
 );
 

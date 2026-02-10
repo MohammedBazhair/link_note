@@ -106,6 +106,10 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   void _handleIncoming(IncomingFrame frame) {
+    Logger.log(
+      message:
+          'Incoming frame from ${frame.peerEndpointId} payloadId=${frame.payloadId} filePath=${frame.filePath} bytes=${frame.bytes?.length} messageId=${frame.messageId}',
+    );
     // 1️⃣ File payload completion
     if (frame.payloadId != null && frame.filePath != null) {
       // mark completion for both image and voice handlers; the correct
@@ -134,6 +138,10 @@ class ChatRepositoryImpl implements ChatRepository {
       );
 
       if (voiceMessage != null) {
+        Logger.log(
+          message:
+              'Built voice message id=${voiceMessage.id} from payload ${frame.payloadId}',
+        );
         _addMessageToHistory(voiceMessage);
         _controller.add(voiceMessage);
         return;
@@ -142,10 +150,20 @@ class ChatRepositoryImpl implements ChatRepository {
     }
 
     // 2️⃣ Bytes payload
-    if (frame.bytes == null) return;
+    if (frame.bytes == null) {
+      Logger.log(
+        message:
+            'Frame bytes null for payloadId=${frame.payloadId} from ${frame.peerEndpointId}',
+      );
+      return;
+    }
 
     try {
       final packet = Protocol.parsePacket(frame.bytes!);
+      Logger.log(
+        message:
+            'Parsed Packet sender=${packet.senderUserId} id=${packet.messageId} type=${packet.messageType}',
+      );
 
       // Handshake packets are handled separately
       if (packet.messageType == MessageType.handshake) {
@@ -155,6 +173,13 @@ class ChatRepositoryImpl implements ChatRepository {
 
       // Delegate message logic
       final message = _incomingHandler.handlePacket(frame, packet);
+
+      if (message != null) {
+        Logger.log(
+          message:
+              'Incoming message built id=${message.id} chatId=${message.chatId} from=${message.senderUserId}',
+        );
+      }
 
       if (message != null) {
         _addMessageToHistory(message);

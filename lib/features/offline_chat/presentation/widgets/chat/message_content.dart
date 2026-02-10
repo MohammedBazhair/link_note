@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
 import '../../../domain/entities/message.dart';
@@ -147,14 +149,20 @@ class MessageImage extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 4 / 5,
-            child: Image.asset(
-              message.filePath!,
+            child: Image.file(
+              File(message.filePath!),
               width: 250,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: Colors.black45,
-                child: const Center(child: Text('هذه الصورة غير متاحة')),
-              ),
+              errorBuilder: (context, error, stackTrace) {
+                Logger.log(
+                  error: 'Error loading image: $error',
+                  stackTrace: stackTrace,
+                );
+                return Container(
+                  color: Colors.black45,
+                  child: const Center(child: Text('هذه الصورة غير متاحة')),
+                );
+              },
             ),
           ),
 

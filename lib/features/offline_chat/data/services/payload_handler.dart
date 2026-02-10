@@ -16,12 +16,27 @@ class NearbyPayloadManager {
   Stream<IncomingFrame> get incomingFrames => _incomingStreamController.stream;
 
   void handlePayloadReceived(String endpointId, Payload payload) {
-    if (payload.type == PayloadType.BYTES && payload.bytes == null) return;
+    if (payload.type == PayloadType.BYTES && payload.bytes == null) {
+      Logger.log(
+        message:
+            'Received BYTES payload with null bytes from $endpointId id=${payload.id}',
+      );
+      return;
+    }
 
     try {
+      Logger.log(
+        message:
+            'handlePayloadReceived endpoint=$endpointId id=${payload.id} type=${payload.type}',
+      );
+
       switch (payload.type) {
         case PayloadType.BYTES:
           final packet = Protocol.parsePacket(payload.bytes!);
+          Logger.log(
+            message:
+                'Parsed packet from $endpointId messageId=${packet.messageId} type=${packet.messageType}',
+          );
           _payloadMessagesIds[payload.id] = packet.messageId;
 
           _incomingStreamController.add(
@@ -33,15 +48,26 @@ class NearbyPayloadManager {
               replyToMessageId: packet.replyToMessageId,
             ),
           );
+          break;
         case PayloadType.FILE:
           if (payload.filePath != null) {
+            Logger.log(
+              message:
+                  'Received FILE payload from $endpointId id=${payload.id} path=${payload.filePath}',
+            );
             _payloadPaths[payload.id] = payload.filePath!;
           }
+          break;
         case PayloadType.NONE:
         case PayloadType.STREAM:
+          Logger.log(
+            message:
+                'Received unsupported payload type ${payload.type} from $endpointId id=${payload.id}',
+          );
+          break;
       }
-    } catch (e) {
-      Logger.log(error: e);
+    } catch (e, st) {
+      Logger.log(error: 'Error in handlePayloadReceived: $e', stackTrace: st);
     }
   }
 
@@ -50,9 +76,13 @@ class NearbyPayloadManager {
       case PayloadStatus.IN_PROGRESS:
         break;
       case PayloadStatus.SUCCESS:
+        Logger.log(
+          message:
+              'Payload transfer SUCCESS endpoint=$endpointId id=${update.id}',
+        );
         final path = _payloadPaths.remove(update.id);
         final messageId = _payloadMessagesIds.remove(update.id);
-        
+
         _incomingStreamController.add(
           IncomingFrame(
             peerEndpointId: endpointId,
