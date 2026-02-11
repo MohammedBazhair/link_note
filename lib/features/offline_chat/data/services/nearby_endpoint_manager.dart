@@ -55,13 +55,10 @@ class NearbyEndpointManager {
     _connectedEndpointIds.remove(endpointId);
   }
 
-  void updateUuidMapping({required String uuid, required String name}) {
+  void updateIdentity(NearbyIdentityModel identity) {
     for (final element in _endpoints.entries) {
-      if (element.value.uuid == uuid) {
-        _endpoints.update(
-          element.key,
-          (identity) => identity.copyWith(displayName: name),
-        );
+      if (element.value.uuid == identity.uuid) {
+        _endpoints[element.key] = identity;
         return;
       }
     }

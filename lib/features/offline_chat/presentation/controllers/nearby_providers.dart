@@ -31,7 +31,7 @@ final nearbyIdentityManagerProvider = Provider<NearbyIdentityManager>((ref) {
     asyncFile.whenData((file) async {
       final bytes = await file.readAsBytes();
       manager.updateAvatar(bytes);
-      cache.set('profileJson', model.toJson());
+      cache.set('profileJson', manager.localIdentityJson);
     });
   }
 

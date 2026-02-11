@@ -5,8 +5,20 @@ class VoiceTransferHandler {
   final Map<int, String> _pendingSenders = {};
   final Map<int, String> _completedPaths = {};
 
-  void registerIncomingVoice(int payloadId, String senderId) {
+  Message? registerIncomingVoice({
+    required int payloadId,
+    required String senderId,
+    required String myUserId,
+    required String messageId,
+    String? replyToMessageId,
+  }) {
     _pendingSenders[payloadId] = senderId;
+    return tryBuildVoiceMessage(
+      payloadId: payloadId,
+      myUserId: myUserId,
+      messageId: messageId,
+      replyToMessageId: replyToMessageId,
+    );
   }
 
   Message? tryBuildVoiceMessage({
@@ -22,7 +34,6 @@ class VoiceTransferHandler {
 
     final finalPath = '$path.ogg';
     final file = File(path);
-    
 
     if (!file.existsSync()) return null;
     try {
@@ -42,8 +53,6 @@ class VoiceTransferHandler {
       time: DateTime.now().toUtc(),
       chatId: Message.buildChatId(myUserId, senderId),
       replyToMessageId: replyToMessageId,
-
-
     );
   }
 

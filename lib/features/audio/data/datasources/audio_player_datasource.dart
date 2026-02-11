@@ -24,8 +24,9 @@ class AudioPlayerDatasource {
       final duration = await _player.getDuration();
       Logger.log(message: 'Audio duration for $path: $duration');
       return duration;
-    } finally {
-      await _player.dispose();
+    } catch (e) {
+      Logger.log(error: 'Error getting audio duration: $e');
+      return null;
     }
   }
 }

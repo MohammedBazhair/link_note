@@ -51,8 +51,8 @@ class NearbyConnectionManager {
     _identityManager.updateAvatar(avatarBytes);
   }
 
-  void updateUuidMapping({required String uuid, required String name}) {
-    _endpointManager.updateUuidMapping(uuid: uuid, name: name);
+  void updateIdentity(NearbyIdentityModel identity) {
+    _endpointManager.updateIdentity(identity);
   }
 
   Future<Result<bool>> initializeDependencies() async {

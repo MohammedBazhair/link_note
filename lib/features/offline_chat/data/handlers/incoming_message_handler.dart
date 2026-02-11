@@ -13,7 +13,8 @@ class IncomingMessageHandler {
   IncomingMessageHandler(
     this._sessionManager,
     this._identityManager,
-    this._imageHandler, this._voiceHandler,
+    this._imageHandler,
+    this._voiceHandler,
   );
 
   final ChatSessionManager _sessionManager;
@@ -38,7 +39,6 @@ class IncomingMessageHandler {
           packet: packet,
           myId: _identityManager.localIdentity.uuid,
           senderId: packet.senderUserId,
-          
         );
       case MessageType.image:
         final payloadId = int.tryParse(utf8.decode(packet.payload));
@@ -47,9 +47,15 @@ class IncomingMessageHandler {
         }
         return null;
       case MessageType.voice:
-      final payloadId = int.tryParse(utf8.decode(packet.payload));
+        final payloadId = int.tryParse(utf8.decode(packet.payload));
         if (payloadId != null) {
-          _voiceHandler.registerIncomingVoice(payloadId, packet.senderUserId);
+          return _voiceHandler.registerIncomingVoice(
+            payloadId: payloadId,
+            senderId: packet.senderUserId,
+            myUserId: _identityManager.localIdentity.uuid,
+            messageId: packet.messageId,
+            replyToMessageId: packet.replyToMessageId,
+          );
         }
         return null;
     }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/controller/audio_provider.dart';
 import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/message.dart';
@@ -162,12 +163,12 @@ class _RepliedContent extends StatelessWidget {
               ),
               child: durationAsync.when(
                 data: (duration) {
-                  return const Row(
+                  return Row(
                     spacing: 5,
                     children: [
-                      Icon(Icons.mic),
+                      const Icon(Icons.mic),
                       Text(
-                        'رسالة صوتية (0:30)',
+                        'رسالة صوتية (${duration.toMMSS})',
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: style,
@@ -181,7 +182,7 @@ class _RepliedContent extends StatelessWidget {
                     children: [
                       Icon(Icons.mic),
                       Text(
-                        'رسالة صوتية',
+                        'رسالة صوتية...',
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: style,

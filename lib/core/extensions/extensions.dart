@@ -66,7 +66,7 @@ extension DateTimeFormats on DateTime {
 extension DurationFormats on Duration {
   String get toMMSS {
     final minutes = inMinutes;
-    final seconds = inSeconds;
+    final seconds = inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 }
