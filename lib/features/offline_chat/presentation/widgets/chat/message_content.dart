@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,11 +31,7 @@ class MessageWidget extends ConsumerWidget {
     final backgroundColor = isMe
         ? Colors.blue.shade800
         : const Color(0xFF343147);
-    final avatarBytes = ref.watch(
-      getIdentityByUserIdProvider(
-        message.senderUserId,
-      ).select((i) => i.avatarBytes),
-    );
+
     return Align(
       alignment: isMe
           ? AlignmentDirectional.centerStart
@@ -85,11 +80,10 @@ class MessageWidget extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ReplyMessageWidget(repliedMessage: repliedMessage),
-                  MessageContnetWidget(
-                    message: message,
-                    isMe: isMe,
-                    avatarImage: avatarBytes,
-                  ),
+                    MessageContnetWidget(
+                      message: message,
+                      isMe: isMe,
+                    ),
                 ],
               ),
             ),
@@ -105,11 +99,9 @@ class MessageContnetWidget extends StatelessWidget {
     super.key,
     required this.message,
     required this.isMe,
-    required this.avatarImage,
   });
   final Message message;
   final bool isMe;
-  final Uint8List? avatarImage;
   @override
   Widget build(BuildContext context) {
     switch (message.type) {
@@ -127,7 +119,7 @@ class MessageContnetWidget extends StatelessWidget {
       case MessageType.voice:
         return VoiceMessageBubble(
           path: message.filePath!,
-          image: avatarImage,
+          image: null,
           time: message.time,
         );
     }

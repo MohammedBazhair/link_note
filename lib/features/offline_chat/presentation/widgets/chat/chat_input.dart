@@ -23,10 +23,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     final text = textController.text.trim();
     if (text.isEmpty) return;
 
+    final repliedMessage = ref.read(replyToMessageProvider);
+
     ref
         .read(chatControllerProvider.notifier)
-        .sendText(peerId: widget.peerId, text: text);
+        .sendText(peerId: widget.peerId, text: text, replyToMessageId: repliedMessage?.id);
 
+    ref.read(replyToMessageProvider.notifier).state = null;
     textController.clear();
     FocusScope.of(context).unfocus();
   }
@@ -55,9 +58,13 @@ class _ChatInputState extends ConsumerState<ChatInput> {
       return context.showSnakbar('لم يتم الحصول على ملف التسجيل بنجاح');
     }
 
+    final repliedMessage = ref.read(replyToMessageProvider);
+
     ref
         .read(chatControllerProvider.notifier)
-        .sendVoiceRecord(peerId: widget.peerId, filePath: filePath);
+        .sendVoiceRecord(peerId: widget.peerId, filePath: filePath, replyToMessageId: repliedMessage?.id);
+
+    ref.read(replyToMessageProvider.notifier).state = null;
   }
 
   Future<void> pickImage() async {
@@ -65,9 +72,12 @@ class _ChatInputState extends ConsumerState<ChatInput> {
         .read(imagePickerControllerProvider.notifier)
         .pickImage();
     if (imagePath == null) return;
+    final repliedMessage = ref.read(replyToMessageProvider);
     ref
         .read(chatControllerProvider.notifier)
-        .sendImage(peerId: widget.peerId, filePath: imagePath);
+        .sendImage(peerId: widget.peerId, filePath: imagePath, replyToMessageId: repliedMessage?.id);
+
+    ref.read(replyToMessageProvider.notifier).state = null;
   }
 
   @override

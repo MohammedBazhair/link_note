@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 
 import '../../../../core/presentation/providers/core_providers.dart';
-import '../../../user/presentation/controllers/user_providers.dart';
+
 import '../../data/models/incoming_frame.dart';
 import '../../data/models/nearby_identity_model.dart';
 import '../../data/services/nearby_connection_manager.dart';
@@ -25,15 +25,6 @@ final nearbyIdentityManagerProvider = Provider<NearbyIdentityManager>((ref) {
   );
   cache.set('profileJson', model.toJson());
   final manager = NearbyIdentityManager(model, cache);
-
-  if (profile.avatarUrl != null) {
-    final asyncFile = ref.read((getAvatarFileProvider(profile.avatarUrl!)));
-    asyncFile.whenData((file) async {
-      final bytes = await file.readAsBytes();
-      manager.updateAvatar(bytes);
-      cache.set('profileJson', manager.localIdentityJson);
-    });
-  }
 
   return manager;
 });

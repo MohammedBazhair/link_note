@@ -76,16 +76,34 @@ class ChatController extends Notifier<ChatState> {
     required String text,
     String? replyToMessageId,
   }) {
-    ref.read(chatRepository).sendText(peerUserId: peerId, text: text);
+    ref.read(chatRepository).sendText(
+          peerUserId: peerId,
+          text: text,
+          replyToMessageId: replyToMessageId,
+        );
   }
 
-  void sendImage({required String peerId, required String filePath}) {
-    ref.read(chatRepository).sendImage(peerUserId: peerId, filePath: filePath);
+  void sendImage({
+    required String peerId,
+    required String filePath,
+    String? replyToMessageId,
+  }) {
+    ref.read(chatRepository).sendImage(
+          peerUserId: peerId,
+          filePath: filePath,
+          replyToMessageId: replyToMessageId,
+        );
   }
 
-  void sendVoiceRecord({required String peerId, required String filePath}) {
-    ref
-        .read(chatRepository)
-        .sendVoiceRecord(peerUserId: peerId, filePath: filePath);
+  void sendVoiceRecord({
+    required String peerId,
+    required String filePath,
+    String? replyToMessageId,
+  }) {
+    ref.read(chatRepository).sendVoiceRecord(
+          peerUserId: peerId,
+          filePath: filePath,
+          replyToMessageId: replyToMessageId,
+        );
   }
 }

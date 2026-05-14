@@ -1,8 +1,7 @@
-import 'dart:typed_data';
+
 
 class NearbyIdentity {
-  NearbyIdentity({required this.uuid, required this.displayName,  this.avatarBytes});
+  NearbyIdentity({required this.uuid, required this.displayName});
   final String uuid;
   final String displayName;
-  final Uint8List? avatarBytes;
 }
