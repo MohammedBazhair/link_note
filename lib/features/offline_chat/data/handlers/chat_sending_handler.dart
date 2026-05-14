@@ -24,6 +24,7 @@ class ChatSendingHandler {
   Future<Message?> sendText({
     required String peerUserId,
     required String text,
+    String? replyToMessageId,
   }) async {
     final session = _sessionManager.resolveSession(peerUserId);
     if (session == null) return null;
@@ -38,6 +39,7 @@ class ChatSendingHandler {
         _identityManager.localIdentity.uuid,
         peerUserId,
       ),
+      replyToMessageId: replyToMessageId,
     );
 
     final packet = Protocol.buildPacket(
@@ -45,6 +47,7 @@ class ChatSendingHandler {
       type: MessageType.text,
       payload: Uint8List.fromList(utf8.encode(text)),
       messageId: message.id,
+      replyToMessageId: replyToMessageId,
     );
 
     Logger.log(
@@ -75,6 +78,7 @@ class ChatSendingHandler {
   Future<Message?> sendImage({
     required String peerUserId,
     required String filePath,
+    String? replyToMessageId,
   }) async {
     final session = _sessionManager.resolveSession(peerUserId);
     if (session == null) return null;
@@ -96,6 +100,7 @@ class ChatSendingHandler {
         _identityManager.localIdentity.uuid,
         peerUserId,
       ),
+      replyToMessageId: replyToMessageId,
     );
 
     final metadataPacket = Protocol.buildPacket(
@@ -103,6 +108,7 @@ class ChatSendingHandler {
       type: MessageType.image,
       payload: Uint8List.fromList(utf8.encode('$payloadId')),
       messageId: message.id,
+      replyToMessageId: replyToMessageId,
     );
 
     await _connectionManager.sendBytes(session.peerAddress, metadataPacket);
@@ -113,6 +119,7 @@ class ChatSendingHandler {
   Future<Message?> sendVoiceRecord({
     required String peerUserId,
     required String filePath,
+    String? replyToMessageId,
   }) async {
     final session = _sessionManager.resolveSession(peerUserId);
     if (session == null) return null;
@@ -137,6 +144,7 @@ class ChatSendingHandler {
         _identityManager.localIdentity.uuid,
         peerUserId,
       ),
+      replyToMessageId: replyToMessageId,
     );
 
     final metadataPacket = Protocol.buildPacket(
@@ -144,6 +152,7 @@ class ChatSendingHandler {
       type: MessageType.voice,
       payload: Uint8List.fromList(utf8.encode('$payloadId')),
       messageId: message.id,
+      replyToMessageId: replyToMessageId,
     );
 
     await _connectionManager.sendBytes(session.peerAddress, metadataPacket);

@@ -7,11 +7,11 @@ import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
-import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
+import '../widgets/auth_button.dart';
 import '../widgets/custom_email_field.dart';
 import '../widgets/custom_fullname_field.dart';
 import '../widgets/custom_password_field.dart';
@@ -34,7 +34,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   void initState() {
-    authSubscription = ref.listenManual(authProvider, (previous, next) async {
+    authSubscription = ref.listenManual(authControllerProvider, (
+      previous,
+      next,
+    ) async {
       await authListener(
         context: context,
         previous: previous,
@@ -58,7 +61,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       password: passwordController.text,
     );
 
-    await ref.read(authProvider.notifier).signUp(user);
+    await ref.read(authControllerProvider.notifier).signUp(user);
   }
 
   @override
@@ -165,14 +168,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             const SizedBox(height: 35),
 
                             // زر إنشاء الحساب
-                            AbsorbPointer(
-                              absorbing:
-                                  ref.watch(authProvider) is AuthLoadingState,
-                              child: MainButton(
-                                onPressed: onSubmit,
-                                text: 'إنشاء حساب',
-                              ),
-                            ),
+                            AuthButton(text: 'إنشاء حساب', onPressed: onSubmit),
 
                             const SizedBox(height: 15),
 

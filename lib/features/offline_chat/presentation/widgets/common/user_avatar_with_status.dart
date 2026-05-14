@@ -16,7 +16,7 @@ class UserAvatarWithStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        AvatarBytesWidget(image: params.identity.avatarBytes, radius: radius),
+        AvatarBytesWidget(image: null, radius: radius),
 
         if (params.isConnected)
           const Positioned(

@@ -43,7 +43,13 @@ class IncomingMessageHandler {
       case MessageType.image:
         final payloadId = int.tryParse(utf8.decode(packet.payload));
         if (payloadId != null) {
-          _imageHandler.registerIncomingImage(payloadId, packet.senderUserId);
+          return _imageHandler.registerIncomingImage(
+            payloadId: payloadId,
+            senderId: packet.senderUserId,
+            myUserId: _identityManager.localIdentity.uuid,
+            messageId: packet.messageId,
+            replyToMessageId: packet.replyToMessageId,
+          );
         }
         return null;
       case MessageType.voice:

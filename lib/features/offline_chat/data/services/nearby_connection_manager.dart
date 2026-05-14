@@ -47,10 +47,6 @@ class NearbyConnectionManager {
 
   Iterable<String> get knownEndpointIds => _endpointManager.knownEndpointIds;
 
-  void updateAvatar(Uint8List avatarBytes) {
-    _identityManager.updateAvatar(avatarBytes);
-  }
-
   void updateIdentity(NearbyIdentityModel identity) {
     _endpointManager.updateIdentity(identity);
   }

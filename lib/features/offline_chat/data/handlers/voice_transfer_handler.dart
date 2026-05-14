@@ -3,6 +3,8 @@ import '../../domain/entities/message.dart';
 
 class VoiceTransferHandler {
   final Map<int, String> _pendingSenders = {};
+  final Map<int, String> _pendingMessageIds = {};
+  final Map<int, String> _pendingReplyIds = {};
   final Map<int, String> _completedPaths = {};
 
   Message? registerIncomingVoice({
@@ -13,24 +15,26 @@ class VoiceTransferHandler {
     String? replyToMessageId,
   }) {
     _pendingSenders[payloadId] = senderId;
+    _pendingMessageIds[payloadId] = messageId;
+    if (replyToMessageId != null) {
+      _pendingReplyIds[payloadId] = replyToMessageId;
+    }
     return tryBuildVoiceMessage(
       payloadId: payloadId,
       myUserId: myUserId,
-      messageId: messageId,
-      replyToMessageId: replyToMessageId,
     );
   }
 
   Message? tryBuildVoiceMessage({
     required int payloadId,
     required String myUserId,
-    required String messageId,
-    String? replyToMessageId,
   }) {
     final path = _completedPaths[payloadId];
     final senderId = _pendingSenders[payloadId];
+    final messageId = _pendingMessageIds[payloadId];
+    final replyToMessageId = _pendingReplyIds[payloadId];
 
-    if (path == null || senderId == null) return null;
+    if (path == null || senderId == null || messageId == null) return null;
 
     final finalPath = '$path.ogg';
     final file = File(path);
@@ -42,6 +46,8 @@ class VoiceTransferHandler {
       return null;
     } finally {
       _pendingSenders.remove(payloadId);
+      _pendingMessageIds.remove(payloadId);
+      _pendingReplyIds.remove(payloadId);
       _completedPaths.remove(payloadId);
     }
 

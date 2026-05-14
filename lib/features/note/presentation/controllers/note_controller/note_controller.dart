@@ -21,9 +21,9 @@ class NoteController extends Notifier<void> {
   }
 
   Future<void> addNote(Note note) async {
-    final userNote = note.copyWith(uuid: _userId);
+    final userNote = note.copyWith(ownerId:   _userId);
 
-    await _notesRepository.create(userNote);
+ await _notesRepository.create(userNote);
     _updateUi();
   }
 
@@ -52,10 +52,10 @@ class NoteController extends Notifier<void> {
 
   Future<void> syncNotes() async {
     try {
-  await _notesRepository.syncNotes(_userId);
-}  catch (e) {
-// 
-}
+      await _notesRepository.syncNotes(_userId);
+    } catch (e) {
+      //
+    }
   }
 
   void _updateUi() {

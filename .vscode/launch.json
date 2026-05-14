@@ -6,9 +6,10 @@
   "configurations": [
   
     {
-      "name": "link_note",
+      "name": "link_note (debug mode)",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "flutterMode": "debug"
     },
     {
       "name": "link_note (profile mode)",

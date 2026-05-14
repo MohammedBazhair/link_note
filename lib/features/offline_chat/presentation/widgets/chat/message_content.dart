@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,11 +31,7 @@ class MessageWidget extends ConsumerWidget {
     final backgroundColor = isMe
         ? Colors.blue.shade800
         : const Color(0xFF343147);
-    final avatarBytes = ref.watch(
-      getIdentityByUserIdProvider(
-        message.senderUserId,
-      ).select((i) => i.avatarBytes),
-    );
+
     return Align(
       alignment: isMe
           ? AlignmentDirectional.centerStart
@@ -62,7 +57,7 @@ class MessageWidget extends ConsumerWidget {
           child: IntrinsicWidth(
             child: Container(
               padding: EdgeInsets.all(
-                message.type == MessageType.image ? 3 : 12,
+                message.type == MessageType.image ? 3 : 8,
               ),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -81,15 +76,12 @@ class MessageWidget extends ConsumerWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-
+                spacing: 15,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ReplyMessageWidget(repliedMessage: repliedMessage),
-                  MessageContnetWidget(
-                    message: message,
-                    isMe: isMe,
-                    avatarImage: avatarBytes,
-                  ),
+                  if (repliedMessage != null)
+                    ReplyMessageWidget(repliedMessage: repliedMessage!),
+                  MessageContnetWidget(message: message, isMe: isMe),
                 ],
               ),
             ),
@@ -105,11 +97,9 @@ class MessageContnetWidget extends StatelessWidget {
     super.key,
     required this.message,
     required this.isMe,
-    required this.avatarImage,
   });
   final Message message;
   final bool isMe;
-  final Uint8List? avatarImage;
   @override
   Widget build(BuildContext context) {
     switch (message.type) {
@@ -127,7 +117,7 @@ class MessageContnetWidget extends StatelessWidget {
       case MessageType.voice:
         return VoiceMessageBubble(
           path: message.filePath!,
-          image: avatarImage,
+          image: null,
           time: message.time,
         );
     }

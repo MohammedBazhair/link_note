@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
-
+import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/network/connectivity_service.dart';
@@ -20,14 +21,22 @@ class NotesRepositoryImpl implements NotesRepository {
   Future<Note?> create(Note note) async {
     try {
       final now = DateTime.now().toUtc();
-      final newNote = note.copyWith(updatedAt: now);
+      final userId =
+          note.ownerId ?? _cache.getString(key: ExternalConsts.lastUserIdKey);
+
+      final newNote = note.copyWith(
+        id: note.id ?? const Uuid().v4(),
+        updatedAt: now,
+        ownerId: userId,
+      );
 
       await _local.createNote(newNote);
 
       if (await _network.hasConnection()) await _remote.createNote(newNote);
 
       return newNote;
-    } catch (e) {
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
       return null;
     }
   }

@@ -120,8 +120,6 @@ class ChatRepositoryImpl implements ChatRepository {
       final imageMessage = _imageHandler.tryBuildImageMessage(
         payloadId: frame.payloadId!,
         myUserId: _identityManager.localIdentity.uuid,
-        messageId: frame.messageId,
-        replyToMessageId: frame.replyToMessageId,
       );
 
       if (imageMessage != null) {
@@ -133,8 +131,6 @@ class ChatRepositoryImpl implements ChatRepository {
       final voiceMessage = _voiceHandler.tryBuildVoiceMessage(
         payloadId: frame.payloadId!,
         myUserId: _identityManager.localIdentity.uuid,
-        messageId: frame.messageId,
-        replyToMessageId: frame.replyToMessageId,
       );
 
       if (voiceMessage != null) {
@@ -213,6 +209,7 @@ class ChatRepositoryImpl implements ChatRepository {
     final message = await _sendingHandler.sendText(
       peerUserId: peerUserId,
       text: text,
+      replyToMessageId: replyToMessageId,
     );
 
     if (message == null) return;
@@ -231,6 +228,7 @@ class ChatRepositoryImpl implements ChatRepository {
     final message = await _sendingHandler.sendImage(
       peerUserId: peerUserId,
       filePath: filePath,
+      replyToMessageId: replyToMessageId,
     );
 
     if (message == null) return;
@@ -248,6 +246,7 @@ class ChatRepositoryImpl implements ChatRepository {
     final message = await _sendingHandler.sendVoiceRecord(
       peerUserId: peerUserId,
       filePath: filePath,
+      replyToMessageId: replyToMessageId,
     );
 
     if (message == null) return;

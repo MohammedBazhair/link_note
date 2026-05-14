@@ -7,13 +7,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
-import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
+import '../widgets/auth_button.dart';
 import '../widgets/custom_email_field.dart';
 import '../widgets/custom_password_field.dart';
 import '../widgets/sign_google_button.dart';
@@ -27,7 +28,8 @@ class SignInScreen extends ConsumerStatefulWidget {
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignInScreenState extends ConsumerState<SignInScreen> {
+class _SignInScreenState extends ConsumerState<SignInScreen>
+    with WidgetsBindingObserver {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -39,10 +41,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     super.initState();
     listenAuthStates();
     initDeepLink();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   void listenAuthStates() {
-    _authSubscription = ref.listenManual(authProvider, (previous, next) async {
+    _authSubscription = ref.listenManual(authControllerProvider, (
+      previous,
+      next,
+    ) async {
       await authListener(
         context: context,
         previous: previous,
@@ -56,7 +62,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final _appLinks = AppLinks();
 
     _subscribtionsLinks = _appLinks.uriLinkStream.listen((uri) async {
-      await ref.read(authProvider.notifier).loginWithUri(uri);
+      await ref.read(authControllerProvider.notifier).loginWithUri(uri);
     });
   }
 
@@ -69,7 +75,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final email = _emailController.text;
 
     await ref
-        .read(authProvider.notifier)
+        .read(authControllerProvider.notifier)
         .loginWithEmail(email: email, password: password);
   }
 
@@ -79,7 +85,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     _passwordController.dispose();
     _authSubscription.close();
     _subscribtionsLinks.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(authControllerProvider.notifier).reset();
+      Logger.log(message: 'resumed');
+    }
   }
 
   @override
@@ -174,24 +189,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             ),
                             const SizedBox(height: 25),
 
-                            // زر تسجيل الدخول
-                            AbsorbPointer(
-                              absorbing:
-                                  ref.watch(authProvider) is AuthLoadingState,
-                              child: MainButton(
-                                onPressed: onSubmit,
-                                text: 'تسجيل الدخول',
-                              ),
+                            AuthButton(
+                              text: 'تسجيل الدخول',
+                              onPressed: onSubmit,
                             ),
 
                             const SizedBox(height: 15),
 
-                            AbsorbPointer(
-                              absorbing:
-                                  ref.watch(authProvider) is AuthLoadingState,
-
-                              child: const SignGoogleButton(),
-                            ),
+                            const SignGoogleButton(),
 
                             const SizedBox(height: 25),
 
@@ -219,7 +224,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                 ],
                               ),
                             ),
-
                           ],
                         ),
                       ),

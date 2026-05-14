@@ -23,10 +23,17 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     final text = textController.text.trim();
     if (text.isEmpty) return;
 
+    final repliedMessage = ref.read(replyToMessageProvider);
+
     ref
         .read(chatControllerProvider.notifier)
-        .sendText(peerId: widget.peerId, text: text);
+        .sendText(
+          peerId: widget.peerId,
+          text: text,
+          replyToMessageId: repliedMessage?.id,
+        );
 
+    ref.read(replyToMessageProvider.notifier).state = null;
     textController.clear();
     FocusScope.of(context).unfocus();
   }
@@ -55,9 +62,17 @@ class _ChatInputState extends ConsumerState<ChatInput> {
       return context.showSnakbar('لم يتم الحصول على ملف التسجيل بنجاح');
     }
 
+    final repliedMessage = ref.read(replyToMessageProvider);
+
     ref
         .read(chatControllerProvider.notifier)
-        .sendVoiceRecord(peerId: widget.peerId, filePath: filePath);
+        .sendVoiceRecord(
+          peerId: widget.peerId,
+          filePath: filePath,
+          replyToMessageId: repliedMessage?.id,
+        );
+
+    ref.read(replyToMessageProvider.notifier).state = null;
   }
 
   Future<void> pickImage() async {
@@ -65,9 +80,16 @@ class _ChatInputState extends ConsumerState<ChatInput> {
         .read(imagePickerControllerProvider.notifier)
         .pickImage();
     if (imagePath == null) return;
+    final repliedMessage = ref.read(replyToMessageProvider);
     ref
         .read(chatControllerProvider.notifier)
-        .sendImage(peerId: widget.peerId, filePath: imagePath);
+        .sendImage(
+          peerId: widget.peerId,
+          filePath: imagePath,
+          replyToMessageId: repliedMessage?.id,
+        );
+
+    ref.read(replyToMessageProvider.notifier).state = null;
   }
 
   @override
@@ -82,6 +104,7 @@ class _ChatInputState extends ConsumerState<ChatInput> {
     final isRecordingVoice = ref.watch(
       voiceRecordControllerProvider.select((s) => s.isRecording),
     );
+    final repliedMessage = ref.watch(replyToMessageProvider);
     return Padding(
       padding: const EdgeInsets.all(7.0),
       child: Row(
@@ -105,20 +128,20 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-              decoration: const BoxDecoration(
-                color: Color(0xFF343147),
-                borderRadius: BorderRadius.all(Radius.circular(30)),
+              padding: repliedMessage != null
+                  ? const EdgeInsets.all(7)
+                  : const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFF343147),
+                borderRadius: BorderRadius.circular(
+                  repliedMessage != null ? 15 : 30,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final repliedMessage = ref.watch(replyToMessageProvider);
-                      return ReplyMessageWidget(repliedMessage: repliedMessage);
-                    },
-                  ),
+                  if (repliedMessage != null)
+                    ReplyMessageWidget(repliedMessage: repliedMessage),
 
                   if (isRecordingVoice)
                     RecordingWaveform(recorderController: recorderController),
