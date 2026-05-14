@@ -5,21 +5,28 @@ import '../../domain/repositories/audio_repository.dart';
 import 'audio_provider.dart';
 
 class AudioController extends Notifier<void> {
- late final AudioRepository repository;
+  late final AudioRepository _repository;
 
   @override
   void build() {
-    repository= ref.read(audioRepositoryProvider);
+    _repository = ref.read(audioRepositoryProvider);
   }
 
-
   Future<void> playSound(String assetPath) {
-    return repository.play(assetPath);
+    return _repository.play(assetPath);
   }
 
   Future<void> playBell() {
-    return repository.play(Assets.soundsBell);
+    return _repository.play(Assets.soundsBell);
   }
 
-  
+  Future<Duration> getSoundDuration(String? path) async {
+    try {
+      if (path == null) throw Exception();
+      final duration = await _repository.getAudioDuration(path);
+      return duration ?? Duration.zero;
+    } catch (e) {
+      return Duration.zero;
+    }
+  }
 }

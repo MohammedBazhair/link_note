@@ -3,19 +3,21 @@ import 'package:nearby_connections/nearby_connections.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../../data/datasource/nearby_service.dart';
-import 'chat_providers.dart';
+import '../../data/services/nearby_connection_manager.dart';
+import '../../domain/entities/nearby_identity.dart';
+import 'nearby_providers.dart';
 import 'nearby_state.dart';
 
 /// Controller to manage Nearby Connections discovery and advertising.
 class NearbyDiscoveryController extends Notifier<NearbyState> {
   late final NearbyConnectionManager _nearbyManager;
 
- Stream<Map<String, String>>  get endpoints => _nearbyManager.allKnownEndpoints;
+  Stream<Map<String, NearbyIdentity>> get endpoints =>
+      _nearbyManager.allKnownEndpoints;
 
   @override
   NearbyState build() {
-    _nearbyManager = ref.read(connectionManagerProvider);
+    _nearbyManager = ref.read(nearbyConnectionManagerProvider);
 
     ref.onDispose(stopAll);
 
@@ -23,7 +25,7 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
   }
 
   Future<void> runDependencies() async {
-    final result = await _nearbyManager.runDependencies();
+    final result = await _nearbyManager.initializeDependencies();
 
     if (!result.hasError) return;
 
@@ -38,18 +40,14 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
     required String serviceId,
   }) async {
     try {
-      print('1');
       await startAdvertising(strategy: strategy, serviceId: serviceId);
 
-      print('2');
       final isDiscovering = await startDiscovery(
         strategy: strategy,
         serviceId: serviceId,
       );
 
-      print('3');
-      Future.delayed(const Duration(seconds: 5), () async {
-        print('مرت 5 ث');
+      Future.delayed(const Duration(seconds: 7), () async {
         if (!isDiscovering) return;
 
         await stopDiscovery();
@@ -58,6 +56,7 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
         );
       });
     } catch (e) {
+      Logger.log(error: e);
       state = NearbyeErrorState(nearby: state.nearby, message: e.toString());
     }
   }
@@ -107,8 +106,7 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
         nearby: state.nearby.copyWith(isAdvertising: true),
       );
       return true;
-    } on AlreadyRunnedException catch (e) {
-      state = NearbyeErrorState(nearby: state.nearby, message: e.message);
+    } on AlreadyRunnedException catch (_) {
       return true;
     } catch (e) {
       state = NearbyeErrorState(nearby: state.nearby, message: e.toString());
@@ -119,8 +117,8 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
 
   /// Stop discovery and advertising, clean up resources.
   Future<void> stopAll() async {
-    await _nearbyManager.stopDiscovery();
-    await _nearbyManager.stopAdvertising();
+    await stopDiscovery();
+    await stopAdvertising();
   }
 
   Future<void> stopAdvertising() async {
@@ -149,9 +147,13 @@ class NearbyDiscoveryController extends Notifier<NearbyState> {
     required Strategy strategy,
     required String serviceId,
   }) async {
-    await stopAll();
-    // Give the radio a full second to reset
-    await Future.delayed(const Duration(seconds: 1));
-    await beginNearbyCommunication(strategy: strategy, serviceId: serviceId);
+    try {
+      await stopAll();
+      // Give the radio a full second to reset
+      await Future.delayed(const Duration(seconds: 1));
+      await beginNearbyCommunication(strategy: strategy, serviceId: serviceId);
+    } catch (e) {
+      Logger.log(error: e);
+    }
   }
 }

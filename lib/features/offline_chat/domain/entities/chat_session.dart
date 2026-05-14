@@ -34,30 +34,3 @@ class ChatSession {
   /// Bluetooth MAC address of the peer device.
   final String peerAddress;
 }
-
-/// In-memory manager for multiple chat sessions.
-///
-/// The manager is keyed by peerUserId to make it easy to route
-/// user-centric actions (send message to user X) to the correct
-/// underlying Bluetooth address.
-class ChatSessionManager {
-  final Map<String, ChatSession> _sessions = {};
-
-  void addSession(ChatSession session) {
-    _sessions[session.peerUserId] = session;
-  }
-
-  ChatSession? getSession(String peerUserId) {
-    return _sessions[peerUserId];
-  }
-
-  List<ChatSession> get allSessions => _sessions.values.toList(growable: false);
-
-  void removeSession(String peerUserId) {
-    _sessions.remove(peerUserId);
-  }
-
-  void clear() {
-    _sessions.clear();
-  }
-}

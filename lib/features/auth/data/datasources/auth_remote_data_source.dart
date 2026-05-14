@@ -17,7 +17,7 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> signInWithGoogle();
 
-  Future<Session> getSessionFromUrl(Uri originUrl);
+  Future<AuthResponse> exchangeCodeForAuthSession(String code);
 
   Future<void> resetPassword(String email);
 
@@ -69,10 +69,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Session> getSessionFromUrl(Uri originUrl) async {
-    final response = await _auth.getSessionFromUrl(originUrl);
+  Future<AuthResponse> exchangeCodeForAuthSession(String code) async {
+    final response = await _auth.exchangeCodeForSession(code);
 
-    return response.session;
+    return AuthResponse(session: response.session, user: response.session.user);
   }
 
   @override

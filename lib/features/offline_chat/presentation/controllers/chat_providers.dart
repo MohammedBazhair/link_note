@@ -1,102 +1,114 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nearby_connections/nearby_connections.dart';
-
-import '../../../../core/presentation/providers/core_providers.dart';
-import '../../data/datasource/nearby_service.dart';
-import '../../data/models/nearby_identity_model.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import '../../data/handlers/chat_handshake_handler.dart';
+import '../../data/handlers/chat_sending_handler.dart';
+import '../../data/handlers/image_transfer_handler.dart';
+import '../../data/handlers/incoming_message_handler.dart';
+import '../../data/handlers/voice_transfer_handler.dart';
 import '../../data/repositories/chat_repository_impl.dart';
-import '../../domain/entities/chat_session.dart';
+import '../../data/services/chat_session_manager.dart';
 import '../../domain/entities/message.dart';
+import '../../domain/entities/nearby_identity.dart';
 import 'chat_controller.dart';
+import 'chat_state.dart';
 import 'nearby_discovery_controller.dart';
+import 'nearby_providers.dart';
 import 'nearby_state.dart';
 
-final chatControllerProvider = NotifierProvider<ChatController, List<Message>>(
-  () {
-    return ChatController();
-  },
-);
+typedef ChatMessagesMap = Map<String, Message>;
 
-class NearbyDisplayName extends Notifier<String> {
-  @override
-  String build() {
-    final profile = ref.watch(userControllerProvider).profile;
-    return profile.username;
-  }
-
-  void update(String name) => state = name;
-}
-
-final nearbyDisplayNameProvider = NotifierProvider<NearbyDisplayName, String>(
-  NearbyDisplayName.new,
-);
-
-/// Low-level Nearby adapter + connection manager (Android only).
-final nearbyProvider = Provider<Nearby>((ref) {
-  final raw = Nearby();
-  return raw;
+final chatControllerProvider = NotifierProvider<ChatController, ChatState>(() {
+  return ChatController();
 });
-
-final connectionManagerProvider = Provider.autoDispose<NearbyConnectionManager>(
-  (ref) {
-    final adapter = ref.watch(nearbyProvider);
-    final displayName = ref.watch(nearbyDisplayNameProvider);
-    final userRepo = ref.watch(userRepositoryProvider);
-    final currentUser = userRepo.currentUser;
-
-    // We encode identity as JSON to ensure stable data handling
-    final identity = NearbyIdentityModel(
-      uuid: currentUser?.id ?? 'unknown',
-      displayName: displayName,
-    );
-
-    final manager = NearbyConnectionManager(adapter, identity);
-
-    ref.onDispose(manager.dispose);
-    return manager;
-  },
-);
 
 final nearbyDiscoveryControllerProvider =
     NotifierProvider<NearbyDiscoveryController, NearbyState>(() {
       return NearbyDiscoveryController();
     });
 
-final nearbyEndpointsProvider = StreamProvider<Map<String, String>>((ref) {
-  final manager = ref.watch(connectionManagerProvider);
-  return manager.allKnownEndpoints;
+final getChatMessagesProvider = Provider.family<ChatMessagesMap, String>((
+  ref,
+  chatId,
+) {
+  final chatRoom = ref.watch(
+    chatControllerProvider.select((state) => state.chatRooms[chatId]),
+  );
+
+  return chatRoom?.messages ?? {};
 });
 
-final nearbyConnectedEndpointsProvider = StreamProvider<Set<String>>((ref) {
-  final manager = ref.watch(connectionManagerProvider);
-  return manager.connectedStream;
+final getUserNameByUserIdProvider = Provider.family<String, String>((
+  ref,
+  userId,
+) {
+  final manager = ref.watch(nearbyConnectionManagerProvider);
+  final userName = manager.getDisplayNameByUserId(userId);
+
+  return userName;
+});
+
+final getIdentityByUserIdProvider = Provider.family<NearbyIdentity, String>((
+  ref,
+  userId,
+) {
+  final manager = ref.watch(nearbyConnectionManagerProvider);
+  final identity = manager.getIdentityByUserId(userId);
+
+  return identity;
+});
+
+final getMyFriendsIdsProvider = Provider((ref) {
+  final chatFriendsIds = ref.watch(
+    chatControllerProvider.select((state) => state.myChatFriendsIds),
+  );
+
+  return chatFriendsIds;
+});
+
+final replyToMessageProvider = StateProvider.autoDispose<Message?>((ref) {
+  return null;
 });
 
 final chatRepository = Provider((ref) {
-  final connectionManager = ref.watch(connectionManagerProvider);
-  final userRepo = ref.watch(userRepositoryProvider);
-  final currentUser = userRepo.currentUser;
+  final _connectionManager = ref.watch(nearbyConnectionManagerProvider);
+  final _sessionManager = ref.read(chatSessionManagerProvider);
 
-  if (currentUser == null) {
-    throw Exception('User must be logged in for chat');
-  }
-
-  final sessionManager = ref.read(chatSessionManagerProvider);
-
-  final displayName = ref.watch(nearbyDisplayNameProvider);
-
+  final _identityManager = ref.watch(nearbyIdentityManagerProvider);
+  final _sendingHandler = ChatSendingHandler(
+    _connectionManager,
+    _sessionManager,
+    _identityManager,
+  );
+  final _handshakeHandler = ChatHandshakeHandler(
+    _connectionManager,
+    _identityManager,
+  );
+  final _imageHandler = ImageTransferHandler();
+  final _voiceHandler = VoiceTransferHandler();
+  final _incomingHandler = IncomingMessageHandler(
+    _sessionManager,
+    _identityManager,
+    _imageHandler,
+    _voiceHandler,
+  );
   final repo = ChatRepositoryImpl(
-    connectionManager,
-    sessionManager,
-    myUserId: currentUser.id,
-    myDisplayName: displayName,
+    _connectionManager,
+    _sessionManager,
+    _identityManager,
+    _sendingHandler,
+    _handshakeHandler,
+    _imageHandler,
+    _voiceHandler,
+    _incomingHandler,
   );
   ref.onDispose(repo.dispose);
 
   return repo;
 });
 
-final chatSessionManagerProvider = Provider((_) {
-  return ChatSessionManager();
+final chatSessionManagerProvider = Provider((ref) {
+  final _connectionManager = ref.read(nearbyConnectionManagerProvider);
+  final _identityManager = ref.read(nearbyIdentityManagerProvider);
+  return ChatSessionManager(_connectionManager, _identityManager);
 });
 //

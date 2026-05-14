@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/constants/colors/colors.dart';
+import '../../../domain/entities/nearby_identity.dart';
 import '../common/user_avatar_with_status.dart';
 
-class ChatAppbarParams {
-  ChatAppbarParams({required this.personName, required this.isConnected});
+class ChatParams {
+  ChatParams({required this.identity, required this.isConnected});
 
-  final String personName;
+  final NearbyIdentity identity;
   final bool isConnected;
 }
 
 class ChatAppbar extends StatelessWidget {
   const ChatAppbar(this.params, {super.key});
 
-  final ChatAppbarParams params;
+  final ChatParams params;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,7 +40,10 @@ class ChatAppbar extends StatelessWidget {
         children: [
           const BackButton(color: Colors.white),
           const SizedBox(width: 3),
-          UserAvatarWithStatus(connected: params.isConnected, radius: 25),
+          UserAvatarWithStatus(
+            radius: 25,
+            params: params,
+          ),
           const SizedBox(width: 10),
 
           Expanded(
@@ -49,7 +53,7 @@ class ChatAppbar extends StatelessWidget {
               spacing: 3,
               children: [
                 Text(
-                  params.personName * 10,
+                  params.identity.displayName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

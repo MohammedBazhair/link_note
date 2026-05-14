@@ -1,44 +1,99 @@
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
-import '../../../../../core/presentation/widgets/conditional_builder.dart';
+import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
 import '../../../domain/entities/message.dart';
+import '../../controllers/chat_providers.dart';
+import 'message_text.dart';
+import 'reply_message_widget.dart';
 import 'tail_message_paint.dart';
 
-class MessageWidget extends StatelessWidget {
-  const MessageWidget({super.key, required this.isMe, required this.message});
+class MessageWidget extends ConsumerWidget {
+  const MessageWidget({
+    super.key,
+    required this.isMe,
+    required this.message,
+    required this.hasTail,
+    this.repliedMessage,
+  });
 
   final bool isMe;
   final Message message;
+  final Message? repliedMessage;
+  final bool hasTail;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final backgroundColor = isMe
-        ? const Color(0xFF1976D2)
+        ? Colors.blue.shade800
         : const Color(0xFF343147);
+    final avatarBytes = ref.watch(
+      getIdentityByUserIdProvider(
+        message.senderUserId,
+      ).select((i) => i.avatarBytes),
+    );
     return Align(
       alignment: isMe
           ? AlignmentDirectional.centerStart
           : AlignmentDirectional.centerEnd,
-      child: CustomPaint(
-        painter: TailMessagePaint(isMe: isMe, color: backgroundColor),
+      child: Dismissible(
+        key: ValueKey(message.id),
+        direction: DismissDirection.endToStart,
+        dismissThresholds: const {DismissDirection.endToStart: 0.5},
+        confirmDismiss: (direction) {
+          ref.read(replyToMessageProvider.notifier).state = message;
 
-        child: Container(
-          padding: EdgeInsets.all(message.type == MessageType.image ? 5 : 12),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadiusDirectional.only(
-              topStart: const Radius.circular(13),
-              topEnd: const Radius.circular(13),
-              bottomStart: isMe ? Radius.zero : const Radius.circular(13),
-              bottomEnd: !isMe ? Radius.zero : const Radius.circular(13),
+          return Future.value(false);
+        },
+
+        child: CustomPaint(
+          painter: hasTail
+              ? TailMessagePaint(
+                  isMe: isMe,
+                  color: backgroundColor,
+                  textDirection: Directionality.of(context),
+                )
+              : null,
+          child: IntrinsicWidth(
+            child: Container(
+              padding: EdgeInsets.all(
+                message.type == MessageType.image ? 3 : 12,
+              ),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: !hasTail
+                    ? BorderRadius.circular(13)
+                    : BorderRadiusDirectional.only(
+                        topStart: const Radius.circular(13),
+                        topEnd: const Radius.circular(13),
+                        bottomStart: isMe
+                            ? Radius.zero
+                            : const Radius.circular(13),
+                        bottomEnd: !isMe
+                            ? Radius.zero
+                            : const Radius.circular(13),
+                      ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ReplyMessageWidget(repliedMessage: repliedMessage),
+                  MessageContnetWidget(
+                    message: message,
+                    isMe: isMe,
+                    avatarImage: avatarBytes,
+                  ),
+                ],
+              ),
             ),
           ),
-          child: MessageContnetWidget(message: message, isMe: isMe),
         ),
       ),
     );
@@ -50,9 +105,11 @@ class MessageContnetWidget extends StatelessWidget {
     super.key,
     required this.message,
     required this.isMe,
+    required this.avatarImage,
   });
   final Message message;
   final bool isMe;
+  final Uint8List? avatarImage;
   @override
   Widget build(BuildContext context) {
     switch (message.type) {
@@ -67,6 +124,12 @@ class MessageContnetWidget extends StatelessWidget {
         );
       case MessageType.image:
         return MessageImage(message: message);
+      case MessageType.voice:
+        return VoiceMessageBubble(
+          path: message.filePath!,
+          image: avatarImage,
+          time: message.time,
+        );
     }
   }
 }
@@ -76,125 +139,52 @@ class MessageImage extends StatelessWidget {
   final Message message;
   @override
   Widget build(BuildContext context) {
-    Logger.log(message: message.toString());
-    return ConditionalBuilder(
-      condition: message.imagePath != null,
-      builder: (_) => Container(
-        clipBehavior: Clip.antiAlias,
-        width: 250,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(7.5)),
-        child: Stack(
-          children: [
-            Image.file(File(message.imagePath!), width: 250),
+    if (message.filePath == null) return const Text('صورة');
 
-            PositionedDirectional(
-              bottom: 8,
-              end: 9,
-              child: Text(
-                message.time.formatedChatTime,
-                style: const TextStyle(
-                  shadows: [
-                    Shadow(blurRadius: 35, color: Color(0x993A3A3A)),
-                    Shadow(blurRadius: 1, color: Color(0xAB000000)),
-                  ],
-                  fontSize: 9,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.3,
-                ),
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      width: 250,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(7.5)),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 4 / 5,
+            child: Image.file(
+              File(message.filePath!),
+              width: 250,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                Logger.log(
+                  error: 'Error loading image: $error',
+                  stackTrace: stackTrace,
+                );
+                return Container(
+                  color: Colors.black45,
+                  child: const Center(child: Text('هذه الصورة غير متاحة')),
+                );
+              },
+            ),
+          ),
+
+          PositionedDirectional(
+            bottom: 8,
+            end: 9,
+            child: Text(
+              message.time.formattedChatTime,
+              style: const TextStyle(
+                shadows: [
+                  Shadow(blurRadius: 35, color: Color(0x993A3A3A)),
+                  Shadow(blurRadius: 1, color: Color(0xAB000000)),
+                ],
+                fontSize: 9,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.3,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      fallback: (_) => const Text('صورة'),
-    );
-  }
-}
-
-class MessageText extends StatefulWidget {
-  const MessageText({
-    super.key,
-    required this.text,
-    required this.time,
-    required this.isMe,
-  });
-  final String text;
-  final DateTime time;
-  final bool isMe;
-
-  @override
-  State<MessageText> createState() => _MessageTextState();
-}
-
-class _MessageTextState extends State<MessageText> {
-  bool _isExpanded = false;
-  bool get isLongText => widget.text.length > 1000;
-
-  @override
-  void initState() {
-    super.initState();
-    _isExpanded = !isLongText;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 7,
-      crossAxisAlignment: WrapCrossAlignment.end,
-      alignment: WrapAlignment.end,
-      children: [
-        ConditionalBuilder(
-          condition: _isExpanded,
-          builder: (_) => Text(
-            widget.text,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: widget.isMe
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFFF1F0F4),
-            ),
-          ),
-          fallback: (_) => Text.rich(
-            TextSpan(
-              text: '${widget.text.substring(0, 1000)}...  ',
-
-              children: [
-                TextSpan(
-                  text: 'اقرأ المزيد',
-                  style: const TextStyle(
-                    fontSize: 11,
-
-                    fontWeight: FontWeight.bold,
-                    color: Colors.lightBlueAccent,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () => setState(() => _isExpanded = true),
-                ),
-              ],
-            ),
-
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: widget.isMe
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFFF1F0F4),
-            ),
-          ),
-        ),
-
-        Text(
-          widget.time.formatedChatTime,
-          style: TextStyle(
-            fontSize: 9,
-            color: Colors.white.withOpacity(0.8),
-            letterSpacing: -0.3,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 }

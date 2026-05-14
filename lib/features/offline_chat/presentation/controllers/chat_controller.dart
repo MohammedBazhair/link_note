@@ -3,44 +3,89 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../audio/presentation/controller/audio_provider.dart';
+import '../../../user/presentation/controllers/user_providers.dart';
 import '../../domain/entities/message.dart';
 import 'chat_providers.dart';
+import 'chat_state.dart';
 
-/// Presentation-layer controller that exposes a flat list of all messages
-/// across active chat sessions. UI widgets are responsible for filtering
-/// by `chatId` where needed.
-class ChatController extends Notifier<List<Message>> {
+class ChatController extends Notifier<ChatState> {
+  StreamSubscription<Message>? _messageSubscription;
+  Timer? _notificationTimer;
+
   @override
-  List<Message> build() {
-    final repo = ref.watch(chatRepository);
-    Timer? timer;
-    // Initial history
-    final history = repo.messageHistory;
-    final seenIds = <String>{for (final m in history) m.id};
+  ChatState build() {
+    // Watch repository and userId to rebuild when they change
+    final repository = ref.watch(chatRepository);
+    final myUserId = ref.watch(getUserIdProvider);
 
-    final sub = repo.messages.listen((msg) async {
-      if (seenIds.contains(msg.id)) return;
-      seenIds.add(msg.id);
-      state = [...state, msg];
-      if (timer?.isActive ?? false) return;
+    // Initial setup or re-build: cancel old subscription
+    _messageSubscription?.cancel();
 
-      timer = Timer(const Duration(seconds: 3), () {});
-      await ref.read(audioControllerProvider.notifier).playBell();
+    // Listen for new messages from the repository stream
+    _messageSubscription = repository.messages.listen(_onMessageReceived);
+
+    ref.onDispose(() {
+      _messageSubscription?.cancel();
+      _notificationTimer?.cancel();
     });
 
-    ref.onDispose(() async {
-      await sub.cancel();
-      timer?.cancel();
-    });
-
-    return history;
+    // Populate initial state from repository history
+    return ChatState(
+      chatRooms: repository.chatsHistory,
+      myChatFriendsIds: repository.myChatFriendsIds(myUserId).toList(),
+    );
   }
 
-  void sendText({required String peerId, required String text}) {
+  void _onMessageReceived(Message message) async {
+    final isNewChatRoom = state.isNewChatRoom(message.chatId);
+    final myFriendsIds = isNewChatRoom
+        ? [...state.myChatFriendsIds, message.senderUserId]
+        : state.myChatFriendsIds;
+
+    // Immunitably update the chat rooms map
+    final currentMessages = state.chatRooms[message.chatId]?.messages ?? {};
+    final updatedMessages = {...currentMessages, message.id: message};
+
+    final updatedChatRooms = {...state.chatRooms};
+    updatedChatRooms.update(
+      message.chatId,
+      (room) => room.copyWith(
+        messages: updatedMessages,
+        lastUpdated: DateTime.now().toUtc(),
+      ),
+      ifAbsent: () => ChatRoom(
+        messages: updatedMessages,
+        lastUpdated: DateTime.now().toUtc(),
+      ),
+    );
+
+    state = state.copyWith(
+      chatRooms: updatedChatRooms,
+      myChatFriendsIds: myFriendsIds,
+    );
+
+    // Handle notification sound with throttling
+    if (_notificationTimer?.isActive ?? false) return;
+
+    _notificationTimer = Timer(const Duration(seconds: 3), () {});
+    await ref.read(audioControllerProvider.notifier).playBell();
+  }
+
+  void sendText({
+    required String peerId,
+    required String text,
+    String? replyToMessageId,
+  }) {
     ref.read(chatRepository).sendText(peerUserId: peerId, text: text);
   }
 
   void sendImage({required String peerId, required String filePath}) {
     ref.read(chatRepository).sendImage(peerUserId: peerId, filePath: filePath);
+  }
+
+  void sendVoiceRecord({required String peerId, required String filePath}) {
+    ref
+        .read(chatRepository)
+        .sendVoiceRecord(peerUserId: peerId, filePath: filePath);
   }
 }

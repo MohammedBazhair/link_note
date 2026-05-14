@@ -1,87 +1,111 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/message.dart';
 import 'packet.dart';
 
-/// Protocol-level encoder/decoder for chat packets.
+/// Binary protocol encoder/decoder for chat messages.
 ///
 /// Wire format (big-endian):
-/// [36 bytes] UTF8 senderUserId (UUID v4)
-/// [1 byte ]  messageType
-/// [4 bytes]  payloadLength (uint32)
-/// [N bytes]  payload
+/// ┌──────────────────────────────────────────────┐
+/// │ 1 byte   │ senderUserId length               │
+/// │ n bytes  │ senderUserId (UTF-8)              │
+/// │ 1 byte   │ messageId length                  │
+/// │ n bytes  │ messageId (UTF-8)                 │
+/// │ 1 byte   │ replyToMessageId length           │
+/// │ n bytes  │ replyToMessageId (UTF-8, optional)│
+/// │ 1 byte   │ message type                      │
+/// │ 4 bytes  │ payload length (uint32)           │
+/// │ n bytes  │ payload                           │
+/// └──────────────────────────────────────────────┘
 class Protocol {
-  static const _userIdLength = 36; // (UUID v4 utf8)
-  static const _lengthFieldBytes = 4;
+  static const _idLengthFieldBytes = 4;
 
+  /// Serializes a message into a binary packet following the protocol format.
   static Uint8List buildPacket({
     required String senderUserId,
     required MessageType type,
     required Uint8List payload,
+    required String messageId,
+    String? replyToMessageId,
   }) {
+    final writer = WriteBuffer();
+    // Encode variable-length string fields as UTF-8
     final userIdBytes = utf8.encode(senderUserId);
-    final userIdLength = userIdBytes.length;
+    final messageIdBytes = utf8.encode(messageId);
+    final replyBytes = utf8.encode(replyToMessageId ?? '');
 
-    if (userIdLength > 255) {
+    if (userIdBytes.length > 255) {
       throw Exception('UserId too long');
     }
 
-    final lengthBytes = ByteData(_lengthFieldBytes)
-      ..setUint32(0, payload.length);
+    // senderUserId
 
-    final buffer = BytesBuilder();
-    buffer.addByte(userIdLength); // [1 byte] userId length
-    buffer.add(userIdBytes); // [N bytes] userId
-    buffer.addByte(type.typeCode); // [1 byte] type
-    buffer.add(lengthBytes.buffer.asUint8List()); // [4 bytes] payload length
-    buffer.add(payload); // [N bytes] payload
+    writer.putUint8(userIdBytes.length);
+    writer.putUint8List(userIdBytes);
 
-    return buffer.toBytes();
+    // messageId
+    writer.putUint8(messageIdBytes.length);
+    writer.putUint8List(messageIdBytes);
+
+    // replyToMessageId (optional)
+    writer.putUint8(replyBytes.length);
+    writer.putUint8List(replyBytes);
+
+    // message metadata
+    writer.putUint8(type.typeCode);
+    writer.putUint32(payload.length);
+
+    // payload
+    writer.putUint8List(payload);
+
+    return writer.done().buffer.asUint8List();
   }
 
-  /// Reads header + payload from a fully assembled frame.
+  /// Deserializes a binary packet into a [Packet] object.
+  ///
+  /// Throws if the packet is malformed or incomplete.
   static Packet parsePacket(Uint8List data) {
-    if (data.isEmpty) {
-      throw Exception('Empty data');
-    }
+    try {
+      if (data.isEmpty) {
+        throw Exception('Empty packet');
+      }
+      final reader = ReadBuffer(ByteData.sublistView(data));
 
-    var offset = 0;
+      // senderUserId
 
-    final userIdLength = data[offset];
-    offset += 1;
+      final userIdLength = reader.getUint8();
+      final senderUserId = utf8.decode(reader.getUint8List(userIdLength));
 
-    if (data.length < offset + userIdLength + 1 + _lengthFieldBytes) {
-      throw Exception('Packet too short for header');
-    }
+      // messageId
+      final messageIdLength = reader.getUint8();
+      final messageId = utf8.decode(reader.getUint8List(messageIdLength));
 
-    final userIdBytes = data.sublist(offset, offset + userIdLength);
-    final senderUserId = utf8.decode(userIdBytes);
-    offset += userIdLength;
+      // replyToMessageId (optional)
+      final replyLength = reader.getUint8();
+      final replyToMessageId = replyLength == 0
+          ? null
+          : utf8.decode(reader.getUint8List(replyLength));
 
-    final typeValue = data[offset];
-    offset += 1;
+      // message type
+      final typeValue = reader.getUint8();
 
-    final lengthView = ByteData.sublistView(
-      data,
-      offset,
-      offset + _lengthFieldBytes,
-    );
-    final payloadLength = lengthView.getUint32(0);
-    offset += _lengthFieldBytes;
+      // payload
+      final payloadLength = reader.getUint32();
 
-    if (data.length < offset + payloadLength) {
-      throw Exception(
-        'Incomplete packet payload: expected $payloadLength more bytes',
+      final payload = reader.getUint8List(payloadLength);
+
+      return Packet(
+        senderUserId: senderUserId,
+        messageId: messageId,
+        replyToMessageId: replyToMessageId,
+        messageType: MessageType.fromValue(typeValue),
+        payload: payload,
       );
+    } catch (e) {
+      Logger.log(error: e);
+      rethrow;
     }
-
-    final payload = data.sublist(offset, offset + payloadLength);
-
-    return Packet(
-      senderUserId: senderUserId,
-      messageType: MessageType.fromValue(typeValue),
-      payload: payload,
-    );
   }
 }

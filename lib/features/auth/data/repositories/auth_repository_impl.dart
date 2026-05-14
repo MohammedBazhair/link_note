@@ -111,8 +111,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final code = uri.queryParameters['code'];
       if (code == null) throw ArgumentError.notNull();
 
-      final session = await _remote.getSessionFromUrl(uri);
-      final authResponse = AuthResponse(session: session, user: session.user);
+      final authResponse = await _remote.exchangeCodeForAuthSession(code);
 
       final userId = authResponse.user?.id;
 

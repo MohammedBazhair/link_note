@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/colors/colors.dart';
-import '../../../data/models/nearby_identity_model.dart';
+import '../../../domain/entities/nearby_identity.dart';
 import '../../controllers/chat_providers.dart';
+import '../../controllers/nearby_providers.dart';
 import 'nearby_device_card.dart';
 import 'no_device_widget.dart';
 
@@ -12,7 +13,7 @@ class NearbyDevicesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final endpointsAsync = ref.watch(nearbyEndpointsProvider);
+    final endpointsAsync = ref.watch(allKnownEndpointsProvider);
 
     final isDiscovering = ref
         .watch(nearbyDiscoveryControllerProvider)
@@ -46,7 +47,7 @@ class NearbyDevicesList extends ConsumerWidget {
 
 class _DevicesListWidget extends StatelessWidget {
   const _DevicesListWidget(this.endpoints);
-  final Map<String, String> endpoints;
+  final Map<String, NearbyIdentity> endpoints;
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +63,9 @@ class _DevicesListWidget extends StatelessWidget {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final endpointId = endpoints.keys.elementAt(index);
-          final rawName = endpoints[endpointId] ?? endpointId;
+          final identity = endpoints[endpointId];
 
-          final identityModel = NearbyIdentityModel.fromJson(rawName);
-
-          return NearbyDeviceCard(
-            endpointId: endpointId,
-            identity: identityModel,
-          );
+          return NearbyDeviceCard(endpointId: endpointId, identity: identity!);
         },
       ),
     );

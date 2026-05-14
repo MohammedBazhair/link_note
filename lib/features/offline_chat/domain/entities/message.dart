@@ -1,13 +1,12 @@
 import 'dart:convert';
 
-import 'package:uuid/uuid.dart';
-
 import '../../data/models/packet.dart';
 
 enum MessageType {
   handshake(1),
   text(2),
-  image(3);
+  image(3),
+  voice(4);
 
   const MessageType(this.typeCode);
   static MessageType fromValue(int v) {
@@ -25,8 +24,9 @@ class Message {
     required this.id,
     required this.senderUserId,
     required this.type,
+    this.replyToMessageId,
     this.text,
-    this.imagePath,
+    this.filePath,
     required this.time,
     required this.chatId,
   });
@@ -36,7 +36,8 @@ class Message {
     required String senderId,
     required String myId,
   }) {
-    final messageId = const Uuid().v4();
+    final messageId = packet.messageId;
+    final replyToMessageId = packet.replyToMessageId;
     final chatId = buildChatId(myId, senderId);
     final timeNow = DateTime.now().toUtc();
     return switch (packet.messageType) {
@@ -47,15 +48,16 @@ class Message {
         type: packet.messageType,
         text: utf8.decode(packet.payload),
         time: timeNow,
+        replyToMessageId: replyToMessageId
       ),
       MessageType.image => Message(
         id: messageId,
         chatId: chatId,
         senderUserId: senderId,
         type: packet.messageType,
-        imagePath:
-            'received_image_${DateTime.now().millisecondsSinceEpoch}.png',
+        filePath: 'received_image_${DateTime.now().millisecondsSinceEpoch}.png',
         time: timeNow,
+        replyToMessageId: replyToMessageId
       ),
       MessageType.handshake => Message(
         id: messageId,
@@ -63,6 +65,15 @@ class Message {
         type: MessageType.handshake,
         time: timeNow,
         chatId: chatId,
+      ),
+      MessageType.voice => Message(
+        id: messageId,
+        chatId: chatId,
+        senderUserId: senderId,
+        type: packet.messageType,
+        filePath: 'received_voice_${DateTime.now().millisecondsSinceEpoch}.ogg',
+        time: timeNow,
+        replyToMessageId: replyToMessageId,
       ),
     };
   }
@@ -75,15 +86,16 @@ class Message {
   }
 
   final String id;
+  final String? replyToMessageId;
   final String chatId;
   final String senderUserId;
   final MessageType type;
   final String? text;
-  final String? imagePath;
+  final String? filePath;
   final DateTime time;
 
   @override
   String toString() {
-    return 'Message(id: $id, chatId: $chatId, senderUserId: $senderUserId, type: $type, text: $text, imagePath: $imagePath, time: $time)';
+    return 'Message(id: $id, chatId: $chatId, senderUserId: $senderUserId, type: $type, text: $text, imagePath: $filePath, time: $time)';
   }
 }

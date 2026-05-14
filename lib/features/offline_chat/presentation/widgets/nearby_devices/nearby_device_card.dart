@@ -6,7 +6,9 @@ import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/chat_session.dart';
 import '../../../domain/entities/nearby_identity.dart';
 import '../../controllers/chat_providers.dart';
+import '../../controllers/nearby_providers.dart';
 import '../../screens/chat_screen.dart';
+import '../chat/chat_appbar.dart';
 import '../common/user_avatar_with_status.dart';
 
 class NearbyDeviceCard extends ConsumerWidget {
@@ -21,20 +23,22 @@ class NearbyDeviceCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connected = ref
-        .watch(connectionManagerProvider)
-        .isConnected(endpointId);
+    // REFIX: Watch the stream provider to make the UI reactive to connection changes
+    final connectedEndpoints =
+        ref.watch(connectedEndpointsProvider).value ?? {};
+    final connected = connectedEndpoints.contains(endpointId);
+
     final myUserId = ref.read(getUserIdProvider)!;
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
       title: Text(identity.displayName),
-      leading: UserAvatarWithStatus(connected: connected),
+      leading: UserAvatarWithStatus(params: ChatParams(identity: identity, isConnected: connected),),
       subtitle: Text(connected ? 'متصل' : 'اضغط للاتصال'),
       onTap: () async {
         if (!connected) {
           try {
-            await ref.read(connectionManagerProvider).connect(endpointId);
+            await ref.read(nearbyConnectionManagerProvider).connect(endpointId);
           } catch (e) {
             context.showSnakbar('فشل الاتصال');
             return;
@@ -51,12 +55,7 @@ class NearbyDeviceCard extends ConsumerWidget {
         );
         sessionManager.addSession(session);
 
-        await context.pushTo(
-          ChatScreen(
-            peerId: identity.uuid,
-            myId: myUserId,
-          ),
-        );
+        await context.pushTo(ChatScreen(peerId: identity.uuid, myId: myUserId));
       },
     );
   }

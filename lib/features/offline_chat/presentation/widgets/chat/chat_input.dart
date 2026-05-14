@@ -1,8 +1,12 @@
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/extensions/extensions.dart';
+import '../../../../audio/presentation/controller/audio_provider.dart';
+import '../../../../audio/presentation/widgets/recording_waveform.dart';
 import '../../../../image/presentation/controllers/image_providers.dart';
-import '../../../../qr_code/presentation/widgets/filled_icon_button.dart';
 import '../../controllers/chat_providers.dart';
+import 'reply_message_widget.dart';
 
 class ChatInput extends ConsumerStatefulWidget {
   const ChatInput({super.key, required this.peerId});
@@ -12,18 +16,48 @@ class ChatInput extends ConsumerStatefulWidget {
 }
 
 class _ChatInputState extends ConsumerState<ChatInput> {
-  final controller = TextEditingController();
+  final textController = TextEditingController();
+  final recorderController = RecorderController();
 
   void send() {
-    final text = controller.text.trim();
+    final text = textController.text.trim();
     if (text.isEmpty) return;
 
     ref
         .read(chatControllerProvider.notifier)
         .sendText(peerId: widget.peerId, text: text);
 
-    controller.clear();
+    textController.clear();
     FocusScope.of(context).unfocus();
+  }
+
+  Future<void> recordOrStop() async {
+    final controller = ref.read(voiceRecordControllerProvider.notifier);
+
+    if (!recorderController.isRecording) {
+      final hasPermission = await controller.startRecording();
+
+      if (!hasPermission) {
+        return context.showSnakbar('لا يمكن التسجيل بدون أذونات');
+      }
+      await recorderController.record();
+      return;
+    }
+
+    await controller.stopRecording();
+    await recorderController.stop();
+
+    final filePath = ref.read(
+      voiceRecordControllerProvider.select((s) => s.path),
+    );
+
+    if (filePath == null) {
+      return context.showSnakbar('لم يتم الحصول على ملف التسجيل بنجاح');
+    }
+
+    ref
+        .read(chatControllerProvider.notifier)
+        .sendVoiceRecord(peerId: widget.peerId, filePath: filePath);
   }
 
   Future<void> pickImage() async {
@@ -38,68 +72,157 @@ class _ChatInputState extends ConsumerState<ChatInput> {
 
   @override
   void dispose() {
-    controller.dispose();
+    textController.dispose();
+    recorderController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: BoxBorder.fromSTEB(
-          top: const BorderSide(color: Color(0x6E083141), width: .8),
-        ),
-      ),
+    final isRecordingVoice = ref.watch(
+      voiceRecordControllerProvider.select((s) => s.isRecording),
+    );
+    return Padding(
+      padding: const EdgeInsets.all(7.0),
       child: Row(
-        spacing: 4,
+        spacing: 7,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        textDirection: TextDirection.rtl,
         children: [
-          FilledIconButton(
-            onPressed: send,
-            iconData: Icons.send,
-            backgroundColor: Colors.blue.shade800,
-          ),
           ValueListenableBuilder(
-            valueListenable: controller,
-            builder: (context, value, pickerImageIcon) {
+            valueListenable: textController,
+            builder: (context, value, child) {
               final isWriting = value.text.trim().isNotEmpty;
 
-              return AnimatedCrossFade(
-                firstChild: pickerImageIcon!,
-                secondChild: const SizedBox.shrink(),
-                firstCurve: Curves.bounceOut,
-                secondCurve: Curves.fastLinearToSlowEaseIn,
-                crossFadeState: isWriting
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 300),
+              return ChatInputButton(
+                isWriting: isWriting,
+                isRecordingVoice: isRecordingVoice,
+                send: send,
+                record: recordOrStop,
               );
             },
-            child: IconButton(
-              onPressed: pickImage,
-              icon: const Icon(Icons.image_outlined, color: Colors.white),
-              tooltip: 'إرسال صورة',
-            ),
           ),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              maxLines: 6,
-              minLines: 1,
 
-              decoration: const InputDecoration(
-                hintText: 'اكتب رسالة...',
-                filled: false,
-                contentPadding: EdgeInsets.zero,
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+              decoration: const BoxDecoration(
+                color: Color(0xFF343147),
+                borderRadius: BorderRadius.all(Radius.circular(30)),
               ),
-              style: const TextStyle(
-                fontSize: 13.2,
-                height: 1.6,
-                color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final repliedMessage = ref.watch(replyToMessageProvider);
+                      return ReplyMessageWidget(repliedMessage: repliedMessage);
+                    },
+                  ),
+
+                  if (isRecordingVoice)
+                    RecordingWaveform(recorderController: recorderController),
+
+                  if (!isRecordingVoice)
+                    Row(
+                      spacing: 4,
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: textController,
+                          builder: (context, value, pickerImageIcon) {
+                            final isWriting = value.text.trim().isNotEmpty;
+
+                            return AnimatedCrossFade(
+                              firstChild: pickerImageIcon!,
+                              secondChild: const SizedBox.shrink(),
+                              firstCurve: Curves.bounceOut,
+                              secondCurve: Curves.fastLinearToSlowEaseIn,
+                              crossFadeState: isWriting
+                                  ? CrossFadeState.showSecond
+                                  : CrossFadeState.showFirst,
+                              duration: const Duration(milliseconds: 300),
+                            );
+                          },
+                          child: IconButton(
+                            onPressed: pickImage,
+                            icon: const Icon(
+                              Icons.image_outlined,
+                              color: Colors.white,
+                            ),
+                            tooltip: 'إرسال صورة',
+                          ),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: textController,
+                            maxLines: 6,
+                            minLines: 1,
+
+                            decoration: const InputDecoration(
+                              hintText: 'اكتب رسالة...',
+                              filled: false,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 13.2,
+                              height: 1.6,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ChatInputButton extends StatelessWidget {
+  const ChatInputButton({
+    super.key,
+    required this.isWriting,
+    required this.send,
+    required this.record,
+    required this.isRecordingVoice,
+  });
+
+  final bool isWriting;
+  final bool isRecordingVoice;
+  final VoidCallback send;
+  final VoidCallback record;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: isWriting ? send : record,
+      customBorder: const CircleBorder(),
+
+      child: CircleAvatar(
+        backgroundColor: const Color(0xFF1976D2),
+        radius: 26,
+
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          reverseDuration: const Duration(milliseconds: 150),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) {
+            return ScaleTransition(
+              scale: animation,
+              child: FadeTransition(opacity: animation, child: child),
+            );
+          },
+          child: isWriting
+              ? const Icon(key: ValueKey('send'), Icons.send)
+              : isRecordingVoice
+              ? const Icon(key: ValueKey('stop'), Icons.stop)
+              : const Icon(key: ValueKey('mic'), Icons.mic),
+        ),
       ),
     );
   }

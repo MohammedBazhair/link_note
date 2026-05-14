@@ -4,9 +4,9 @@ import 'package:location/location.dart' as loc;
 import 'package:permission_handler/permission_handler.dart';
 
 Future<bool> ensureBluetoothEnabled() async {
-  final enabled =await BluetoothEnable.enableBluetooth;
+  final enabled = await BluetoothEnable.enableBluetooth;
 
-  return enabled=='true';
+  return enabled == 'true';
 }
 
 Future<bool> ensureLocationEnabled() async {

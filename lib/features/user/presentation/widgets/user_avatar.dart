@@ -92,7 +92,7 @@ class LoadingAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
       child: const CircleAvatar(
         radius: 40,
         backgroundColor: Color(0x343D3D3D),
