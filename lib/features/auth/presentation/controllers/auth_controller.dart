@@ -7,10 +7,12 @@ import '../../../user/domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_state.dart';
 
-final authProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
-  final auth = ref.read(authControllerProvider);
-  return auth;
-});
+final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
+  (ref) {
+    final authRepo = ref.read(authRepositoryProvider);
+    return AuthController(authRepo);
+  },
+);
 
 class AuthController extends StateNotifier<AuthState> {
   AuthController(this._auth) : super(const AuthInitialState());
@@ -28,7 +30,7 @@ class AuthController extends StateNotifier<AuthState> {
       if (result.hasError) throw AuthAppException(result.errorMessage!);
 
       state = const AuthSuccessfullState();
-    } on AuthAppException catch  (e) {
+    } on AuthAppException catch (e) {
       Logger.log(error: e.message);
       state = AuthFailedState(e.message);
     }
@@ -55,6 +57,7 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> signOut() async {
     try {
       await _auth.signOut();
+      state = const AuthSignOutState();
     } catch (e) {
       _handleState('حدث خطأ في الخروج حاول مرة أخرى');
     }
@@ -102,12 +105,6 @@ class AuthController extends StateNotifier<AuthState> {
         : AuthFailedState(error);
   }
 
-  Future<void> startLoadingTimeout() async {
-    await Future.delayed(const Duration(seconds: 10));
-    if (mounted) {
-      reset();
-    }
-  }
 
   void reset() {
     state = const AuthInitialState();

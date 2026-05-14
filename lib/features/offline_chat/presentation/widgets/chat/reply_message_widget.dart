@@ -10,49 +10,18 @@ import '../../../../user/presentation/controllers/user_providers.dart';
 import '../../../domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 
-class ReplyMessageWidget extends StatelessWidget {
-  const ReplyMessageWidget({super.key, this.repliedMessage});
-  final Message? repliedMessage;
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-
-      reverseDuration: const Duration(),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.bounceOut,
-
-      transitionBuilder: (child, animation) {
-        return SizeTransition(
-          sizeFactor: animation,
-
-          axisAlignment: -20,
-          child: FadeTransition(opacity: animation, child: child),
-        );
-      },
-      child: repliedMessage == null
-          ? const SizedBox(key: ValueKey('empty'))
-          : _OverlayMessage(
-              key: ValueKey(repliedMessage!.id),
-              message: repliedMessage!,
-            ),
-    );
-  }
-}
-
-class _OverlayMessage extends ConsumerWidget {
-  const _OverlayMessage({required this.message, super.key});
-  final Message message;
-
+class ReplyMessageWidget extends ConsumerWidget {
+  const ReplyMessageWidget({super.key, required this.repliedMessage});
+  final Message repliedMessage;
   @override
   Widget build(BuildContext context, ref) {
     final myId = ref.watch(getUserIdProvider);
-    final isMe = message.senderUserId == myId;
+    final isMe = repliedMessage.senderUserId == myId;
     final primaryColor = isMe ? Colors.blue.shade400 : Colors.blue.shade100;
 
     final senderName = isMe
         ? 'أنت'
-        : ref.watch(getUserNameByUserIdProvider(message.senderUserId));
+        : ref.watch(getUserNameByUserIdProvider(repliedMessage.senderUserId));
     return GestureDetector(
       onTap: () async {
         ref.read(replyToMessageProvider.notifier).state = null;
@@ -61,8 +30,6 @@ class _OverlayMessage extends ConsumerWidget {
       child: Container(
         clipBehavior: Clip.antiAlias,
         width: double.infinity,
-        margin: const EdgeInsets.only(top: 7, bottom: 10, right: 3, left: 3),
-        padding: const EdgeInsetsDirectional.only(start: 10),
         decoration: BoxDecoration(
           color: primaryColor.withOpacity(0.15),
           border: BoxBorder.fromSTEB(
@@ -75,7 +42,10 @@ class _OverlayMessage extends ConsumerWidget {
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 10,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,15 +61,15 @@ class _OverlayMessage extends ConsumerWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    _RepliedContent(message),
+                    _RepliedContent(repliedMessage),
                   ],
                 ),
               ),
             ),
 
-            if (message.type == MessageType.image)
+            if (repliedMessage.type == MessageType.image)
               Image.file(
-                File(message.filePath!),
+                File(repliedMessage.filePath!),
                 width: 60,
                 height: 60,
                 fit: BoxFit.cover,

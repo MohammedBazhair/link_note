@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../../../core/features/database/local/cache_service.dart';
@@ -26,13 +24,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
 
   @override
   Future<int> createNote(Note note) {
-    final userId = _cache.getString(key: ExternalConsts.lastUserIdKey);
-    final noteId=const Uuid().v4();
-    final newNote = note.copyWith(
-      id: note.id?? noteId,
-      uuid: userId,
-    );
-    return _db.insertRow(map: newNote.toMap(), table: _notesTable);
+    return _db.insertRow(map: note.toMap(), table: _notesTable);
   }
 
   @override

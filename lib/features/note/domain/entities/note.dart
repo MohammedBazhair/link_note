@@ -81,7 +81,7 @@ class Note {
 
   Note copyWith({
     String? id,
-    String? uuid,
+    String? ownerId,
     String? title,
     String? content,
     DateTime? updatedAt,
@@ -89,7 +89,7 @@ class Note {
   }) {
     return Note(
       id: id ?? this.id,
-      ownerId: uuid ?? ownerId,
+      ownerId: ownerId ?? this.ownerId,
       title: title ?? this.title,
       content: content ?? this.content,
       updatedAt: updatedAt ?? this.updatedAt,

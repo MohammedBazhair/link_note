@@ -78,7 +78,7 @@ class SignOutTile extends ConsumerWidget {
     return IconButton(
       iconSize: 30,
       onPressed: () async {
-        await ref.read(authProvider.notifier).signOut();
+        await ref.read(authControllerProvider.notifier).signOut();
         await context.pushReplacementTo(const SignInScreen());
       },
       icon: const Icon(Icons.login_outlined),

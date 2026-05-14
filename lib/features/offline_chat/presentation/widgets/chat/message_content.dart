@@ -57,7 +57,7 @@ class MessageWidget extends ConsumerWidget {
           child: IntrinsicWidth(
             child: Container(
               padding: EdgeInsets.all(
-                message.type == MessageType.image ? 3 : 12,
+                message.type == MessageType.image ? 3 : 8,
               ),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -76,14 +76,12 @@ class MessageWidget extends ConsumerWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-
+                spacing: 15,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ReplyMessageWidget(repliedMessage: repliedMessage),
-                    MessageContnetWidget(
-                      message: message,
-                      isMe: isMe,
-                    ),
+                  if (repliedMessage != null)
+                    ReplyMessageWidget(repliedMessage: repliedMessage!),
+                  MessageContnetWidget(message: message, isMe: isMe),
                 ],
               ),
             ),
