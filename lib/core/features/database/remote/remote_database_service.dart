@@ -9,7 +9,7 @@ abstract interface class RemoteDatabaseService {
     required String table,
   });
 
-  Future<void> insertRows({
+  Future<void> upsertRows({
     required RowList rows,
     required String table,
     required String primaryKey,
@@ -42,7 +42,6 @@ abstract interface class RemoteDatabaseService {
     required String column,
     required String table,
   });
-
 
   Future<void> delete({
     required String id,
@@ -176,7 +175,7 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
   }
 
   @override
-  Future<void> insertRows({
+  Future<void> upsertRows({
     required RowList rows,
     required String table,
     required String primaryKey,
@@ -187,5 +186,4 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
       debugPrint(e.toString());
     }
   }
-  
 }

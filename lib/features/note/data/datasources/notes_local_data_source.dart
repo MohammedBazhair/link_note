@@ -1,4 +1,5 @@
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/database/local/local_database_service.dart';
@@ -8,6 +9,7 @@ abstract interface class NotesLocalDataSource {
   Future<int> createNote(Note note);
   Future<void> insertNotes(Iterable<Note> notes);
   Future<List<Note>> readNotes();
+  Future<Note?> getNoteById(String id);
   Stream<RowList> fetchNotesRealTime();
   Future<void> updateNote(Note note);
   Future<void> deleteNote(String id);
@@ -42,7 +44,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
     if (note.id == null) return Future.value();
     return _db.update(
       updated: note.toMap(),
-      id: note.id!,
+      value: note.id,
       column: _idColumn,
       table: _notesTable,
     );
@@ -62,5 +64,19 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
   Future<void> insertNotes(Iterable<Note> notes) async {
     final rows = notes.map((n) => n.toMap()).toList();
     await _db.insertRows(rows: rows, table: _notesTable);
+  }
+
+  @override
+  Future<Note?> getNoteById(String id) async {
+    try {
+      final rows = await _db.readRowsWhere(
+        table: ExternalConsts.notesTable,
+        filters: {'id': id},
+      );
+      return rows.isNotEmpty ? Note.fromMap(rows.first) : null;
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+      return null;
+    }
   }
 }

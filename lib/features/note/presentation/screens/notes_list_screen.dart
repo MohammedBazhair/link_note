@@ -24,7 +24,6 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(tokenRefreshProvider);
     ref.read(syncNotesProvider);
     ref.read(userControllerProvider.notifier).loadProfile();
     WidgetsBinding.instance.addPostFrameCallback((_) {

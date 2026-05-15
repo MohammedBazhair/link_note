@@ -6,7 +6,6 @@ abstract interface class NotesRepository {
   Future<List<Note>> getAll();
   Stream<List<Note>> fetchNotesRealTime(String? userId);
   Stream<Note?> fetchNoteStream(String noteId);
-  Future<void> syncNotes(String? userId);
   Future<void> update(Note note);
   Future<void> delete(Note note);
 }

@@ -60,12 +60,7 @@ class NotesRepositoryImpl implements NotesRepository {
     final noteId = note.id;
     if (noteId == null) return;
 
-    if (await _network.hasConnection()) {
-      await _remote.deleteNote(noteId);
-      await _local.deleteNote(noteId);
-    } else {
-      await _local.updateNote(note.copyWith(deletedAt: DateTime.now().toUtc()));
-    }
+    await _local.updateNote(note.copyWith(isDeleted: true));
   }
 
   Stream<List<Note>> _mapStreamToNotes(Stream<RowList> rawStream) {
@@ -73,7 +68,7 @@ class NotesRepositoryImpl implements NotesRepository {
         .map(((raws) {
           final notes = raws
               .map(Note.fromMap)
-              .where((note) => note.deletedAt == null)
+              .where((note) => !note.isDeleted)
               .toList();
           notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
           return notes;
@@ -119,42 +114,5 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Future<Note?> getNoteById(String noteId) {
     return _remote.getNoteById(noteId);
-  }
-
-  @override
-  Future<void> syncNotes(String? userId) async {
-    final id = _cache.getString(key: ExternalConsts.lastUserIdKey) ?? userId;
-    if (id == null) return;
-    if (!await _network.hasConnection()) return;
-
-    final localNotes = await _local.readNotes();
-    final remoteNotes = await _remote.readNotes(id);
-
-    final remoteNotesMap = Map.fromEntries(
-      remoteNotes.map((n) => MapEntry(n.id, n)),
-    );
-
-    for (final localNote in localNotes) {
-      final remoteNote = remoteNotesMap[localNote.id];
-
-      if (remoteNote != null && localNote.isDeleted) {
-        await delete(localNote);
-        continue;
-      }
-
-      if (remoteNote == null) {
-        await create(localNote);
-        continue;
-      }
-
-      final localTime = localNote.updatedAt;
-      final remoteTime = remoteNote.updatedAt;
-
-      if (localTime.isAfter(remoteTime)) {
-        await update(localNote, changeUpdateDate: false);
-      } else if (remoteTime.isAfter(localTime)) {
-        await update(remoteNote, changeUpdateDate: false);
-      }
-    }
   }
 }

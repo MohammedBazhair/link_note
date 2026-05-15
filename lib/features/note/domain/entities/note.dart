@@ -9,7 +9,7 @@ class Note {
     required this.updatedAt,
     required this.title,
     required this.content,
-    this.deletedAt,
+    this.isDeleted = false,
   });
 
   factory Note.fromJson(String json) {
@@ -38,7 +38,7 @@ class Note {
       title: map['title'] as String,
       content: map['content'] as String,
       updatedAt: DateTime.parse(map['updated_at']),
-      deletedAt: DateTime.tryParse(map['deleted_at'] ?? ''),
+      isDeleted: map['is_deleted'] == 1 ? true : false,
     );
   }
   final String? id;
@@ -46,9 +46,7 @@ class Note {
   final String title;
   final String content;
   final DateTime updatedAt;
-  final DateTime? deletedAt;
-
-  bool get isDeleted => deletedAt != null;
+  final bool isDeleted;
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -57,7 +55,7 @@ class Note {
       'content': content,
       'updated_at': updatedAt.toIso8601String(),
       'owner_id': ?ownerId,
-      'deleted_at': ?(deletedAt?.toUtc().toIso8601String()),
+      'is_deleted': isDeleted,
     };
   }
 
@@ -85,7 +83,7 @@ class Note {
     String? title,
     String? content,
     DateTime? updatedAt,
-    DateTime? deletedAt,
+    bool? isDeleted,
   }) {
     return Note(
       id: id ?? this.id,
@@ -93,7 +91,7 @@ class Note {
       title: title ?? this.title,
       content: content ?? this.content,
       updatedAt: updatedAt ?? this.updatedAt,
-      deletedAt: deletedAt ?? this.deletedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
     );
   }
 

@@ -5,11 +5,13 @@ import '../../../../../core/presentation/providers/core_providers.dart';
 import '../../../../user/domain/repositories/user_repository.dart';
 import '../../../domain/entities/note.dart';
 import '../../../domain/repositories/notes_repository.dart';
+import '../../../domain/repositories/sync_note_repository.dart';
 import '../../../injection.dart';
 import '../note_providers.dart';
 
 class NoteController extends Notifier<void> {
   late final NotesRepository _notesRepository;
+  late final SyncNoteRepository _syncNoteRepository;
   late final UserRepository _userRepository;
 
   String? get _userId => _userRepository.currentUser?.id;
@@ -17,13 +19,14 @@ class NoteController extends Notifier<void> {
   @override
   void build() {
     _notesRepository = ref.read(notesRepositoryProvider);
+    _syncNoteRepository = ref.read(syncNotesRepositoryProvider);
     _userRepository = ref.read(userRepositoryProvider);
   }
 
   Future<void> addNote(Note note) async {
-    final userNote = note.copyWith(ownerId:   _userId);
+    final userNote = note.copyWith(ownerId: _userId);
 
- await _notesRepository.create(userNote);
+    await _notesRepository.create(userNote);
     _updateUi();
   }
 
@@ -51,11 +54,7 @@ class NoteController extends Notifier<void> {
   }
 
   Future<void> syncNotes() async {
-    try {
-      await _notesRepository.syncNotes(_userId);
-    } catch (e) {
-      //
-    }
+    await _syncNoteRepository.syncAllNotes(_userId);
   }
 
   void _updateUi() {

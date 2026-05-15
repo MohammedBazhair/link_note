@@ -24,7 +24,7 @@ class ExternalConsts {
     content TEXT NOT NULL,
     owner_id TEXT NULL,
     updated_at TEXT NOT NULL,
-    deleted_at TEXT
+    is_deleted INTEGER NOT NULL DEFAULT 0 CHECK (is_deleted IN (0, 1))
   );
   ''';
 

@@ -27,7 +27,7 @@ abstract interface class LocalDatabaseService {
 
   Future<int> update({
     required Map<String, dynamic> updated,
-    required String id,
+    required dynamic value,
     required String column,
     required String table,
   });
@@ -81,7 +81,7 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
   @override
   Future<int> update({
     required Map<String, dynamic> updated,
-    required String id,
+    required dynamic value,
     required String column,
     required String table,
   }) {
@@ -89,7 +89,7 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
       table,
       updated,
       where: '$column = ?',
-      whereArgs: [id],
+      whereArgs: [value],
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }

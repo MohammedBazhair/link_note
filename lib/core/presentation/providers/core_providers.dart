@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:http/http.dart' as http;
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -22,9 +21,11 @@ import '../../features/init_local_data_base.dart';
 import '../../features/memory_cache/memory_cache.dart';
 import '../../features/network/connectivity_service.dart';
 import '../../features/network/network_clinet.dart';
+import '../../features/sync/sync_local_data_source.dart';
 
 final networkProvider = Provider((_) {
-  return ConnectivityServiceImpl(InternetConnection());
+  final _connection= Connectivity();
+  return ConnectivityServiceImpl(_connection);
 });
 
 final supabaseProvider = Provider((ref) {
@@ -122,28 +123,6 @@ final authRepositoryProvider = Provider((ref) {
   return AuthRepositoryImpl(remoteAuth, network, localCacheService);
 });
 
-
-final tokenRefreshProvider = Provider((ref) {
-  final network = ref.watch(networkProvider);
-  final supabase = ref.watch(supabaseAuthProvider);
-  // استمع لتغييرات الاتصال
-  final subscription = network.listenToConnectionChanges((status) async {
-    if (status == InternetStatus.connected) {
-      try {
-        // جدد التوكن فقط عند الاتصال الأول
-        final session = supabase.currentSession;
-        if (session == null || session.isExpired) {
-          await supabase.refreshSession();
-        }
-      } catch (e) {
-        debugPrint('Failed to refresh token: $e');
-      }
-    }
-  });
-
-  ref.onDispose(subscription.cancel);
-});
-
 Future<List<Override>> getOverrides() async {
   final prefs = await SharedPreferences.getInstance();
   final dbOverride = await getOverrideDatabase();
@@ -151,3 +130,8 @@ Future<List<Override>> getOverrides() async {
 }
 
 final memoryCacheProvider = Provider((ref)=> MemoryCache());
+
+final syncLocalProvider = Provider((ref) {
+  final localCache = ref.read(localDatabaseProvider);
+  return SyncLocalDataSourceImpl(localCache);
+});
