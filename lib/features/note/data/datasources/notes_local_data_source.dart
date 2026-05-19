@@ -1,3 +1,5 @@
+// ignore_for_file: unawaited_futures
+
 import 'dart:async';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
@@ -45,7 +47,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       recordId: noteId,
       operation: SyncOperation.insert,
     );
-    unawaited(_syncLocal.addChange(change));
+    _syncLocal.addChange(change);
 
     return result;
   }
@@ -53,7 +55,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
   @override
   Future<List<Note>> readNotes() async {
     try {
-      final mapList = await _db.readRows(table: _notesTable);
+      final mapList = await _db.readRows(table: _notesTable, orderBy: 'updated_at DESC');
       return mapList.map(Note.fromMap).toList();
     } catch (e) {
       return Future.value([]);
@@ -82,7 +84,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       recordId: noteId,
       operation: SyncOperation.update,
     );
-    await _syncLocal.addChange(change);
+     _syncLocal.addChange(change);
   }
 
   @override
@@ -106,7 +108,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       recordId: id,
       operation: SyncOperation.delete,
     );
-    await _syncLocal.addChange(change);
+     _syncLocal.addChange(change);
   }
 
   @override

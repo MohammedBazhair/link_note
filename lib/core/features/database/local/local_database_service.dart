@@ -21,7 +21,9 @@ abstract interface class LocalDatabaseService {
     required Map<String, Object> filters,
   });
 
-  Future<List<Map<String, dynamic>>> readRows({required String table});
+  Future<List<Map<String, dynamic>>> readRows({required String table,
+    String? orderBy,
+  });
 
   Stream<RowList> readRowsRealTime({required String table});
 
@@ -74,8 +76,8 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> readRows({required String table}) {
-    return _database.rawQuery('SELECT * FROM $table');
+  Future<List<Map<String, dynamic>>> readRows({required String table, String? orderBy}) {
+    return _database.query(table, orderBy: orderBy);
   }
 
   @override
