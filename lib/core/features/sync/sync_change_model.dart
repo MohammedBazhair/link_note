@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 
 enum SyncOperation {
@@ -27,6 +26,19 @@ class SyncChangeModel extends Equatable {
       recordId: map['record_id'],
       operation: SyncOperation.fromString(map['operation']),
       updatedAt: DateTime.parse(map['updated_at']),
+    );
+  }
+
+  factory SyncChangeModel.create({
+    required String tableName,
+    required String recordId,
+    required SyncOperation operation,
+  }) {
+    return SyncChangeModel(
+      tableName: tableName,
+      recordId:recordId,
+      operation: operation,
+      updatedAt:DateTime.now().toUtc(),
     );
   }
   final int? id;
@@ -60,7 +72,7 @@ class SyncChangeModel extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-  
+
   @override
   List<Object?> get props => [tableName, recordId, operation];
 }

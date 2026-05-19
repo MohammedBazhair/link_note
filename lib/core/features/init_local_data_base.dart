@@ -19,7 +19,7 @@ Future<Override> getOverrideDatabase() async {
 
 Future<Database> _initDatabase() async {
   final dbDir = await getDatabasesPath();
-  final dbPath = join(dbDir, 'Link Note.db');
+  final dbPath = join(dbDir, 'Link Note 2.0.db');
   if (Platform.isWindows) {
     final winDb = await databaseFactory.openDatabase(
       dbPath,
@@ -34,5 +34,11 @@ Future<Database> _initDatabase() async {
 }
 
 Future<void> _onCreate(Database db, int version) async {
-  await db.execute(ExternalConsts.createTableNotesQuery);
+  final futures = [
+    db.execute(ExternalConsts.createTableNotesQuery),
+    db.execute(ExternalConsts.createTableSyncChangesQuery),
+    db.execute(ExternalConsts.createTableSyncStateQuery),
+  ];
+
+  await Future.wait(futures);
 }

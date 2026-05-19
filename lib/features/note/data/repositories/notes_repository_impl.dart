@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
@@ -29,10 +31,10 @@ class NotesRepositoryImpl implements NotesRepository {
         updatedAt: now,
         ownerId: userId,
       );
+      final hasConnection = await _network.hasConnection();
+      await _local.createNote(note: newNote, skipLocalTracking: hasConnection);
 
-      await _local.createNote(newNote);
-
-      if (await _network.hasConnection()) await _remote.createNote(newNote);
+      if (hasConnection) unawaited(_remote.createNote(newNote));
 
       return newNote;
     } catch (e, st) {
@@ -47,12 +49,15 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<void> update(Note note, {bool changeUpdateDate = true}) async {
-    final updatedNote = changeUpdateDate
-        ? note.copyWith(updatedAt: DateTime.now().toUtc())
-        : note;
-    if (await _network.hasConnection()) await _remote.updateNote(updatedNote);
-    await _local.updateNote(updatedNote);
+  Future<void> update(Note note) async {
+    final updatedNote = note.copyWith(updatedAt: DateTime.now().toUtc());
+    final hasConnection = await _network.hasConnection();
+
+    await _local.updateNote(
+      note: updatedNote,
+      skipLocalTracking: hasConnection,
+    );
+    if (hasConnection) unawaited(_remote.updateNote(updatedNote));
   }
 
   @override
@@ -60,7 +65,11 @@ class NotesRepositoryImpl implements NotesRepository {
     final noteId = note.id;
     if (noteId == null) return;
 
-    await _local.updateNote(note.copyWith(isDeleted: true));
+    final hasConnection = await _network.hasConnection();
+
+    await _local.deleteNote(id: noteId, skipLocalTracking: hasConnection);
+
+    if (hasConnection) unawaited(_remote.deleteNote(noteId));
   }
 
   Stream<List<Note>> _mapStreamToNotes(Stream<RowList> rawStream) {

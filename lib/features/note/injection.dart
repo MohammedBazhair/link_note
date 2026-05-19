@@ -12,6 +12,7 @@ import 'domain/repositories/note_ai_repository.dart';
 import 'domain/repositories/notes_repository.dart';
 import 'domain/repositories/sync_note_repository.dart';
 import 'presentation/controllers/note_ai_controller/note_ai_controller.dart';
+
 final notesRemoteDataSourceProvider = Provider((ref) {
   final remoteDatabaseService = ref.read(remoteDatabaseServiceProvider);
   final _client = ref.read(supabaseProvider).client;
@@ -21,8 +22,9 @@ final notesRemoteDataSourceProvider = Provider((ref) {
 final notesLocalDataSourceProvider = Provider<NotesLocalDataSource>((ref) {
   final localCacheService = ref.read(localCacheServiceProvider);
   final localDatabase = ref.read(localDatabaseProvider);
+  final syncLocal = ref.read(syncLocalProvider);
 
-  return NotesLocalDataSourceImpl(localDatabase, localCacheService);
+  return NotesLocalDataSourceImpl(localDatabase, localCacheService, syncLocal);
 });
 
 final notesRepositoryProvider = Provider<NotesRepository>((ref) {

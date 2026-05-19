@@ -133,7 +133,8 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
     final whereClause = filters.entries
         .map((e) => '${e.key} = ?')
         .join(' AND ');
-    return _database.rawQuery('SELECET * FROM $table WHERE $whereClause', []);
+    return _database.rawQuery('SELECT * FROM $table WHERE $whereClause', filters.values.toList(),
+    );
   }
 
   @override

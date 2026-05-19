@@ -37,7 +37,7 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
- Future<List<Note>> readNotes({
+  Future<List<Note>> readNotes({
     required String ownerId,
     SyncStateModel? lastNotesSync,
   }) async {
@@ -117,17 +117,21 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
 
   @override
   Future<void> deleteNote(String id) {
+    final updatedAt = DateTime.now().toUtc().toIso8601String();
+
     return _database.update(
       id: id,
       column: _idColumn,
       table: _notesTable,
-      updated: {'is_deleted': 1},
+      updated: {'is_deleted': 1, 'updated_at': updatedAt},
     );
   }
 
   @override
   Future<void> deleteNotes(List<String> ids) {
-    final updates = ids.map((id) => {'id': id, 'is_deleted': 1}).toList();
+    final updatedAt = DateTime.now().toUtc().toIso8601String();
+    final values = {'is_deleted': 1, 'updated_at': updatedAt};
+    final updates = ids.map((id) => {'id': id, ...values}).toList();
 
     return _database.upsertRows(
       rows: updates,
