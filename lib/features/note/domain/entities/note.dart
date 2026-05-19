@@ -55,7 +55,7 @@ class Note {
       'content': content,
       'updated_at': updatedAt.toIso8601String(),
       'owner_id': ?ownerId,
-      'is_deleted': isDeleted,
+      'is_deleted': isDeleted ? 1 : 0,
     };
   }
 

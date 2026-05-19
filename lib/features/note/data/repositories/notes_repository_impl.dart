@@ -1,3 +1,5 @@
+// ignore_for_file: unawaited_futures
+
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -34,7 +36,11 @@ class NotesRepositoryImpl implements NotesRepository {
       final hasConnection = await _network.hasConnection();
       await _local.createNote(note: newNote, skipLocalTracking: hasConnection);
 
-      if (hasConnection) unawaited(_remote.createNote(newNote));
+      try {
+        if (hasConnection) _remote.createNote(newNote);
+      } catch (e, st) {
+        Logger.log(error: e, stackTrace: st);
+      }
 
       return newNote;
     } catch (e, st) {
@@ -44,9 +50,7 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<List<Note>> getAll() {
-    return _local.readNotes();
-  }
+  Future<List<Note>> getAll() => _local.readNotes();
 
   @override
   Future<void> update(Note note) async {

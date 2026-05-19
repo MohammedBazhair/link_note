@@ -1,48 +1,57 @@
 import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/presentation/providers/core_providers.dart';
 import '../../../../user/domain/repositories/user_repository.dart';
 import '../../../domain/entities/note.dart';
 import '../../../domain/repositories/notes_repository.dart';
-import '../../../domain/repositories/sync_note_repository.dart';
 import '../../../injection.dart';
 import '../note_providers.dart';
 
-class NoteController extends Notifier<void> {
+class NoteController extends StreamNotifier<List<Note>> {
   late final NotesRepository _notesRepository;
-  late final SyncNoteRepository _syncNoteRepository;
   late final UserRepository _userRepository;
 
   String? get _userId => _userRepository.currentUser?.id;
 
   @override
-  void build() {
+  Stream<List<Note>> build() {
     _notesRepository = ref.read(notesRepositoryProvider);
-    _syncNoteRepository = ref.read(syncNotesRepositoryProvider);
     _userRepository = ref.read(userRepositoryProvider);
+    return _notesRepository.fetchNotesRealTime(_userId);
+  }
+
+  Future<void> _getAllNotes() async {
+    final notes = await _notesRepository.getAll();
+    state = AsyncData(notes);
   }
 
   Future<void> addNote(Note note) async {
     final userNote = note.copyWith(ownerId: _userId);
 
-    await _notesRepository.create(userNote);
-    _updateUi();
+    final noteCreated = await _notesRepository.create(userNote);
+    if (noteCreated == null) return;
+
+    await _getAllNotes();
   }
 
   Future<void> updateNote(Note note) async {
-    await _notesRepository.update(note);
-    _updateUi();
+    try {
+      await _notesRepository.update(note);
+      await _getAllNotes();
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+    }
   }
 
   Future<void> deleteNote(Note note) async {
-    if (note.id == null) return;
-    await _notesRepository.delete(note);
-    _updateUi();
-  }
-
-  Stream<List<Note>> fetchNotesRealtime() {
-    return _notesRepository.fetchNotesRealTime(_userId);
+    try {
+      if (note.id == null) return;
+      await _notesRepository.delete(note);
+      await _getAllNotes();
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+    }
   }
 
   Stream<Note?> fetchSingleNoteRealtime(String noteId) {
@@ -54,11 +63,11 @@ class NoteController extends Notifier<void> {
   }
 
   Future<void> syncNotes() async {
-    await _syncNoteRepository.syncAllNotes(_userId);
-    _updateUi();
-  }
-
-  void _updateUi() {
-    ref.invalidate(notesStreamProvider);
+    try {
+      await ref.read(syncNotesControllerProvider.notifier).syncNotes();
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+    }
+    await _getAllNotes();
   }
 }

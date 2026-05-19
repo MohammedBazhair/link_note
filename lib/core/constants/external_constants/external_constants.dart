@@ -3,6 +3,7 @@ class ExternalConsts {
 
   static const fontFamily = 'IBM Plex Sans Arabic';
   static const imagesBucket = 'images';
+  static const databaseName = 'Link Note 2.0.db';
   static const notesTable = 'notes';
   static const syncChangesTable = 'sync_changes';
   static const syncStateTable = 'sync_state';

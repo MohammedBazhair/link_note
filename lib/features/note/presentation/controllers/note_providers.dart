@@ -10,10 +10,12 @@ import 'note_ai_controller/note_ai_controller.dart';
 import 'note_ai_controller/note_ai_state.dart';
 import 'note_controller/note_controller.dart';
 import 'note_controller/note_form_state.dart';
+import 'note_controller/sync_notes_controller.dart';
 
-final noteControllerProvider = NotifierProvider<NoteController, void>(() {
-  return NoteController();
-});
+final noteControllerProvider =
+    StreamNotifierProvider<NoteController, List<Note>>(() {
+      return NoteController();
+    });
 
 final noteAiRepositoryProvider = Provider((ref) {
   final aiClient = ref.read(aiCilientProvider);
@@ -36,12 +38,6 @@ final editorFormProvider = StateProvider((ref) {
 });
 
 final isInNotesListScreen = StateProvider.autoDispose((_) => false);
-
-final notesStreamProvider = StreamProvider.autoDispose((ref) {
-  final notesController = ref.read(noteControllerProvider.notifier);
-
-  return notesController.fetchNotesRealtime();
-});
 
 final singleNoteStreamProvider = StreamProvider.family
     .autoDispose<Note?, String>((ref, noteId) {
@@ -67,16 +63,11 @@ final getNoteByIdProvider = FutureProvider.family.autoDispose<Note?, String>((
   return controller.getNoteById(noteId);
 });
 
-final syncNotesProvider = Provider((ref) {
-  final network = ref.read(networkProvider);
-  final controller = ref.read(noteControllerProvider.notifier);
-  // استمع لتغييرات الاتصال
-  final subscription = network.listenToConnectionChanges((status) async {
-    if (await network.hasConnection()) await controller.syncNotes();
-  });
-
-  ref.onDispose(subscription.cancel);
-});
+final syncNotesControllerProvider = NotifierProvider<SyncNotesController, bool>(
+  () {
+    return SyncNotesController();
+  },
+);
 
 final selectableNoteProvider = StateProvider.autoDispose(
   (_) => SelectableNote(),

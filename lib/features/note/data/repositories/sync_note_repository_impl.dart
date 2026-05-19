@@ -27,36 +27,28 @@ class SyncNoteRepositoryImpl implements SyncNoteRepository {
 
   @override
   Future<void> syncAllNotes([String? userId]) async {
-    try {
-      final selectedUserId =
-          userId ?? _localCache.getString(key: ExternalConsts.lastUserIdKey);
+    final selectedUserId =
+        userId ?? _localCache.getString(key: ExternalConsts.lastUserIdKey);
 
-      if (selectedUserId == null) return;
-      if (!await _connectivity.hasConnection()) return;
-      await _pushNotesChanges();
+    if (selectedUserId == null) return;
+    if (!await _connectivity.hasConnection()) return;
+    await _pushNotesChanges();
 
-      final lastNotesSync = await _sync.getLastSynced(
-        ExternalConsts.notesTable,
-      );
+    final lastNotesSync = await _sync.getLastSynced(ExternalConsts.notesTable);
 
-      final remoteNotes = await _remoteNotes.readNotes(
-       ownerId:  selectedUserId,
-        lastNotesSync: lastNotesSync,
-      );
+    final remoteNotes = await _remoteNotes.readNotes(
+      ownerId: selectedUserId,
+      lastNotesSync: lastNotesSync,
+    );
 
-      await _localNotes.insertNotes(remoteNotes);
+    await _localNotes.insertNotes(remoteNotes);
 
-      final newDate = DateTime.now().toUtc();
-      final newLastGlobalSync = SyncStateModel(
-        tableName: ExternalConsts.notesTable,
-        lastSynced: newDate,
-      );
-      await _sync.saveLastSynced(newLastGlobalSync);
-
-
-    } catch (e, st) {
-      Logger.log(error: e, stackTrace: st);
-    }
+    final newDate = DateTime.now().toUtc();
+    final newLastGlobalSync = SyncStateModel(
+      tableName: ExternalConsts.notesTable,
+      lastSynced: newDate,
+    );
+    await _sync.saveLastSynced(newLastGlobalSync);
   }
 
   Future<void> _pushNotesChanges() async {

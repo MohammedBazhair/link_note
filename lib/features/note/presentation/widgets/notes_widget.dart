@@ -24,7 +24,7 @@ class NotesListView extends ConsumerWidget {
       effect: StylesConsts.shimmerEffect,
       child: RefreshIndicator(
         color: DarkColors.primary,
-        onRefresh: () async => ref.invalidate(notesStreamProvider),
+        onRefresh: ref.read(noteControllerProvider.notifier).syncNotes,
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
