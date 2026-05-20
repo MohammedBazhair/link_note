@@ -14,7 +14,7 @@ import '../../domain/entities/note.dart';
 abstract interface class NotesLocalDataSource {
   Future<int> createNote({required Note note, bool skipLocalTracking = false});
   Future<void> insertNotes(Iterable<Note> notes);
-  Future<List<Note>> readNotes();
+  Future<List<Note>> readNotes({bool includeDeleted = true});
   Future<Note?> getNoteById(String id);
   Stream<RowList> fetchNotesRealTime();
   Future<void> updateNote({required Note note, bool skipLocalTracking = false});
@@ -53,9 +53,16 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
   }
 
   @override
-  Future<List<Note>> readNotes() async {
+  Future<List<Note>> readNotes({bool includeDeleted = true}) async {
     try {
-      final mapList = await _db.readRows(table: _notesTable, orderBy: 'updated_at DESC');
+      final where = includeDeleted ? null : 'is_deleted = 0';
+      const orderBy = 'updated_at DESC';
+
+      final mapList = await _db.readRows(
+        table: _notesTable,
+        orderBy: orderBy,
+        where: where,
+      );
       return mapList.map(Note.fromMap).toList();
     } catch (e) {
       return Future.value([]);
@@ -84,7 +91,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       recordId: noteId,
       operation: SyncOperation.update,
     );
-     _syncLocal.addChange(change);
+    _syncLocal.addChange(change);
   }
 
   @override
@@ -93,7 +100,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
     bool skipLocalTracking = false,
   }) async {
     final updatedAt = DateTime.now().toUtc().toIso8601String();
-    
+
     await _db.update(
       updated: {'is_deleted': 1, 'updated_at': updatedAt},
       column: _idColumn,
@@ -108,7 +115,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       recordId: id,
       operation: SyncOperation.delete,
     );
-     _syncLocal.addChange(change);
+    _syncLocal.addChange(change);
   }
 
   @override

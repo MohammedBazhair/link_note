@@ -47,6 +47,11 @@ class ExternalConsts {
       );
     ''';
 
+  static String createIndexesOfsyncChangesQuery= '''
+    CREATE INDEX idx_sync_changes_table_record ON $syncChangesTable (table_name, record_id);
+    CREATE INDEX idx_sync_changes_table_name ON $syncChangesTable (table_name);
+    ''';
+
   static const lastUserIdKey = 'user_id';
   static const profileUserKey = 'user_profile';
   static const aiApiUrl =

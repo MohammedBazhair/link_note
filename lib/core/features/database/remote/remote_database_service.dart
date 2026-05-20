@@ -12,7 +12,7 @@ abstract interface class RemoteDatabaseService {
   Future<void> upsertRows({
     required RowList rows,
     required String table,
-    required String primaryKey,
+    String? primaryKey,
   });
 
   Future<Map<String, dynamic>> readRow({
@@ -59,6 +59,13 @@ abstract interface class RemoteDatabaseService {
     required String column,
     required List<dynamic> values,
     List<String> columnsSelect = const ['*'],
+  });
+
+  Future<void> updateManyByFilter({
+    required String table,
+    required Map<String, dynamic> data,
+    required String column,
+    required List<dynamic> values,
   });
 }
 
@@ -178,12 +185,22 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
   Future<void> upsertRows({
     required RowList rows,
     required String table,
-    required String primaryKey,
+    String? primaryKey,
   }) async {
     try {
       return await _client.from(table).upsert(rows, onConflict: primaryKey);
     } catch (e) {
       debugPrint(e.toString());
     }
+  }
+
+  @override
+  Future<void> updateManyByFilter({
+    required String table,
+    required Map<String, dynamic> data,
+    required String column,
+    required List<dynamic> values,
+  }) async {
+    await _client.from(table).update(data).inFilter(column, values);
   }
 }

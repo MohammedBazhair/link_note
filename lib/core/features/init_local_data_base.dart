@@ -55,4 +55,6 @@ Future<void> _onCreate(Database db, int version) async {
   ];
 
   await Future.wait(futures);
+
+  await db.execute(ExternalConsts.createIndexesOfsyncChangesQuery);
 }

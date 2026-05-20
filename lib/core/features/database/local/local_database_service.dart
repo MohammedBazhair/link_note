@@ -21,8 +21,11 @@ abstract interface class LocalDatabaseService {
     required Map<String, Object> filters,
   });
 
-  Future<List<Map<String, dynamic>>> readRows({required String table,
+  Future<List<Map<String, dynamic>>> readRows({
+    required String table,
     String? orderBy,
+    String? where,
+    List<Object?>? whereArgs,
   });
 
   Stream<RowList> readRowsRealTime({required String table});
@@ -76,8 +79,18 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> readRows({required String table, String? orderBy}) {
-    return _database.query(table, orderBy: orderBy);
+  Future<List<Map<String, dynamic>>> readRows({
+    required String table,
+    String? orderBy,
+    String? where,
+    List<Object?>? whereArgs,
+  }) {
+    return _database.query(
+      table,
+      orderBy: orderBy,
+      where: where,
+      whereArgs: whereArgs,
+    );
   }
 
   @override
@@ -135,7 +148,9 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
     final whereClause = filters.entries
         .map((e) => '${e.key} = ?')
         .join(' AND ');
-    return _database.rawQuery('SELECT * FROM $table WHERE $whereClause', filters.values.toList(),
+    return _database.rawQuery(
+      'SELECT * FROM $table WHERE $whereClause',
+      filters.values.toList(),
     );
   }
 

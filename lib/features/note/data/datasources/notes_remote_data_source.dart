@@ -19,8 +19,8 @@ abstract interface class NotesRemoteDataSource {
   Stream<RowList> fetchNotesRealTime(String ownerId);
   Stream<Map<String, dynamic>?> fetchNoteStream(String noteId);
   Future<void> updateNote(Note note);
-  Future<void> deleteNote(String id);
-  Future<void> deleteNotes(List<String> ids);
+  Future<void> softDeleteNote(String id);
+  Future<void> softDeleteNotes(List<String> ids);
 }
 
 class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
@@ -123,7 +123,7 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> deleteNote(String id) {
+  Future<void> softDeleteNote(String id) {
     final updatedAt = DateTime.now().toUtc().toIso8601String();
 
     return _database.update(
@@ -135,15 +135,15 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> deleteNotes(List<String> ids) {
+  Future<void> softDeleteNotes(List<String> ids) {
     final updatedAt = DateTime.now().toUtc().toIso8601String();
     final values = {'is_deleted': 1, 'updated_at': updatedAt};
-    final updates = ids.map((id) => {'id': id, ...values}).toList();
 
-    return _database.upsertRows(
-      rows: updates,
+    return _database.updateManyByFilter(
       table: _notesTable,
-      primaryKey: _idColumn,
+      data: values,
+      column: _idColumn,
+      values: ids,
     );
   }
 }

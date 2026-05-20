@@ -50,7 +50,7 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<List<Note>> getAll() => _local.readNotes();
+  Future<List<Note>> getAll() => _local.readNotes(includeDeleted: false);
 
   @override
   Future<void> update(Note note) async {
@@ -73,7 +73,7 @@ class NotesRepositoryImpl implements NotesRepository {
 
     await _local.deleteNote(id: noteId, skipLocalTracking: hasConnection);
 
-    if (hasConnection) unawaited(_remote.deleteNote(noteId));
+    if (hasConnection) unawaited(_remote.softDeleteNote(noteId));
   }
 
   Stream<List<Note>> _mapStreamToNotes(Stream<RowList> rawStream) {

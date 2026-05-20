@@ -1,3 +1,4 @@
+import '../../constants/external_constants/external_constants.dart';
 import '../../constants/internal_constants/log.dart';
 import '../database/local/local_database_service.dart';
 import 'sync_change_model.dart';
@@ -24,12 +25,12 @@ class SyncLocalDataSourceImpl implements SyncLocalDataSource {
   @override
   Future<void> addChange(SyncChangeModel change) async {
     final existing = await _db.readRowsWhere(
-      table: 'sync_changes',
+      table: ExternalConsts.syncChangesTable,
       filters: {'table_name': change.tableName, 'record_id': change.recordId},
     );
 
     if (existing.isEmpty) {
-      await _db.insertRow(table: 'sync_changes', map: change.toMap());
+      await _db.insertRow(table: ExternalConsts.syncChangesTable, map: change.toMap());
 
       return;
     }
@@ -57,7 +58,7 @@ class SyncLocalDataSourceImpl implements SyncLocalDataSource {
     final updatedValues = {'operation': newOperation.name};
 
     await _db.update(
-      table: 'sync_changes',
+      table: ExternalConsts.syncChangesTable,
       updated: updatedValues,
       column: 'id',
       value: oldChange.id,
