@@ -19,12 +19,23 @@ class TitleFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
+      textInputAction: TextInputAction.newline,
       minLines: 1,
-      style: TextStyle(color: Colors.white.withAlpha(200)),
+      maxLines: 2,
+      maxLength: 100,
+      keyboardType: TextInputType.multiline,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 17,
+        fontWeight: FontWeight.w500,
+      ),
       cursorColor: const Color(0x809CDEBC),
       decoration: InputDecoration(
+        contentPadding: EdgeInsets.zero,
         hintText: 'العنوان...',
         filled: false,
+        counterText: '',
+
         suffixIcon: readOnly
             ? null
             : Consumer(
@@ -36,16 +47,13 @@ class TitleFormField extends StatelessWidget {
                     noteAiNotiferProvider.select((s) => s.isTitleProcessing),
                   );
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: AiActionButton(
-                      isProcessing: isProcessing,
-                      onPressed: () async {
-                        final title = await aiController.improveTitle(note);
-                        controller.text = title;
-                        onChanged?.call(title);
-                      },
-                    ),
+                  return AiActionButton(
+                    isProcessing: isProcessing,
+                    onPressed: () async {
+                      final title = await aiController.improveTitle(note);
+                      controller.text = title;
+                      onChanged?.call(title);
+                    },
                   );
                 },
               ),

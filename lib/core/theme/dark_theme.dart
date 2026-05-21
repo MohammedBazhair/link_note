@@ -18,9 +18,8 @@ ThemeData darkTheme() => ThemeData(
     backgroundColor: Color(0xFF151825),
     surfaceTintColor: Colors.transparent,
     iconTheme: IconThemeData(color: Colors.white),
-
-    actionsPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-    leadingWidth: 100,
+    actionsPadding: EdgeInsets.symmetric(horizontal: 12),
+    leadingWidth: 56,
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(

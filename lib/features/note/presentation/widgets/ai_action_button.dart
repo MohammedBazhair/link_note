@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../../../../core/constants/assets/app_assets.dart';
 
 class AiActionButton extends ConsumerWidget {
@@ -14,7 +13,7 @@ class AiActionButton extends ConsumerWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
     return AnimatedCrossFade(
       firstChild: Container(
         padding: const EdgeInsets.all(13),

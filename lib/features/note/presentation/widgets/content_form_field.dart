@@ -18,71 +18,88 @@ class ContentFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Column(
       children: [
-        TextFormField(
-          controller: controller,
-          maxLines: null,
-          expands: true,
-          readOnly: readOnly,
+        Expanded(
+          child: TextFormField(
+            controller: controller,
+            maxLines: null,
+            expands: true,
+            readOnly: readOnly,
+            textInputAction: TextInputAction.newline,
 
-          textAlignVertical: TextAlignVertical.top,
-          style: TextStyle(color: Colors.white.withAlpha(200)),
-          cursorColor: const Color(0x809CDEBC),
-          decoration: InputDecoration(
-            hintText: 'اكتب ما تريد...',
-            counter: ValueListenableBuilder(
-              valueListenable: controller,
-              builder: (context, value, _) {
-                return Text(
-                  '${controller.text.length}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    height: 2.5,
-                    color: DarkColors.secondFont,
-                  ),
-                );
-              },
+            keyboardType: TextInputType.multiline,
+
+            textAlignVertical: TextAlignVertical.top,
+            style: TextStyle(color: Colors.white.withAlpha(180), fontSize: 15),
+            cursorColor: const Color(0x809CDEBC),
+            decoration: const InputDecoration(
+              hintText: 'اكتب ما تريد...',
+              filled: false,
+              contentPadding: EdgeInsets.zero,
             ),
-            contentPadding: const EdgeInsetsDirectional.only(
-              end: 40,
-              start: 15,
-              bottom: 15,
-              top: 15,
-            ),
+            onChanged: onChanged,
+            validator: (value) {
+              if (value?.isEmpty ?? true) {
+                return "Field Can't be Empty";
+              }
+              return null;
+            },
           ),
-          onChanged: onChanged,
-          validator: (value) {
-            if (value?.isEmpty ?? true) {
-              return "Field Can't be Empty";
-            }
-            return null;
+        ),
+        _CounterWithAiAction(controller: controller, onChanged: onChanged),
+      ],
+    );
+  }
+}
+
+class _CounterWithAiAction extends StatelessWidget {
+  const _CounterWithAiAction({
+    required this.controller,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+      children: [
+        Consumer(
+          builder: (_, ref, __) {
+            final aiController = ref.read(noteAiNotiferProvider.notifier);
+            final isProcessing = ref.watch(
+              noteAiNotiferProvider.select((s) => s.isContentProcessing),
+            );
+            return AiActionButton(
+              isProcessing: isProcessing,
+              onPressed: () async {
+                final note = ref.watch(editorFormProvider).note;
+
+                final content = await aiController.improveContent(note);
+                controller.text = content;
+                onChanged(content);
+              },
+            );
           },
         ),
 
-        if (!readOnly)
-          PositionedDirectional(
-            end: 5,
-            top: 5,
-            child: Consumer(
-              builder: (_, ref, __) {
-                final aiController = ref.read(noteAiNotiferProvider.notifier);
-                final isProcessing = ref.watch(
-                  noteAiNotiferProvider.select((s) => s.isContentProcessing),
-                );
-                return AiActionButton(
-                  isProcessing: isProcessing,
-                  onPressed: () async {
-                    final note = ref.watch(editorFormProvider).note;
-
-                    final content = await aiController.improveContent(note);
-                    controller.text = content;
-                    onChanged(content);
-                  },
-                );
-              },
-            ),
-          ),
+        ValueListenableBuilder(
+          valueListenable: controller,
+          builder: (context, value, _) {
+            return Text(
+              '${controller.text.length}',
+              style: const TextStyle(
+                fontSize: 11,
+                height: 2.5,
+                color: DarkColors.secondFont,
+              ),
+            );
+          },
+        ),
       ],
     );
   }
