@@ -6,6 +6,9 @@ class FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: const TextStyle(fontSize: 15));
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(text, style: const TextStyle(fontSize: 14)),
+    );
   }
 }

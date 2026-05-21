@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../auth_listeners.dart';
@@ -81,7 +80,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(Assets.imagesBackground),
-            fit: BoxFit.fill,
+            fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
@@ -127,42 +126,37 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
                             const SizedBox(height: 80),
 
-                            // الاسم
-                            const FieldLabel(text: 'الاسم الكامل'),
-                            const SizedBox(height: 8),
-                            CustomFullNameField(nameController: nameController),
+                            GridView(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: context.isDesktop ? 2 : 1,
+                                    crossAxisSpacing: 24,
+                                    mainAxisSpacing: 24,
+                                    mainAxisExtent: 130,
+                                  ),
+                              children: [
+                                CustomFullNameField(
+                                  nameController: nameController,
+                                ),
 
-                            const SizedBox(height: 25),
+                                CustomEmailField(emailController),
 
-                            // البريد
-                            const FieldLabel(text: 'البريد الإلكتروني'),
+                                CustomPasswordField(
+                                  controller: passwordController,
+                                  hintText: 'أدخل كلمة المرور',
+                                ),
 
-                            const SizedBox(height: 8),
-
-                            CustomEmailField(emailController),
-                            const SizedBox(height: 25),
-
-                            // كلمة المرور
-                            const FieldLabel(text: 'كلمة المرور'),
-                            const SizedBox(height: 8),
-
-                            CustomPasswordField(
-                              controller: passwordController,
-                              hintText: 'أدخل كلمة المرور',
-                            ),
-
-                            const SizedBox(height: 25),
-
-                            // تأكيد كلمة المرور
-                            const FieldLabel(text: 'تأكيد الباسورد'),
-                            const SizedBox(height: 8),
-
-                            CustomPasswordField(
-                              originalController: passwordController,
-                              controller: confirmPasswordController,
-                              hintText: 'أعد إدخال كلمة المرور',
-                              onSubmit: onSubmit,
-                              textInputAction: TextInputAction.done,
+                                CustomPasswordField(
+                                  originalController: passwordController,
+                                  controller: confirmPasswordController,
+                                  hintText: 'أعد إدخال كلمة المرور',
+                                  onSubmit: onSubmit,
+                                  textInputAction: TextInputAction.done,
+                                  isConfirmField: true,
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 35),

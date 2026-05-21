@@ -24,25 +24,28 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async{
-    await ref.read(userControllerProvider.notifier).loadProfile();
-    await ref.read(noteControllerProvider.notifier).syncNotes();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(userControllerProvider.notifier).loadProfile();
+      await ref.read(noteControllerProvider.notifier).syncNotes();
       ref.read(isInNotesListScreen.notifier).update((_) => true);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: widget.key,
-      appBar: const PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight),
-        child: NotesListAppBar(),
+    return GestureDetector(
+      onTap: () => ref.read(isFloatingActiosClicked.notifier).state = false,
+      child: Scaffold(
+        key: widget.key,
+        appBar: const PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: NotesListAppBar(),
+        ),
+        drawer: const CustomDrawer(),
+        floatingActionButton: const FloatingActionsButtons(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        body: const NotesStreamBuilder(),
       ),
-      drawer: const CustomDrawer(),
-      floatingActionButton: const FloatingActionsButtons(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: const NotesStreamBuilder(),
     );
   }
 }

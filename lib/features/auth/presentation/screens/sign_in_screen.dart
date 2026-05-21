@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
@@ -99,12 +98,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
 
   @override
   Widget build(BuildContext context) {
+    context.printDebug();
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(Assets.imagesBackground),
-            fit: BoxFit.fill,
+            fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
@@ -150,23 +150,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
 
                             const SizedBox(height: 80),
 
-                            const FieldLabel(text: 'البريد الإلكتروني'),
+                            GridView(
+                              physics: const NeverScrollableScrollPhysics(),
 
-                            const SizedBox(height: 8),
+                              shrinkWrap: true,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: context.isDesktop ? 2 : 1,
+                                    mainAxisSpacing: 24,
+                                    crossAxisSpacing: 24,
+                                    mainAxisExtent: 130,
+                                  ),
 
-                            CustomEmailField(_emailController),
+                              children: [
+                                CustomEmailField(_emailController),
 
-                            const SizedBox(height: 25),
-
-                            const FieldLabel(text: 'كلمة المرور'),
-
-                            const SizedBox(height: 8),
-
-                            CustomPasswordField(
-                              controller: _passwordController,
-                              hintText: 'أدخل كلمة المرور',
-                              onSubmit: onSubmit,
-                              textInputAction: TextInputAction.done,
+                                CustomPasswordField(
+                                  controller: _passwordController,
+                                  hintText: 'أدخل كلمة المرور',
+                                  onSubmit: onSubmit,
+                                  textInputAction: TextInputAction.done,
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 25),
