@@ -1,3 +1,7 @@
+// ignore_for_file: unawaited_futures
+
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
@@ -29,10 +33,14 @@ class NotesRepositoryImpl implements NotesRepository {
         updatedAt: now,
         ownerId: userId,
       );
+      final hasConnection = await _network.hasConnection();
+      await _local.createNote(note: newNote, skipLocalTracking: hasConnection);
 
-      await _local.createNote(newNote);
-
-      if (await _network.hasConnection()) await _remote.createNote(newNote);
+      try {
+        if (hasConnection) _remote.createNote(newNote);
+      } catch (e, st) {
+        Logger.log(error: e, stackTrace: st);
+      }
 
       return newNote;
     } catch (e, st) {
@@ -42,17 +50,18 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<List<Note>> getAll() {
-    return _local.readNotes();
-  }
+  Future<List<Note>> getAll() => _local.readNotes(includeDeleted: false);
 
   @override
-  Future<void> update(Note note, {bool changeUpdateDate = true}) async {
-    final updatedNote = changeUpdateDate
-        ? note.copyWith(updatedAt: DateTime.now().toUtc())
-        : note;
-    if (await _network.hasConnection()) await _remote.updateNote(updatedNote);
-    await _local.updateNote(updatedNote);
+  Future<void> update(Note note) async {
+    final updatedNote = note.copyWith(updatedAt: DateTime.now().toUtc());
+    final hasConnection = await _network.hasConnection();
+
+    await _local.updateNote(
+      note: updatedNote,
+      skipLocalTracking: hasConnection,
+    );
+    if (hasConnection) unawaited(_remote.updateNote(updatedNote));
   }
 
   @override
@@ -60,12 +69,11 @@ class NotesRepositoryImpl implements NotesRepository {
     final noteId = note.id;
     if (noteId == null) return;
 
-    if (await _network.hasConnection()) {
-      await _remote.deleteNote(noteId);
-      await _local.deleteNote(noteId);
-    } else {
-      await _local.updateNote(note.copyWith(deletedAt: DateTime.now().toUtc()));
-    }
+    final hasConnection = await _network.hasConnection();
+
+    await _local.deleteNote(id: noteId, skipLocalTracking: hasConnection);
+
+    if (hasConnection) unawaited(_remote.softDeleteNote(noteId));
   }
 
   Stream<List<Note>> _mapStreamToNotes(Stream<RowList> rawStream) {
@@ -73,7 +81,7 @@ class NotesRepositoryImpl implements NotesRepository {
         .map(((raws) {
           final notes = raws
               .map(Note.fromMap)
-              .where((note) => note.deletedAt == null)
+              .where((note) => !note.isDeleted)
               .toList();
           notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
           return notes;
@@ -119,42 +127,5 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Future<Note?> getNoteById(String noteId) {
     return _remote.getNoteById(noteId);
-  }
-
-  @override
-  Future<void> syncNotes(String? userId) async {
-    final id = _cache.getString(key: ExternalConsts.lastUserIdKey) ?? userId;
-    if (id == null) return;
-    if (!await _network.hasConnection()) return;
-
-    final localNotes = await _local.readNotes();
-    final remoteNotes = await _remote.readNotes(id);
-
-    final remoteNotesMap = Map.fromEntries(
-      remoteNotes.map((n) => MapEntry(n.id, n)),
-    );
-
-    for (final localNote in localNotes) {
-      final remoteNote = remoteNotesMap[localNote.id];
-
-      if (remoteNote != null && localNote.isDeleted) {
-        await delete(localNote);
-        continue;
-      }
-
-      if (remoteNote == null) {
-        await create(localNote);
-        continue;
-      }
-
-      final localTime = localNote.updatedAt;
-      final remoteTime = remoteNote.updatedAt;
-
-      if (localTime.isAfter(remoteTime)) {
-        await update(localNote, changeUpdateDate: false);
-      } else if (remoteTime.isAfter(localTime)) {
-        await update(remoteNote, changeUpdateDate: false);
-      }
-    }
   }
 }

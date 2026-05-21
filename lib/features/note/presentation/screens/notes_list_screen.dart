@@ -24,11 +24,9 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(tokenRefreshProvider);
-    ref.read(syncNotesProvider);
-    ref.read(userControllerProvider.notifier).loadProfile();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // للتأكد من تجديد التوكن عند أول اتصال
+    WidgetsBinding.instance.addPostFrameCallback((_) async{
+    await ref.read(userControllerProvider.notifier).loadProfile();
+    await ref.read(noteControllerProvider.notifier).syncNotes();
       ref.read(isInNotesListScreen.notifier).update((_) => true);
     });
   }
@@ -96,7 +94,7 @@ class NotesStreamBuilder extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final notesAsync = ref.watch(notesStreamProvider);
+    final notesAsync = ref.watch(noteControllerProvider);
 
     return notesAsync.when(
       data: (notes) {
