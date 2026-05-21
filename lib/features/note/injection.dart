@@ -68,7 +68,7 @@ final noteAiControllerProvider = Provider<NoteAiController>((ref) {
 });
 
 final aiClientProvider = Provider<AiClient>((ref) {
-  final networkClint = ref.read(networkCilientProvider);
+  final _client = ref.read(supabaseProvider).client.functions;
 
-  return AiClientImpl(networkClint);
+  return AiClientImpl(_client);
 });

@@ -24,7 +24,7 @@ class TitleFormField extends StatelessWidget {
       cursorColor: const Color(0x809CDEBC),
       decoration: InputDecoration(
         hintText: 'العنوان...',
-
+        filled: false,
         suffixIcon: readOnly
             ? null
             : Consumer(

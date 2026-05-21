@@ -48,9 +48,9 @@ final networkCilientProvider = Provider((ref) {
 });
 
 final aiCilientProvider = Provider((ref) {
-  final networkClint = ref.read(networkCilientProvider);
+  final functionsClient  = ref.read(supabaseProvider).client.functions;
 
-  return AiClientImpl(networkClint);
+  return AiClientImpl(functionsClient);
 });
 
 final authRemoteDataSourceProvider = Provider((ref) {

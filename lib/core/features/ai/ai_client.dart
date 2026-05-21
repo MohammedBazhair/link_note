@@ -1,7 +1,4 @@
-import 'dart:convert';
-
-import '../../constants/external_constants/external_constants.dart';
-import '../network/network_clinet.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'ai_client_params.dart';
 
 abstract class AiClient {
@@ -11,19 +8,15 @@ abstract class AiClient {
 class AiClientImpl implements AiClient {
   AiClientImpl(this._client);
 
-  final NetworkClient _client;
+  final FunctionsClient _client;
 
   @override
   Future<Map<String, dynamic>> generate(AiClientParams params) async {
-    final response = await _client.post(
-      params.apiUrl,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${ExternalConsts.supabaseAnonKey}',
-      },
-      body: jsonEncode({'prompt': params.prompt}),
+    final response = await _client.invoke(
+      'generate-ai',
+      body: {'prompt': params.prompt},
     );
 
-    return jsonDecode(response.body);
+    return response.data;
   }
 }
