@@ -69,15 +69,12 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
         if (didPop) return;
         await onPopInvoke();
       },
-      child: Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [Expanded(child: EditorForm(onPopInvoke: onPopInvoke))],
-            ),
-          ),
+      child: const Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: NoteFormHeader(),
         ),
+        body: Padding(padding: EdgeInsets.all(18), child: EditorForm()),
       ),
     );
   }

@@ -14,9 +14,7 @@ import 'content_form_field.dart';
 import 'title_form_field.dart';
 
 class EditorForm extends ConsumerWidget {
-  const EditorForm({super.key, required this.onPopInvoke});
-
-  final VoidCallback onPopInvoke;
+  const EditorForm({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
@@ -29,7 +27,11 @@ class EditorForm extends ConsumerWidget {
         child: Column(
           spacing: 24,
           children: [
-            NoteFormHeader(onBack: onPopInvoke),
+            TitleFormField(
+              controller: formState.titleController,
+              onChanged: (value) => formState.markedChanges(),
+            ),
+
             Expanded(
               child: ContentFormField(
                 controller: formState.contentController,
@@ -44,27 +46,26 @@ class EditorForm extends ConsumerWidget {
 }
 
 class NoteFormHeader extends ConsumerWidget {
-  const NoteFormHeader({super.key, required this.onBack});
-
-  final VoidCallback onBack;
+  const NoteFormHeader({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
     final formState = ref.read(editorFormProvider);
 
-    return Row(
-      children: [
-        const BackButton(),
-        const SizedBox(width: 5),
-        Expanded(
-          child: TitleFormField(
-            controller: formState.titleController,
-            onChanged: (value) => formState.markedChanges(),
-          ),
-        ),
-        const SizedBox(width: 10),
+    return AppBar(
+      actions: [
         const CreditsWidget(),
-        const SizedBox(width: 5),
+        const SizedBox(width: 10),
+        const IconButton(
+          onPressed: null,
+          icon: Icon(Icons.redo_rounded, textDirection: TextDirection.ltr),
+          tooltip: 'إعادة',
+        ),
+        const IconButton(
+          onPressed: null,
+          icon: Icon(Icons.undo_rounded, textDirection: TextDirection.ltr),
+          tooltip: 'تراجع',
+        ),
         PopupMenuButton<NotePopupAction>(
           onSelected: (action) async {
             switch (action) {
@@ -73,8 +74,10 @@ class NoteFormHeader extends ConsumerWidget {
                   return context.showSnakbar('هذه الميزة لاتعمل على ويندوز');
                 }
                 final note = formState.note;
-                final qrData = QrData(name: note.title, qrCodeRaw: note.toJson());
-
+                final qrData = QrData(
+                  name: note.title,
+                  qrCodeRaw: note.toJson(),
+                );
 
                 await context.pushTo(GenerateQrCodeScreen(data: qrData));
 
@@ -90,7 +93,9 @@ class NoteFormHeader extends ConsumerWidget {
                 final note = formState.note;
                 if (note.id == null) return context.pop();
 
-                await ref.read(noteControllerProvider.notifier).deleteNote(note);
+                await ref
+                    .read(noteControllerProvider.notifier)
+                    .deleteNote(note);
                 context.pop();
             }
           },

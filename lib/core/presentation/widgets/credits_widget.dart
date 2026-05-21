@@ -34,7 +34,7 @@ class CreditsWidget extends ConsumerWidget {
         return const Skeletonizer(child: _CreditsBody(0));
       },
       error: (error, stackTrace) {
-        return const SizedBox.shrink();
+        return const _CreditsBody(0);
       },
     );
   }
@@ -47,16 +47,17 @@ class _CreditsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 20,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: DarkColors.primary.withOpacity(0.15),
         borderRadius: BorderRadius.circular(25),
       ),
-
       child: Row(
         spacing: 5,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.flash_on, size: 16),
+          const Icon(Icons.flash_on, size: 14),
           Text(
             '$credits',
             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
