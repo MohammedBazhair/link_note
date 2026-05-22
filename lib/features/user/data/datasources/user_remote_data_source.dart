@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
@@ -173,14 +172,19 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       );
 
       final credits = (map['credits'] as int);
-
+      await _locaCache.setString(
+        key: ExternalConsts.creditsKey,
+        value: '$credits',
+      );
       return Result.ok(credits);
-    } on ClientException catch (_) {
-      rethrow;
     } on UserNotLoggedInException catch (_) {
       rethrow;
     } catch (_) {
-      rethrow;
+      final cachedCredits = await _locaCache.getString(
+        key: ExternalConsts.creditsKey,
+      );
+      if (cachedCredits == null) return Result.error('خطأ في جلب عدد النقاط');
+      return Result.ok(int.tryParse(cachedCredits) ?? 0);
     }
   }
 

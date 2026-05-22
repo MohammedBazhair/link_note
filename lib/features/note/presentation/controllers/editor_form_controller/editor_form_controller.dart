@@ -26,24 +26,34 @@ class EditorFormController extends Notifier<EditorFormState> {
   }
 
   void _titleListener() {
-    state = state.copyWith(
-      hasChanges: true,
-      note: state.note?.copyWith(title: titleController.text),
-    );
+    Future.microtask(() {
+      state = state.copyWith(
+        hasChanges: _hasChanges,
+        note: state.note?.copyWith(title: titleController.text),
+      );
+    });
+  }
+
+  bool get _hasChanges {
+    final isDifferentTitle = state.note?.title != titleController.text;
+    final isDifferentContent = state.note?.content != contentController.text;
+
+    return isDifferentTitle || isDifferentContent;
   }
 
   void _contentListener() {
-    state = state.copyWith(
-      hasChanges: true,
-      note: state.note?.copyWith(content: contentController.text),
-    );
+    Future.microtask(() {
+      state = state.copyWith(
+        hasChanges: _hasChanges,
+        note: state.note?.copyWith(content: contentController.text),
+      );
+    });
   }
-
-
 
   void initForm([Note? note]) {
     if (note == null) return _clearForm();
 
+    state = state.copyWith(note: note);
     titleController.text = note.title;
     contentController.text = note.content;
   }

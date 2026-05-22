@@ -20,10 +20,13 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(editorFormControllerProvider.notifier).initForm(widget.note);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(editorFormControllerProvider.notifier).initForm(widget.note);
+    });
   }
 
-  GlobalKey<FormState> get formKey => ref.read(editorFormControllerProvider.notifier).formKey;
+  GlobalKey<FormState> get formKey =>
+      ref.read(editorFormControllerProvider.notifier).formKey;
 
   bool get isFormValid => formKey.currentState?.validate() ?? false;
 

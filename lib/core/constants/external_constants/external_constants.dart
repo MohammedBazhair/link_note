@@ -56,5 +56,7 @@ class ExternalConsts {
   static const profileUserKey = 'user_profile';
   static const aiApiUrl =
       'https://fyfutnuahjknmvdorkwa.supabase.co/functions/v1/generate-ai';
+  static const creditsKey = 'credits';
+
 
 }

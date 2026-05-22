@@ -27,7 +27,7 @@ class NoteTile extends ConsumerWidget {
           maxLines: 1,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-        subtitle:note.title.isEmpty ? null: Text(note.content, maxLines: 1),
+        subtitle: note.title.isEmpty ? null : Text(note.content, maxLines: 1),
         trailing: Skeleton.ignore(
           child: isSelected
               ? const Icon(Icons.check_circle_outline_rounded, size: 30)
@@ -42,6 +42,7 @@ class NoteTile extends ConsumerWidget {
             return;
           }
 
+          
           context.pushTo(NoteEditorScreen(note: note));
         },
       ),
