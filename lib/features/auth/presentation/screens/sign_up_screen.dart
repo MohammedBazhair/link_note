@@ -1,8 +1,6 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
@@ -11,6 +9,7 @@ import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 import '../widgets/auth_button.dart';
+import '../widgets/auth_switcher_text.dart';
 import '../widgets/custom_email_field.dart';
 import '../widgets/custom_fullname_field.dart';
 import '../widgets/custom_password_field.dart';
@@ -161,33 +160,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
                             const SizedBox(height: 35),
 
-                            // زر إنشاء الحساب
                             AuthButton(text: 'إنشاء حساب', onPressed: onSubmit),
 
                             const SizedBox(height: 15),
 
-                            // العودة لتسجيل الدخول
-                            RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                text: 'لديك حساب بالفعل؟',
-                                children: [
-                                  const TextSpan(text: '  '),
-                                  TextSpan(
-                                    text: 'سجل الدخول',
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        context.pushReplacementTo(
-                                          const SignInScreen(),
-                                        );
-                                      },
-                                    style: const TextStyle(
-                                      color: Color(0xFF00FFFF),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            AuthSwitcherText(
+                              text: 'لديك حساب بالفعل؟',
+                              actionText: 'سجل الدخول',
+                              builder: (_) => const SignInScreen(),
                             ),
                           ],
                         ),

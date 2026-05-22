@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/features/database/local/cache_service.dart';
@@ -85,9 +86,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         storageBucket: ExternalConsts.imagesBucket,
       );
       return profileEntity.copyWith(avatarUrl: avatarUrl);
-    } catch (e) {
-      debugPrint(e.toString());
-
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
       rethrow;
     }
   }

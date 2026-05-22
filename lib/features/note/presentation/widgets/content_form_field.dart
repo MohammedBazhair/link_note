@@ -75,6 +75,7 @@ class _CounterWithAiAction extends StatelessWidget {
               noteAiNotiferProvider.select((s) => s.isContentProcessing),
             );
             return AiActionButton(
+              tooltip: 'تحسين المحتوى عبر AI',
               isProcessing: isProcessing,
               onPressed: () async {
                 final note = ref.watch(editorFormProvider).note;

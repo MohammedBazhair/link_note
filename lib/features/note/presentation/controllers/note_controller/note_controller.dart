@@ -22,7 +22,7 @@ class NoteController extends StreamNotifier<List<Note>> {
   }
 
   Future<void> _getAllNotes() async {
-    final notes = await _notesRepository.getAll();
+    final notes = await _notesRepository.getAll(_userId);
     state = AsyncData(notes);
   }
 

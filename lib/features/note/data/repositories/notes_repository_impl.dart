@@ -1,8 +1,6 @@
 // ignore_for_file: unawaited_futures
 
 import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
@@ -50,7 +48,16 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<List<Note>> getAll() => _local.readNotes(includeDeleted: false);
+  Future<List<Note>> getAll(String? userId) {
+    final ownerId =
+        userId ?? _cache.getString(key: ExternalConsts.lastUserIdKey);
+
+    if (ownerId?.isEmpty ?? true) {
+      return Future.value([]);
+    }
+
+    return _local.readNotes(ownerId: ownerId!, includeDeleted: false);
+  }
 
   @override
   Future<void> update(Note note) async {
@@ -91,25 +98,26 @@ class NotesRepositoryImpl implements NotesRepository {
 
   @override
   Stream<List<Note>> fetchNotesRealTime(String? userId) async* {
-    final localStream = _mapStreamToNotes(_local.fetchNotesRealTime());
+    final ownerId =
+        userId ?? _cache.getString(key: ExternalConsts.lastUserIdKey);
+
+    final hasOwnerId = ownerId?.isNotEmpty ?? false;
+
+    final localStream = hasOwnerId
+        ? _mapStreamToNotes(_local.fetchNotesRealTime(ownerId!))
+        : Stream.value(<Note>[]);
 
     // If no user id provided, fallback to local stream only.
-    if (userId == null || userId.isEmpty) {
+    if (ownerId?.isEmpty ?? true) {
       yield* localStream;
       return;
     }
 
-    final remoteStream = _mapStreamToNotes(_remote.fetchNotesRealTime(userId));
+    final remoteStream = _mapStreamToNotes(
+      _remote.fetchNotesRealTime(ownerId!),
+    );
 
-    // Safely check network availability. If the connectivity check fails
-    // for any reason, fall back to the local stream instead of throwing.
-    bool hasConnection = false;
-    try {
-      hasConnection = await _network.hasConnection();
-    } catch (e) {
-      debugPrint('Connectivity check failed: $e');
-      hasConnection = false;
-    }
+    final hasConnection = await _network.hasConnection();
 
     yield* (hasConnection ? remoteStream : localStream);
   }

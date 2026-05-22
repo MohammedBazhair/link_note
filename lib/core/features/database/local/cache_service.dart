@@ -35,7 +35,7 @@ class LocalCacheServiceImpl implements LocalCacheService {
   }
 
   @override
-String? getString({required String key})  {
+  String? getString({required String key}) {
     return _prefs.getString(key);
   }
 
@@ -45,7 +45,7 @@ String? getString({required String key})  {
   }
 
   @override
-  bool? getBool({required String key})  {
+  bool? getBool({required String key}) {
     return _prefs.getBool(key);
   }
 
@@ -55,7 +55,7 @@ String? getString({required String key})  {
   }
 
   @override
-  int? getInt({required String key})  {
+  int? getInt({required String key}) {
     return _prefs.getInt(key);
   }
 
@@ -68,7 +68,7 @@ String? getString({required String key})  {
   }
 
   @override
-  List<String>? getStringList({required String key})  {
+  List<String>? getStringList({required String key}) {
     return _prefs.getStringList(key);
   }
 

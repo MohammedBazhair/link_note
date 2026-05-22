@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/features/network/connectivity_service.dart';
 import '../../../../../core/presentation/providers/core_providers.dart';
 import '../../../domain/repositories/sync_note_repository.dart';
@@ -11,12 +14,20 @@ class SyncNotesController extends Notifier<bool> {
 
   @override
   bool build() {
-    final listen = _network.listenToConnectionChanges((status) async {
-      final hasConnection = await _network.hasConnection();
-      if (hasConnection) {
-        await syncNotes();
-      }
-    });
+    final listen = _network.onStatusChanged().listen(
+      (hasConnection) {
+        Logger.log(
+          message:
+              'Network status changed: ${hasConnection ? 'Connected' : 'Disconnected'}',
+        );
+        if (hasConnection) {
+          syncNotes();
+        }
+      },
+      onError: (e) {
+        Logger.log(message: 'Error listening to network changes: $e');
+      },
+    );
 
     ref.onDispose(listen.cancel);
     return false;

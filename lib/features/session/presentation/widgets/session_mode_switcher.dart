@@ -26,7 +26,7 @@ class SessionModeSwitcher extends StatelessWidget {
         children: SessionMode.values.map((m) {
           final selected = m == mode;
           return Expanded(
-            child: GestureDetector(
+            child: InkWell(
               onTap: () => onChanged(m),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 400),

@@ -14,9 +14,12 @@ import '../../domain/entities/note.dart';
 abstract interface class NotesLocalDataSource {
   Future<int> createNote({required Note note, bool skipLocalTracking = false});
   Future<void> insertNotes(Iterable<Note> notes);
-  Future<List<Note>> readNotes({bool includeDeleted = true});
+  Future<List<Note>> readNotes({
+    bool includeDeleted = true,
+    required String ownerId,
+  });
   Future<Note?> getNoteById(String id);
-  Stream<RowList> fetchNotesRealTime();
+  Stream<RowList> fetchNotesRealTime(String ownerId);
   Future<void> updateNote({required Note note, bool skipLocalTracking = false});
   Future<void> deleteNote({required String id, bool skipLocalTracking = false});
 }
@@ -53,15 +56,21 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
   }
 
   @override
-  Future<List<Note>> readNotes({bool includeDeleted = true}) async {
+  Future<List<Note>> readNotes({
+    bool includeDeleted = true,
+    required String ownerId,
+  }) async {
     try {
-      final where = includeDeleted ? null : 'is_deleted = 0';
+      final where = includeDeleted
+          ? 'owner_id = ?'
+          : 'owner_id = ? AND is_deleted = 0';
       const orderBy = 'updated_at DESC';
 
       final mapList = await _db.readRows(
         table: _notesTable,
         orderBy: orderBy,
         where: where,
+        whereArgs: [ownerId],
       );
       return mapList.map(Note.fromMap).toList();
     } catch (e) {
@@ -119,8 +128,12 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
   }
 
   @override
-  Stream<RowList> fetchNotesRealTime() {
-    return _db.readRowsRealTime(table: _notesTable);
+  Stream<RowList> fetchNotesRealTime(String ownerId) {
+    return _db.readRowsRealTime(
+      table: _notesTable,
+      where:  'owner_id = ?',
+      whereArgs:  [ownerId],
+    );
   }
 
   @override

@@ -82,6 +82,9 @@ class NoteFormHeader extends ConsumerWidget {
                 await context.pushTo(GenerateQrCodeScreen(data: qrData));
 
               case NotePopupAction.qrScanner:
+                if (Platform.isWindows) {
+                  return context.showSnakbar('هذه الميزة لاتعمل على ويندوز');
+                }
                 final data = await context.pushTo<String?>(
                   const ScannerQrCodeScreen(),
                 );

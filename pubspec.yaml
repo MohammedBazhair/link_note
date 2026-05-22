@@ -42,7 +42,7 @@ dependencies:
   file_picker: ^10.3.10
   path_provider: ^2.1.5
   equatable: ^2.0.8
-  connectivity_plus: ^7.1.1
+  internet_connection_checker_plus: ^3.0.0
   mocktail: ^1.0.5
 
 dev_dependencies:

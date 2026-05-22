@@ -41,15 +41,16 @@ class TitleFormField extends StatelessWidget {
             : Consumer(
                 builder: (_, ref, __) {
                   final aiController = ref.read(noteAiNotiferProvider.notifier);
-                  final note = ref.watch(editorFormProvider).note;
 
                   final isProcessing = ref.watch(
                     noteAiNotiferProvider.select((s) => s.isTitleProcessing),
                   );
 
                   return AiActionButton(
+                    tooltip: 'تحسين العنوان عبر AI',
                     isProcessing: isProcessing,
                     onPressed: () async {
+                      final note = ref.read(editorFormProvider).note;
                       final title = await aiController.improveTitle(note);
                       controller.text = title;
                       onChanged?.call(title);

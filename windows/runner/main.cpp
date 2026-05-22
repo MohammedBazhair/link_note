@@ -27,7 +27,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   // تحقق إن كان التطبيق مفتوح بالفعل
-  HWND hwnd = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"link_note");
+  HWND hwnd = ::FindWindow(L"FLUTTER_RUNNER_WIN32_WINDOW", L"Link Note");
   if (hwnd != NULL)
   {
     // أرسل الرابط للتطبيق المفتوح
@@ -44,7 +44,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"link_note", origin, size)) {
+  if (!window.Create(L"Link Note", origin, size))
+  {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

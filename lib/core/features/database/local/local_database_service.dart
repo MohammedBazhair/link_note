@@ -28,7 +28,12 @@ abstract interface class LocalDatabaseService {
     List<Object?>? whereArgs,
   });
 
-  Stream<RowList> readRowsRealTime({required String table});
+  Stream<RowList> readRowsRealTime({
+    required String table,
+    String? orderBy,
+    String? where,
+    List<Object?>? whereArgs,
+  });
 
   Future<int> update({
     required Map<String, dynamic> updated,
@@ -135,8 +140,18 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
   }
 
   @override
-  Stream<RowList> readRowsRealTime({required String table}) {
-    final future = readRows(table: table);
+  Stream<RowList> readRowsRealTime({
+    required String table,
+    String? orderBy,
+    String? where,
+    List<Object?>? whereArgs,
+  }) {
+    final future = readRows(
+      table: table,
+      orderBy: orderBy,
+      where: where,
+      whereArgs: whereArgs,
+    );
     return Stream.fromFuture(future);
   }
 

@@ -1,8 +1,8 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,7 +24,7 @@ import '../../features/network/network_clinet.dart';
 import '../../features/sync/sync_local_data_source.dart';
 
 final networkProvider = Provider((_) {
-  final _connection= Connectivity();
+  final _connection= InternetConnection();
   return ConnectivityServiceImpl(_connection);
 });
 

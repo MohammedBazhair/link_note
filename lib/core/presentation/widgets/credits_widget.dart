@@ -47,7 +47,6 @@ class _CreditsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 20,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: DarkColors.primary.withOpacity(0.15),
