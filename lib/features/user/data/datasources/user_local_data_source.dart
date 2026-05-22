@@ -1,5 +1,5 @@
 import '../../../../core/constants/external_constants/external_constants.dart';
-import '../../../../core/features/database/local/cache_service.dart';
+import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../domain/entities/profile.dart';
 import '../models/profile_model.dart';
 
@@ -11,7 +11,7 @@ abstract interface class UserLocalDataSource {
 class UserLocalDataSourceImpl implements UserLocalDataSource {
   UserLocalDataSourceImpl(this._cacheService);
 
-  final LocalCacheService _cacheService;
+  final SecureCacheService _cacheService;
 
   @override
   Future<void> saveProfile(ProfileEntity profile) async {
@@ -24,7 +24,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<ProfileEntity> readProfile() async {
-    final raw = _cacheService.getString(key: ExternalConsts.profileUserKey);
+    final raw = await _cacheService.getString(key: ExternalConsts.profileUserKey);
     if (raw == null) return ProfileEntity.guest();
 
     final model = ProfileModel.fromJson(raw);

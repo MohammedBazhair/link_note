@@ -6,7 +6,7 @@ import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/result.dart';
-import '../../../../core/features/database/local/cache_service.dart';
+import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../../../core/features/database/remote/remote_storage_service.dart';
 import '../../domain/entities/profile.dart';
@@ -40,7 +40,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   final SupabaseClient _client;
   final RemoteDatabaseService _remoteDatabase;
   final RemoteStorageService _remoteStorage;
-  final LocalCacheService _locaCache;
+  final SecureCacheService _locaCache;
 
   @override
   Future<void> createProfile(ProfileEntity profile) {
@@ -158,9 +158,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   Future<Result<int>> readCredits() async {
-    const creditsKey = 'Credits';
     try {
-      // if()
       final userId = _client.auth.currentUser?.id;
       if (userId == null) {
         throw const UserNotLoggedInException(
@@ -176,11 +174,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       final credits = (map['credits'] as int);
 
-      await _locaCache.setInt(key: creditsKey, value: credits);
       return Result.ok(credits);
     } on ClientException catch (_) {
-      final credits = _locaCache.getInt(key: creditsKey);
-      if (credits != null) return Result.ok(credits);
       rethrow;
     } on UserNotLoggedInException catch (_) {
       rethrow;

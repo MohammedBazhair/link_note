@@ -1,6 +1,6 @@
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
-import '../../../../core/features/database/local/cache_service.dart';
+import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../../../core/features/network/connectivity_service.dart';
 import '../../../../core/features/sync/sync_change_model.dart';
 import '../../../../core/features/sync/sync_local_data_source.dart';
@@ -19,7 +19,7 @@ class SyncNoteRepositoryImpl implements SyncNoteRepository {
     this._remoteNotes,
   );
 
-  final LocalCacheService _localCache;
+  final SecureCacheService _localCache;
   final ConnectivityService _connectivity;
   final SyncLocalDataSource _sync;
   final NotesLocalDataSource _localNotes;
@@ -28,7 +28,7 @@ class SyncNoteRepositoryImpl implements SyncNoteRepository {
   @override
   Future<void> syncAllNotes([String? userId]) async {
     final selectedUserId =
-        userId ?? _localCache.getString(key: ExternalConsts.lastUserIdKey);
+        userId ??await _localCache.getString(key: ExternalConsts.lastUserIdKey);
 
     if (selectedUserId == null) return;
     if (!await _connectivity.hasConnection()) return;

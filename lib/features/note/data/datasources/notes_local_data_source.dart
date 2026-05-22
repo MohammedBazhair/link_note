@@ -5,7 +5,6 @@ import 'dart:async';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
-import '../../../../core/features/database/local/cache_service.dart';
 import '../../../../core/features/database/local/local_database_service.dart';
 import '../../../../core/features/sync/sync_change_model.dart';
 import '../../../../core/features/sync/sync_local_data_source.dart';
@@ -25,9 +24,8 @@ abstract interface class NotesLocalDataSource {
 }
 
 class NotesLocalDataSourceImpl implements NotesLocalDataSource {
-  NotesLocalDataSourceImpl(this._db, this._cache, this._syncLocal);
+  NotesLocalDataSourceImpl(this._db, this._syncLocal);
   final LocalDatabaseService _db;
-  final LocalCacheService _cache;
   final SyncLocalDataSource _syncLocal;
 
   final _notesTable = ExternalConsts.notesTable;
@@ -131,8 +129,8 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
   Stream<RowList> fetchNotesRealTime(String ownerId) {
     return _db.readRowsRealTime(
       table: _notesTable,
-      where:  'owner_id = ?',
-      whereArgs:  [ownerId],
+      where: 'owner_id = ?',
+      whereArgs: [ownerId],
     );
   }
 

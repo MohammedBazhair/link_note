@@ -11,6 +11,7 @@ import '../../domain/entities/note.dart';
 import '../../domain/entities/note_popup_action.dart';
 import '../controllers/note_providers.dart';
 import 'content_form_field.dart';
+import 'save_note_button.dart';
 import 'title_form_field.dart';
 
 class EditorForm extends ConsumerWidget {
@@ -54,18 +55,22 @@ class NoteFormHeader extends ConsumerWidget {
 
     return AppBar(
       actions: [
-        const CreditsWidget(),
-        const SizedBox(width: 10),
-        const IconButton(
-          onPressed: null,
-          icon: Icon(Icons.redo_rounded, textDirection: TextDirection.ltr),
-          tooltip: 'إعادة',
-        ),
         const IconButton(
           onPressed: null,
           icon: Icon(Icons.undo_rounded, textDirection: TextDirection.ltr),
           tooltip: 'تراجع',
         ),
+        const SizedBox(width: 4),
+        const IconButton(
+          onPressed: null,
+          icon: Icon(Icons.redo_rounded, textDirection: TextDirection.ltr),
+          tooltip: 'إعادة',
+        ),
+        const SizedBox(width: 8),
+        const SaveNoteButton(),
+        const SizedBox(width: 8),
+        const CreditsWidget(),
+        const SizedBox(width: 8),
         PopupMenuButton<NotePopupAction>(
           onSelected: (action) async {
             switch (action) {

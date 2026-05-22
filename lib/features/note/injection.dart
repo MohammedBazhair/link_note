@@ -20,34 +20,33 @@ final notesRemoteDataSourceProvider = Provider((ref) {
 });
 
 final notesLocalDataSourceProvider = Provider<NotesLocalDataSource>((ref) {
-  final localCacheService = ref.read(localCacheServiceProvider);
   final localDatabase = ref.read(localDatabaseProvider);
   final syncLocal = ref.read(syncLocalProvider);
 
-  return NotesLocalDataSourceImpl(localDatabase, localCacheService, syncLocal);
+  return NotesLocalDataSourceImpl(localDatabase, syncLocal);
 });
 
 final notesRepositoryProvider = Provider<NotesRepository>((ref) {
   final localDataSource = ref.read(notesLocalDataSourceProvider);
   final remote = ref.read(notesRemoteDataSourceProvider);
   final network = ref.read(networkProvider);
-  final localCacheService = ref.read(localCacheServiceProvider);
+  final _cache = ref.read(secureCacheServiceProvider);
   return NotesRepositoryImpl(
     remote,
     localDataSource,
     network,
-    localCacheService,
+    _cache,
   );
 });
 
 final syncNotesRepositoryProvider = Provider<SyncNoteRepository>((ref) {
-  final _localCache = ref.read(localCacheServiceProvider);
+  final _cache = ref.read(secureCacheServiceProvider);
   final _sync = ref.read(syncLocalProvider);
   final _connectivity = ref.read(networkProvider);
   final _localNotes = ref.read(notesLocalDataSourceProvider);
   final _remoteNotes = ref.read(notesRemoteDataSourceProvider);
   return SyncNoteRepositoryImpl(
-    _localCache,
+    _cache,
     _sync,
     _connectivity,
     _localNotes,

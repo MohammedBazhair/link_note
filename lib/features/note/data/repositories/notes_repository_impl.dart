@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
-import '../../../../core/features/database/local/cache_service.dart';
+import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../../../core/features/network/connectivity_service.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
@@ -17,14 +17,15 @@ class NotesRepositoryImpl implements NotesRepository {
   final NotesRemoteDataSource _remote;
   final NotesLocalDataSource _local;
   final ConnectivityService _network;
-  final LocalCacheService _cache;
+  final SecureCacheService _cache;
 
   @override
   Future<Note?> create(Note note) async {
     try {
       final now = DateTime.now().toUtc();
       final userId =
-          note.ownerId ?? _cache.getString(key: ExternalConsts.lastUserIdKey);
+          note.ownerId ??
+          await _cache.getString(key: ExternalConsts.lastUserIdKey);
 
       final newNote = note.copyWith(
         id: note.id ?? const Uuid().v4(),
@@ -48,9 +49,9 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<List<Note>> getAll(String? userId) {
+  Future<List<Note>> getAll(String? userId) async {
     final ownerId =
-        userId ?? _cache.getString(key: ExternalConsts.lastUserIdKey);
+        userId ?? await _cache.getString(key: ExternalConsts.lastUserIdKey);
 
     if (ownerId?.isEmpty ?? true) {
       return Future.value([]);
@@ -99,7 +100,7 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Stream<List<Note>> fetchNotesRealTime(String? userId) async* {
     final ownerId =
-        userId ?? _cache.getString(key: ExternalConsts.lastUserIdKey);
+        userId ?? await _cache.getString(key: ExternalConsts.lastUserIdKey);
 
     final hasOwnerId = ownerId?.isNotEmpty ?? false;
 
@@ -108,14 +109,12 @@ class NotesRepositoryImpl implements NotesRepository {
         : Stream.value(<Note>[]);
 
     // If no user id provided, fallback to local stream only.
-    if (ownerId?.isEmpty ?? true) {
+    if (!hasOwnerId) {
       yield* localStream;
       return;
     }
 
-    final remoteStream = _mapStreamToNotes(
-      _remote.fetchNotesRealTime(ownerId!),
-    );
+    final remoteStream = _mapStreamToNotes(_remote.fetchNotesRealTime(ownerId!));
 
     final hasConnection = await _network.hasConnection();
 

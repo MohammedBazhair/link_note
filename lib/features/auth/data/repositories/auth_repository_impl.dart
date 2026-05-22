@@ -5,7 +5,7 @@ import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/result.dart';
-import '../../../../core/features/database/local/cache_service.dart';
+import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../../../core/features/network/connectivity_service.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -15,7 +15,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._remote, this._networkService, this._cache);
   final AuthRemoteDataSource _remote;
   final ConnectivityService _networkService;
-  final LocalCacheService _cache;
+  final SecureCacheService _cache;
 
   @override
   Future<String?> signUp(UserEntity user) async {
