@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/credits_widget.dart';
-import '../../../qr_code/domain/entities/qr_data.dart';
 import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../domain/entities/note.dart';
@@ -19,24 +18,22 @@ class EditorForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final formState = ref.read(editorFormProvider);
+    final controller = ref.read(editorFormControllerProvider.notifier);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Form(
-        key: formState.formKey,
+        key: controller.formKey,
 
         child: Column(
           spacing: 24,
           children: [
             TitleFormField(
-              controller: formState.titleController,
-              onChanged: (value) => formState.markedChanges(),
+              controller: controller.titleController,
             ),
 
             Expanded(
               child: ContentFormField(
-                controller: formState.contentController,
-                onChanged: (value) => formState.markedChanges(),
+                controller: controller.contentController,
               ),
             ),
           ],
@@ -51,7 +48,7 @@ class NoteFormHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final formState = ref.read(editorFormProvider);
+    final controller = ref.read(editorFormControllerProvider.notifier);
 
     return AppBar(
       actions: [
@@ -78,11 +75,7 @@ class NoteFormHeader extends ConsumerWidget {
                 if (Platform.isWindows) {
                   return context.showSnakbar('هذه الميزة لاتعمل على ويندوز');
                 }
-                final note = formState.note;
-                final qrData = QrData(
-                  name: note.title,
-                  qrCodeRaw: note.toJson(),
-                );
+                final qrData = controller.generateQrData();
 
                 await context.pushTo(GenerateQrCodeScreen(data: qrData));
 
@@ -95,16 +88,12 @@ class NoteFormHeader extends ConsumerWidget {
                 );
                 if (data == null) return;
                 final note = Note.fromJson(data);
-                formState.initForm(note);
-                formState.markedChanges();
+                controller.initForm(note);
               case NotePopupAction.deleteNote:
-                final note = formState.note;
-                if (note.id == null) return context.pop();
+                final isDeleted =await controller.deleteNote();
+                if (isDeleted) return context.pop();
 
-                await ref
-                    .read(noteControllerProvider.notifier)
-                    .deleteNote(note);
-                context.pop();
+               
             }
           },
           itemBuilder: (context) => NotePopupAction.values

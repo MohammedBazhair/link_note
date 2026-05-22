@@ -6,14 +6,14 @@ import '../controllers/note_providers.dart';
 import 'ai_action_button.dart';
 
 class ContentFormField extends StatelessWidget {
-  const ContentFormField({
+  const ContentFormField( {
     super.key,
     required this.controller,
-    required this.onChanged,
     this.readOnly = false,
+    this.onChanged
   });
   final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final VoidCallback? onChanged;
   final bool readOnly;
 
   @override
@@ -38,7 +38,6 @@ class ContentFormField extends StatelessWidget {
               filled: false,
               contentPadding: EdgeInsets.zero,
             ),
-            onChanged: onChanged,
             validator: (value) {
               if (value?.isEmpty ?? true) {
                 return "Field Can't be Empty";
@@ -47,7 +46,7 @@ class ContentFormField extends StatelessWidget {
             },
           ),
         ),
-        _CounterWithAiAction(controller: controller, onChanged: onChanged),
+        _CounterWithAiAction(controller: controller),
       ],
     );
   }
@@ -56,11 +55,9 @@ class ContentFormField extends StatelessWidget {
 class _CounterWithAiAction extends StatelessWidget {
   const _CounterWithAiAction({
     required this.controller,
-    required this.onChanged,
   });
 
   final TextEditingController controller;
-  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +75,12 @@ class _CounterWithAiAction extends StatelessWidget {
               tooltip: 'تحسين المحتوى عبر AI',
               isProcessing: isProcessing,
               onPressed: () async {
-                final note = ref.watch(editorFormProvider).note;
-
+                final note = ref.read(
+                  editorFormControllerProvider.select((s) => s.note),
+                );
+                if (note == null) return;
                 final content = await aiController.improveContent(note);
                 controller.text = content;
-                onChanged(content);
               },
             );
           },

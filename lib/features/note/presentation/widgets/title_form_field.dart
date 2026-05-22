@@ -7,11 +7,9 @@ class TitleFormField extends StatelessWidget {
   const TitleFormField({
     super.key,
     required this.controller,
-    this.onChanged,
     this.readOnly = false,
   });
   final TextEditingController controller;
-  final ValueChanged<String>? onChanged;
   final bool readOnly;
 
   @override
@@ -50,16 +48,17 @@ class TitleFormField extends StatelessWidget {
                     tooltip: 'تحسين العنوان عبر AI',
                     isProcessing: isProcessing,
                     onPressed: () async {
-                      final note = ref.read(editorFormProvider).note;
+                      final note = ref.read(editorFormControllerProvider.select((s)=>s.note));
+                      if(note == null) return;
+
                       final title = await aiController.improveTitle(note);
+
                       controller.text = title;
-                      onChanged?.call(title);
                     },
                   );
                 },
               ),
       ),
-      onChanged: onChanged,
     );
   }
 }

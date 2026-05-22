@@ -20,23 +20,23 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(editorFormProvider).initForm(widget.note);
+    ref.read(editorFormControllerProvider.notifier).initForm(widget.note);
   }
 
-  GlobalKey<FormState> get formKey => ref.read(editorFormProvider).formKey;
+  GlobalKey<FormState> get formKey => ref.read(editorFormControllerProvider.notifier).formKey;
 
   bool get isFormValid => formKey.currentState?.validate() ?? false;
 
   Future<void> onSubmit() async {
     if (!isFormValid) return;
     final noteController = ref.read(noteControllerProvider.notifier);
-    final editorState = ref.read(editorFormProvider);
+    final editorController = ref.read(editorFormControllerProvider.notifier);
 
     final note = Note(
       id: widget.note?.id,
       ownerId: widget.note?.ownerId,
-      title: editorState.titleController.text,
-      content: editorState.contentController.text,
+      title: editorController.titleController.text,
+      content: editorController.contentController.text,
       updatedAt: DateTime.now().toUtc(),
     );
 
@@ -49,7 +49,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   }
 
   Future<void> onPopInvoke() async {
-    final anyChanges = ref.read(editorFormProvider).hasChanges;
+    final anyChanges = ref.read(editorFormControllerProvider).hasChanges;
     if (!isFormValid || !anyChanges) return context.pop();
 
     final isWantToSave = await showDialog<bool?>(

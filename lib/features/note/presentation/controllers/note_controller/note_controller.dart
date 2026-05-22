@@ -45,13 +45,10 @@ class NoteController extends StreamNotifier<List<Note>> {
   }
 
   Future<void> deleteNote(Note note) async {
-    try {
       if (note.id == null) return;
       await _notesRepository.delete(note);
       await _getAllNotes();
-    } catch (e, st) {
-      Logger.log(error: e, stackTrace: st);
-    }
+   
   }
 
   Stream<Note?> fetchSingleNoteRealtime(String noteId) {

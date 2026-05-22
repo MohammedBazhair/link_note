@@ -26,11 +26,14 @@ class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
     _updateDebounceTimer?.cancel();
     _updateDebounceTimer = Timer(
       const Duration(seconds: 2),
-      () => ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote),
+      () {
+        if(currentEditedNote == null) return;
+        ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote!);
+      },
     );
   }
 
-  Note get currentEditedNote => ref.read(editorFormProvider).note;
+  Note? get currentEditedNote => ref.read(editorFormControllerProvider).note;
 
   @override
   void dispose() {
@@ -70,7 +73,7 @@ class SessionNoteForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final formState = ref.watch(editorFormProvider);
+    final controller = ref.read(editorFormControllerProvider.notifier);
     final isHost = ref.watch(
       sessionControllerProvider.select((s) => s.currentMember?.isHost ?? false),
     );
@@ -79,16 +82,15 @@ class SessionNoteForm extends ConsumerWidget {
       spacing: 16,
       children: [
         TitleFormField(
-          controller: formState.titleController,
+          controller: controller.titleController,
           readOnly: !isHost,
-          onChanged: (_) => onNoteChanged?.call(),
         ),
 
         Expanded(
           child: ContentFormField(
-            controller: formState.contentController,
+            controller: controller.contentController,
             readOnly: !isHost,
-            onChanged: (_) => onNoteChanged?.call(),
+            onChanged: () => onNoteChanged?.call(),
           ),
         ),
       ],

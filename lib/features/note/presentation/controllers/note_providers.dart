@@ -1,15 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
 import '../../data/repositories/note_ai_repository_impl.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/selectable_note.dart';
 import '../../injection.dart';
+import 'editor_form_controller/editor_form_controller.dart';
+import 'editor_form_controller/editor_form_state.dart';
 import 'note_ai_controller/note_ai_controller.dart';
 import 'note_ai_controller/note_ai_state.dart';
 import 'note_controller/note_controller.dart';
-import 'note_controller/note_form_state.dart';
 import 'note_controller/sync_notes_controller.dart';
 
 final noteControllerProvider =
@@ -29,13 +31,10 @@ final noteAiNotiferProvider =
       return controller;
     });
 
-final editorFormProvider = StateProvider((ref) {
-  final state = EditorFormState();
-
-  ref.onDispose(state.dispose);
-
-  return state;
-});
+final editorFormControllerProvider =
+    NotifierProvider<EditorFormController, EditorFormState>(() {
+      return EditorFormController();
+    });
 
 final isInNotesListScreen = StateProvider.autoDispose((_) => false);
 
@@ -46,7 +45,7 @@ final singleNoteStreamProvider = StreamProvider.family
 
       final subscription = stream.listen((note) {
         if (note != null) {
-          ref.read(editorFormProvider).syncWith(note);
+          ref.read(editorFormControllerProvider.notifier).syncWith(note);
         }
       });
 

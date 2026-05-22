@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import '../../../../core/constants/colors/colors.dart';
-
-// TODO: Completed Logic of this button to enable it only when there are changes and show a loading state when saving
-final hasChangesProvider = StateProvider.autoDispose<bool>((_) => false);
+import '../controllers/note_providers.dart';
 
 class SaveNoteButton extends ConsumerWidget {
   const SaveNoteButton({super.key});
 
   @override
   Widget build(BuildContext context, ref) {
-    final hasChanges = ref.watch(hasChangesProvider);
+    final hasChanges = ref.watch(
+      editorFormControllerProvider.select((s) => s.hasChanges),
+    );
 
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF1E2230),
-        foregroundColor: hasChanges ? DarkColors.secondFont : Colors.white,
+        backgroundColor: DarkColors.primary.withOpacity(0.15),
+        foregroundColor: hasChanges ? Colors.white : DarkColors.secondFont,
         textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
         padding: const EdgeInsets.symmetric(horizontal: 15),
         fixedSize: const Size.fromHeight(20),
