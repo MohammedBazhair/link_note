@@ -3,19 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/note_providers.dart';
 import 'ai_action_button.dart';
 
-class TitleFormField extends StatelessWidget {
-  const TitleFormField({
-    super.key,
-    required this.controller,
-    this.readOnly = false,
-  });
-  final TextEditingController controller;
+class TitleFormField extends ConsumerWidget {
+  const TitleFormField({super.key, this.readOnly = false});
   final bool readOnly;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final titleController = ref.watch(noteFormProvider).title;
     return TextFormField(
-      controller: controller,
+      controller: titleController,
       readOnly: readOnly,
       textInputAction: TextInputAction.newline,
       minLines: 1,
@@ -48,12 +44,14 @@ class TitleFormField extends StatelessWidget {
                     tooltip: 'تحسين العنوان عبر AI',
                     isProcessing: isProcessing,
                     onPressed: () async {
-                      final note = ref.read(editorFormControllerProvider.select((s)=>s.note));
-                      if(note == null) return;
+                      final note = ref.read(
+                        editorFormControllerProvider.select((s) => s.note),
+                      );
+                      if (note == null) return;
 
                       final title = await aiController.improveTitle(note);
 
-                      controller.text = title;
+                      titleController.text = title;
                     },
                   );
                 },

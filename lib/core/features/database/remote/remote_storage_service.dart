@@ -1,10 +1,8 @@
 import 'dart:io';
-
 import 'package:path/path.dart' as p;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../utils.dart';
-
+import '../../../services/cipher_service.dart';
 
 abstract interface class RemoteStorageService {
   String getUrlFrom({required String path, required String storageBucket});

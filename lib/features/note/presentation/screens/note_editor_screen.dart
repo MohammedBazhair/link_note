@@ -25,21 +25,20 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
     });
   }
 
-  GlobalKey<FormState> get formKey =>
-      ref.read(editorFormControllerProvider.notifier).formKey;
+  GlobalKey<FormState> get formKey => ref.watch(noteFormProvider).formKey;
 
   bool get isFormValid => formKey.currentState?.validate() ?? false;
 
   Future<void> onSubmit() async {
     if (!isFormValid) return;
     final noteController = ref.read(noteControllerProvider.notifier);
-    final editorController = ref.read(editorFormControllerProvider.notifier);
+    final form = ref.read(noteFormProvider);
 
     final note = Note(
       id: widget.note?.id,
       ownerId: widget.note?.ownerId,
-      title: editorController.titleController.text,
-      content: editorController.contentController.text,
+      title: form.title.text,
+      content:form.content.text,
       updatedAt: DateTime.now().toUtc(),
     );
 

@@ -5,24 +5,24 @@ import '../../../../core/constants/colors/colors.dart';
 import '../controllers/note_providers.dart';
 import 'ai_action_button.dart';
 
-class ContentFormField extends StatelessWidget {
+class ContentFormField extends ConsumerWidget {
   const ContentFormField( {
     super.key,
-    required this.controller,
     this.readOnly = false,
     this.onChanged
   });
-  final TextEditingController controller;
   final VoidCallback? onChanged;
   final bool readOnly;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,ref) {
+    final contentController = ref.watch(noteFormProvider).content;
+
     return Column(
       children: [
         Expanded(
           child: TextFormField(
-            controller: controller,
+            controller: contentController,
             maxLines: null,
             expands: true,
             readOnly: readOnly,
@@ -46,7 +46,7 @@ class ContentFormField extends StatelessWidget {
             },
           ),
         ),
-        _CounterWithAiAction(controller: controller),
+        _CounterWithAiAction(controller: contentController),
       ],
     );
   }

@@ -73,7 +73,6 @@ class SessionNoteForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final controller = ref.read(editorFormControllerProvider.notifier);
     final isHost = ref.watch(
       sessionControllerProvider.select((s) => s.currentMember?.isHost ?? false),
     );
@@ -82,13 +81,11 @@ class SessionNoteForm extends ConsumerWidget {
       spacing: 16,
       children: [
         TitleFormField(
-          controller: controller.titleController,
           readOnly: !isHost,
         ),
 
         Expanded(
           child: ContentFormField(
-            controller: controller.contentController,
             readOnly: !isHost,
             onChanged: () => onNoteChanged?.call(),
           ),

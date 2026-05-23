@@ -18,24 +18,18 @@ class EditorForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final controller = ref.read(editorFormControllerProvider.notifier);
+    final formKey = ref.watch(noteFormProvider).formKey;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Form(
-        key: controller.formKey,
+        key: formKey,
 
-        child: Column(
+        child: const Column(
           spacing: 24,
           children: [
-            TitleFormField(
-              controller: controller.titleController,
-            ),
+            TitleFormField(),
 
-            Expanded(
-              child: ContentFormField(
-                controller: controller.contentController,
-              ),
-            ),
+            Expanded(child: ContentFormField()),
           ],
         ),
       ),
@@ -90,10 +84,8 @@ class NoteFormHeader extends ConsumerWidget {
                 final note = Note.fromJson(data);
                 controller.initForm(note);
               case NotePopupAction.deleteNote:
-                final isDeleted =await controller.deleteNote();
+                final isDeleted = await controller.deleteNote();
                 if (isDeleted) return context.pop();
-
-               
             }
           },
           itemBuilder: (context) => NotePopupAction.values

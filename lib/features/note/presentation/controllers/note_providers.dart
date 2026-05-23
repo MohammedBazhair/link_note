@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -5,10 +6,12 @@ import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
 import '../../data/repositories/note_ai_repository_impl.dart';
 import '../../domain/entities/note.dart';
+import '../../domain/entities/note_controllers.dart';
 import '../../domain/entities/selectable_note.dart';
 import '../../injection.dart';
 import 'editor_form_controller/editor_form_controller.dart';
 import 'editor_form_controller/editor_form_state.dart';
+import 'editor_history_controller/editor_history_controller.dart';
 import 'note_ai_controller/note_ai_controller.dart';
 import 'note_ai_controller/note_ai_state.dart';
 import 'note_controller/note_controller.dart';
@@ -79,4 +82,30 @@ final getCreditsProvider = FutureProvider((ref) async {
   final result = await userDataSource.readCredits();
   if (result.value == null) return 0;
   return result.value!;
+});
+
+final editorHistoryControllerProvider =
+    NotifierProvider<EditorHistoryController, EditorHistoryState>(
+      EditorHistoryController.new,
+    );
+
+final noteFormProvider = Provider.autoDispose((ref) {
+  final formControllers = NoteFormControllers(
+    title: TextEditingController(),
+    content: TextEditingController(),
+    formKey: GlobalKey(),
+  );
+
+  final historyController = ref.read(editorHistoryControllerProvider.notifier);
+  void sync() {
+    historyController.edit(title: formControllers.title.text, content: formControllers.content.text);
+  }
+
+  formControllers.title.addListener(sync);
+
+  formControllers.content.addListener(sync);
+
+  ref.onDispose(() => formControllers.dispose(sync));
+
+  return formControllers;
 });
