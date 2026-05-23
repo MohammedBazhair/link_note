@@ -11,7 +11,6 @@ import 'data/repositories/sync_note_repository_impl.dart';
 import 'domain/repositories/note_ai_repository.dart';
 import 'domain/repositories/notes_repository.dart';
 import 'domain/repositories/sync_note_repository.dart';
-import 'presentation/controllers/note_ai_controller/note_ai_controller.dart';
 
 final notesRemoteDataSourceProvider = Provider((ref) {
   final remoteDatabaseService = ref.read(remoteDatabaseServiceProvider);
@@ -59,11 +58,6 @@ final noteAiRepositoryProvider = Provider<NoteAiRepository>((ref) {
   final userRemote = ref.watch(userRemoteDataSourceProvider);
 
   return NoteAiRepositoryImpl(aiClient, userRemote);
-});
-
-final noteAiControllerProvider = Provider<NoteAiController>((ref) {
-  final aiRepo = ref.read(noteAiRepositoryProvider);
-  return NoteAiController(aiRepo);
 });
 
 final aiClientProvider = Provider<AiClient>((ref) {

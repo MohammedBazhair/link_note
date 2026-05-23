@@ -44,9 +44,7 @@ class TitleFormField extends ConsumerWidget {
                     tooltip: 'تحسين العنوان عبر AI',
                     isProcessing: isProcessing,
                     onPressed: () async {
-                      final note = ref.read(
-                        editorFormControllerProvider.select((s) => s.note),
-                      );
+                      final note = ref.read(editorFormControllerProvider);
                       if (note == null) return;
 
                       final title = await aiController.improveTitle(note);

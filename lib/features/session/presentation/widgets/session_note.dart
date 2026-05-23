@@ -33,7 +33,7 @@ class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
     );
   }
 
-  Note? get currentEditedNote => ref.read(editorFormControllerProvider).note;
+  Note? get currentEditedNote => ref.read(editorFormControllerProvider);
 
   @override
   void dispose() {

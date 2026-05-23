@@ -1,50 +1,57 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../qr_code/domain/entities/qr_data.dart';
+import '../../../domain/entities/editor_content.dart';
 import '../../../domain/entities/note.dart';
 import '../../../domain/entities/note_controllers.dart';
 import '../note_providers.dart';
-import 'editor_form_state.dart';
 
-class EditorFormController extends Notifier<EditorFormState> {
+class EditorFormController extends Notifier<Note?> {
   @override
-  EditorFormState build() {
-    return EditorFormState();
-  }
+  Note? build() => null;
 
-  NoteFormControllers get form => ref.watch(noteFormProvider);
+  NoteFormControllers get form => ref.read(noteFormProvider);
 
   void initForm([Note? note]) {
     if (note == null) return _clearForm();
 
-    state = state.copyWith(note: note);
+    state = note.copyWith();
     form.title.text = note.title;
     form.content.text = note.content;
+
+    final editorContent = EditorContent(
+      title: note.title,
+      content: note.content,
+    );
+    
+    ref
+        .read(editorHistoryControllerProvider.notifier)
+        .initContent(editorContent);
   }
 
   void _clearForm() {
     form.clearControllers();
-    state = EditorFormState();
+    state = null;
   }
 
   void syncWith(Note note) {
-    if (state.note?.updatedAt == note.updatedAt) return;
+    if (state?.updatedAt == note.updatedAt) return;
 
-    state = state.copyWith(note: note);
+    state = note;
     form.syncWith(note);
   }
 
   QrData generateQrData() {
-    if (state.note == null) throw Exception('No note to generate QR data from');
+    if (state == null) throw Exception('No note to generate QR data from');
 
-    return QrData(name: state.note!.title, qrCodeRaw: state.note!.toJson());
+    return QrData(name: state!.title, qrCodeRaw: state!.toJson());
   }
 
   Future<bool> deleteNote() async {
     try {
-      if (state.note == null) throw Exception('No note to delete');
+      if (state == null) throw Exception('No note to delete');
 
-      await ref.read(noteControllerProvider.notifier).deleteNote(state.note!);
+      await ref.read(noteControllerProvider.notifier).deleteNote(state!);
       return true;
     } catch (e, st) {
       Logger.log(error: e, stackTrace: st);

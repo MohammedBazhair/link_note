@@ -20,6 +20,18 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
+    final form = ref.read(noteFormProvider);
+
+    ref.listenManual(editorHistoryControllerProvider, (_, next) {
+      final editorContnet = next.editorContent;
+      if (form.title.text != editorContnet.title) {
+        form.title.text = editorContnet.title;
+      }
+
+      if (form.content.text != editorContnet.content) {
+        form.content.text = editorContnet.content;
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(editorFormControllerProvider.notifier).initForm(widget.note);
     });
@@ -38,7 +50,7 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
       id: widget.note?.id,
       ownerId: widget.note?.ownerId,
       title: form.title.text,
-      content:form.content.text,
+      content: form.content.text,
       updatedAt: DateTime.now().toUtc(),
     );
 
@@ -51,7 +63,9 @@ class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
   }
 
   Future<void> onPopInvoke() async {
-    final anyChanges = ref.read(editorFormControllerProvider).hasChanges;
+    final anyChanges = ref
+        .read(editorHistoryControllerProvider)
+        .hasUndo;
     if (!isFormValid || !anyChanges) return context.pop();
 
     final isWantToSave = await showDialog<bool?>(

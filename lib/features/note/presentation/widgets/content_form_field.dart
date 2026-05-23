@@ -6,16 +6,12 @@ import '../controllers/note_providers.dart';
 import 'ai_action_button.dart';
 
 class ContentFormField extends ConsumerWidget {
-  const ContentFormField( {
-    super.key,
-    this.readOnly = false,
-    this.onChanged
-  });
+  const ContentFormField({super.key, this.readOnly = false, this.onChanged});
   final VoidCallback? onChanged;
   final bool readOnly;
 
   @override
-  Widget build(BuildContext context,ref) {
+  Widget build(BuildContext context, ref) {
     final contentController = ref.watch(noteFormProvider).content;
 
     return Column(
@@ -29,7 +25,6 @@ class ContentFormField extends ConsumerWidget {
             textInputAction: TextInputAction.newline,
 
             keyboardType: TextInputType.multiline,
-
             textAlignVertical: TextAlignVertical.top,
             style: TextStyle(color: Colors.white.withAlpha(180), fontSize: 15),
             cursorColor: const Color(0x809CDEBC),
@@ -53,9 +48,7 @@ class ContentFormField extends ConsumerWidget {
 }
 
 class _CounterWithAiAction extends StatelessWidget {
-  const _CounterWithAiAction({
-    required this.controller,
-  });
+  const _CounterWithAiAction({required this.controller});
 
   final TextEditingController controller;
 
@@ -75,9 +68,7 @@ class _CounterWithAiAction extends StatelessWidget {
               tooltip: 'تحسين المحتوى عبر AI',
               isProcessing: isProcessing,
               onPressed: () async {
-                final note = ref.read(
-                  editorFormControllerProvider.select((s) => s.note),
-                );
+                final note = ref.read(editorFormControllerProvider);
                 if (note == null) return;
                 final content = await aiController.improveContent(note);
                 controller.text = content;

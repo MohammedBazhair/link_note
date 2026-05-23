@@ -1,32 +1,48 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'dart:async';
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/utils/undo_redo_history.dart';
+import '../../../domain/entities/editor_content.dart';
+import 'editor_history_state.dart';
 
 class EditorHistoryController extends Notifier<EditorHistoryState> {
-  final _history = UndoRedoHistory<EditorHistoryState>();
+  final _history = UndoRedoHistory<EditorContent>();
 
   Timer? _debounce;
-  EditorHistoryState? _snapshot;
+  EditorContent? _snapshot;
 
   @override
   EditorHistoryState build() {
+    Logger.log(message: 'build EditorHistoryController');
+
+    ref.onDispose(() {
+      Logger.log(message: 'dispose EditorHistoryController');
+    });
     return const EditorHistoryState();
   }
 
-  void edit({String? title, String? content}) {
-    _snapshot ??= state;
+  void initContent(EditorContent editorContent) {
+    state = state.copyWith(editorContent: editorContent);
+  }
 
-    state = state.copyWith(title: title, content: content);
+  void edit({String? title, String? content}) {
+    final currentEditorContent = state.editorContent;
+    final newEditorContent = state.editorContent.copyWith(
+      title: title,
+      content: content,
+    );
+
+    if (currentEditorContent == newEditorContent) return;
+
+    _snapshot ??= currentEditorContent;
+    state = state.copyWith(editorContent: newEditorContent);
 
     _debounce?.cancel();
 
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (_snapshot != state) _history.push(_snapshot!);
+      if (_snapshot != currentEditorContent) _history.push(_snapshot!);
 
       _snapshot = null;
     });
@@ -39,38 +55,37 @@ class EditorHistoryController extends Notifier<EditorHistoryState> {
 
     _history.push(_snapshot!);
 
+    state = state.copyWith(
+      hasRedo: _history.canRedo,
+      hasUndo: _history.canUndo,
+    );
+
     _snapshot = null;
   }
 
   void undo() {
     commit();
 
-    final previous = _history.undo(state);
+    final previous = _history.undo(state.editorContent);
 
-    if (previous != null) state = previous;
-  }
+    if (previous == null) return;
 
-  void redo() {
-    final next = _history.redo(state);
-
-    if (next != null) state =next;
-  }
-
-
-}
-
-class EditorHistoryState extends Equatable {
-  const EditorHistoryState({this.title = '', this.content = ''});
-  final String title;
-  final String content;
-
-  EditorHistoryState copyWith({String? title, String? content}) {
-    return EditorHistoryState(
-      title: title ?? this.title,
-      content: content ?? this.content,
+    state = state.copyWith(
+      editorContent: previous,
+      hasRedo: _history.canRedo,
+      hasUndo: _history.canUndo,
     );
   }
 
-  @override
-  List<Object?> get props => [title, content];
+  void redo() {
+    final next = _history.redo(state.editorContent);
+
+    if (next == null) return;
+
+    state = state.copyWith(
+      editorContent: next,
+      hasRedo: _history.canRedo,
+      hasUndo: _history.canUndo,
+    );
+  }
 }

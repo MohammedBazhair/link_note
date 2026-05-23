@@ -10,7 +10,7 @@ import '../../domain/entities/note.dart';
 import '../../domain/entities/note_popup_action.dart';
 import '../controllers/note_providers.dart';
 import 'content_form_field.dart';
-import 'save_note_button.dart';
+import 'note_editor_actions.dart';
 import 'title_form_field.dart';
 
 class EditorForm extends ConsumerWidget {
@@ -18,11 +18,12 @@ class EditorForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final formKey = ref.watch(noteFormProvider).formKey;
+    final form = ref.watch(noteFormProvider);
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Form(
-        key: formKey,
+        key: form.formKey,
 
         child: const Column(
           spacing: 24,
@@ -46,17 +47,9 @@ class NoteFormHeader extends ConsumerWidget {
 
     return AppBar(
       actions: [
-        const IconButton(
-          onPressed: null,
-          icon: Icon(Icons.undo_rounded, textDirection: TextDirection.ltr),
-          tooltip: 'تراجع',
-        ),
+        const EditorRedoAction(),
         const SizedBox(width: 4),
-        const IconButton(
-          onPressed: null,
-          icon: Icon(Icons.redo_rounded, textDirection: TextDirection.ltr),
-          tooltip: 'إعادة',
-        ),
+        const EditorUndoAction(),
         const SizedBox(width: 8),
         const SaveNoteButton(),
         const SizedBox(width: 8),

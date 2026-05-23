@@ -1,13 +1,16 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/errors/exceptions.dart';
 import '../../../domain/entities/note.dart';
 import '../../../domain/repositories/note_ai_repository.dart';
+import '../note_providers.dart';
 import 'note_ai_state.dart';
 
-class NoteAiController extends StateNotifier<NoteAiState> {
-  NoteAiController(this._serviceAi) : super(ResetAiNoteState());
-  final NoteAiRepository _serviceAi;
+class NoteAiController extends Notifier<NoteAiState> {
+   NoteAiRepository get _serviceAi=> ref.read(noteAiRepositoryProvider);
+
+  @override
+  NoteAiState build() => ResetAiNoteState();
 
   Future<String> improveContent(Note note) async {
     state = UpdatingAiNoteState(isContentProcessing: true);
@@ -58,4 +61,5 @@ class NoteAiController extends StateNotifier<NoteAiState> {
     );
     Logger.log(error: e, stackTrace: st);
   }
+
 }

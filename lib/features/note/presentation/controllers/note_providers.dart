@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
 import '../../data/repositories/note_ai_repository_impl.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/note_controllers.dart';
 import '../../domain/entities/selectable_note.dart';
-import '../../injection.dart';
 import 'editor_form_controller/editor_form_controller.dart';
-import 'editor_form_controller/editor_form_state.dart';
 import 'editor_history_controller/editor_history_controller.dart';
+import 'editor_history_controller/editor_history_state.dart';
 import 'note_ai_controller/note_ai_controller.dart';
 import 'note_ai_controller/note_ai_state.dart';
 import 'note_controller/note_controller.dart';
@@ -28,14 +28,14 @@ final noteAiRepositoryProvider = Provider((ref) {
   return NoteAiRepositoryImpl(aiClient, userRemoteDataSource);
 });
 
-final noteAiNotiferProvider =
-    StateNotifierProvider<NoteAiController, NoteAiState>((ref) {
-      final controller = ref.read(noteAiControllerProvider);
-      return controller;
-    });
+final noteAiNotiferProvider = NotifierProvider<NoteAiController, NoteAiState>(
+  () {
+    return NoteAiController();
+  },
+);
 
 final editorFormControllerProvider =
-    NotifierProvider<EditorFormController, EditorFormState>(() {
+    NotifierProvider<EditorFormController, Note?>(() {
       return EditorFormController();
     });
 
@@ -85,11 +85,12 @@ final getCreditsProvider = FutureProvider((ref) async {
 });
 
 final editorHistoryControllerProvider =
-    NotifierProvider<EditorHistoryController, EditorHistoryState>(
+    NotifierProvider.autoDispose<EditorHistoryController, EditorHistoryState>(
       EditorHistoryController.new,
     );
 
 final noteFormProvider = Provider.autoDispose((ref) {
+  Logger.log(message: 'run noteFormProvider Provider');
   final formControllers = NoteFormControllers(
     title: TextEditingController(),
     content: TextEditingController(),
@@ -98,7 +99,11 @@ final noteFormProvider = Provider.autoDispose((ref) {
 
   final historyController = ref.read(editorHistoryControllerProvider.notifier);
   void sync() {
-    historyController.edit(title: formControllers.title.text, content: formControllers.content.text);
+    Logger.log(message: 'addListener');
+    historyController.edit(
+      title: formControllers.title.text,
+      content: formControllers.content.text,
+    );
   }
 
   formControllers.title.addListener(sync);
