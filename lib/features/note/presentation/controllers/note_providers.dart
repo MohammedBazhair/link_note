@@ -9,9 +9,10 @@ import '../../data/repositories/note_ai_repository_impl.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/note_controllers.dart';
 import '../../domain/entities/selectable_note.dart';
-import 'editor_form_controller/editor_form_controller.dart';
-import 'editor_history_controller/editor_history_controller.dart';
-import 'editor_history_controller/editor_history_state.dart';
+import 'current_note_controller/current_note_controller.dart';
+import 'current_note_controller/current_note_state.dart';
+import 'editor_controller/editor_controller.dart';
+import 'editor_controller/editor_state.dart';
 import 'note_ai_controller/note_ai_controller.dart';
 import 'note_ai_controller/note_ai_state.dart';
 import 'note_controller/note_controller.dart';
@@ -34,9 +35,9 @@ final noteAiNotiferProvider = NotifierProvider<NoteAiController, NoteAiState>(
   },
 );
 
-final editorFormControllerProvider =
-    NotifierProvider<EditorFormController, Note?>(() {
-      return EditorFormController();
+final currentNoteControllerProvider =
+    NotifierProvider<CurrentNoteController, CurrentNoteState>(() {
+      return CurrentNoteController();
     });
 
 final isInNotesListScreen = StateProvider.autoDispose((_) => false);
@@ -48,7 +49,7 @@ final singleNoteStreamProvider = StreamProvider.family
 
       final subscription = stream.listen((note) {
         if (note != null) {
-          ref.read(editorFormControllerProvider.notifier).syncWith(note);
+          ref.read(currentNoteControllerProvider.notifier).replaceNote(note);
         }
       });
 
@@ -84,9 +85,9 @@ final getCreditsProvider = FutureProvider((ref) async {
   return result.value!;
 });
 
-final editorHistoryControllerProvider =
-    NotifierProvider.autoDispose<EditorHistoryController, EditorHistoryState>(
-      EditorHistoryController.new,
+final editorControllerProvider =
+    NotifierProvider.autoDispose<EditorController, EditorState>(
+      EditorController.new,
     );
 
 final noteFormProvider = Provider.autoDispose((ref) {
@@ -97,20 +98,7 @@ final noteFormProvider = Provider.autoDispose((ref) {
     formKey: GlobalKey(),
   );
 
-  final historyController = ref.read(editorHistoryControllerProvider.notifier);
-  void sync() {
-    Logger.log(message: 'addListener');
-    historyController.edit(
-      title: formControllers.title.text,
-      content: formControllers.content.text,
-    );
-  }
-
-  formControllers.title.addListener(sync);
-
-  formControllers.content.addListener(sync);
-
-  ref.onDispose(() => formControllers.dispose(sync));
+  ref.onDispose(formControllers.dispose);
 
   return formControllers;
 });

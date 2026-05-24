@@ -10,7 +10,12 @@ class TitleFormField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final titleController = ref.watch(noteFormProvider).title;
+    final textDirection = ref.watch(
+      editorControllerProvider.select((s) => s.titleDirection),
+    );
+
     return TextFormField(
+      textDirection: textDirection,
       controller: titleController,
       readOnly: readOnly,
       textInputAction: TextInputAction.newline,
@@ -24,6 +29,11 @@ class TitleFormField extends ConsumerWidget {
         fontWeight: FontWeight.w500,
       ),
       cursorColor: const Color(0x809CDEBC),
+      onChanged: (title) {
+        final historyController = ref.read(editorControllerProvider.notifier);
+
+        historyController.updateEditorContent(title: title);
+      },
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         hintText: 'العنوان...',
@@ -44,7 +54,7 @@ class TitleFormField extends ConsumerWidget {
                     tooltip: 'تحسين العنوان عبر AI',
                     isProcessing: isProcessing,
                     onPressed: () async {
-                      final note = ref.read(editorFormControllerProvider);
+                      final note = ref.read(currentNoteControllerProvider).note;
                       if (note == null) return;
 
                       final title = await aiController.improveTitle(note);

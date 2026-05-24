@@ -5,6 +5,7 @@ import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/tile_wrapper.dart';
 import '../../domain/entities/note.dart';
+import '../controllers/current_note_controller/current_note_state.dart';
 import '../controllers/note_providers.dart';
 import '../screens/note_editor_screen.dart';
 
@@ -43,7 +44,7 @@ class NoteTile extends ConsumerWidget {
           }
 
           
-          context.pushTo(NoteEditorScreen(note: note));
+          context.pushTo(NoteEditorScreen(note: note,functionality: CurrentNoteFunctionality.edit));
         },
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../features/note/presentation/controllers/current_note_controller/current_note_state.dart';
 import '../../../features/note/presentation/controllers/note_providers.dart';
 import '../../../features/note/presentation/screens/note_editor_screen.dart';
 import '../../../features/session/presentation/screens/session_entry_screen.dart';
@@ -68,7 +69,7 @@ class FloatingActionsButtons extends ConsumerWidget {
                   ref
                       .read(selectableNoteProvider.notifier)
                       .update((s) => s.copyWith(noteId: ''));
-                  context.pushTo(const NoteEditorScreen());
+                  context.pushTo(const NoteEditorScreen(functionality: CurrentNoteFunctionality.add));
                 },
                 tooltip: 'إنشاء ملاحظة',
                 child: const Icon(Icons.add_rounded),

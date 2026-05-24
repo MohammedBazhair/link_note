@@ -23,6 +23,11 @@ class UndoRedoHistory<T> {
     return _redo.removeLast();
   }
 
+  void clearHistory() {
+    _undo.clear();
+    _redo.clear();
+  }
+
   bool get canUndo => _undo.isNotEmpty;
 
   bool get canRedo => _redo.isNotEmpty;

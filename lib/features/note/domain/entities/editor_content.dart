@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class EditorContent extends Equatable {
   const EditorContent({this.title = '', this.content = ''});
+
   final String title;
   final String content;
 

@@ -5,6 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
+import '../../../note/presentation/controllers/current_note_controller/current_note_state.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/screens/note_editor_screen.dart';
 import '../../domain/entities/selected_note_preview_config.dart';
@@ -30,8 +31,8 @@ class SelectedNotePreview extends ConsumerWidget {
               note: note!,
               statusLabel: 'محدد',
               onButtonPressed: () =>
-                  context.pushTo(NoteEditorScreen(note: note)),
-              onCardPressed: () => context.pushTo(NoteEditorScreen(note: note)),
+                  context.pushTo(NoteEditorScreen(note: note,functionality: CurrentNoteFunctionality.edit)),
+              onCardPressed: () => context.pushTo(NoteEditorScreen(note: note,functionality: CurrentNoteFunctionality.edit)),
               textButtonLabel: 'تعديل',
               textButtonIcon: Icons.edit,
             );

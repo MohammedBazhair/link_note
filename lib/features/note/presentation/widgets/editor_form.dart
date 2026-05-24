@@ -19,7 +19,7 @@ class EditorForm extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final form = ref.watch(noteFormProvider);
-    
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Form(
@@ -43,18 +43,19 @@ class NoteFormHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final controller = ref.read(editorFormControllerProvider.notifier);
-
+    final controller = ref.read(currentNoteControllerProvider.notifier);
+    const bigSpacing = 10.0;
+    const smallSpacing = 8.0;
     return AppBar(
       actions: [
-        const EditorRedoAction(),
-        const SizedBox(width: 4),
-        const EditorUndoAction(),
-        const SizedBox(width: 8),
         const SaveNoteButton(),
-        const SizedBox(width: 8),
+        const SizedBox(width: bigSpacing),
+        const EditorRedoAction(),
+        const SizedBox(width: smallSpacing),
+        const EditorUndoAction(),
+        const SizedBox(width: bigSpacing),
         const CreditsWidget(),
-        const SizedBox(width: 8),
+        const SizedBox(width: bigSpacing),
         PopupMenuButton<NotePopupAction>(
           onSelected: (action) async {
             switch (action) {
@@ -75,7 +76,7 @@ class NoteFormHeader extends ConsumerWidget {
                 );
                 if (data == null) return;
                 final note = Note.fromJson(data);
-                controller.initForm(note);
+                controller.loadNote(note:  note);
               case NotePopupAction.deleteNote:
                 final isDeleted = await controller.deleteNote();
                 if (isDeleted) return context.pop();

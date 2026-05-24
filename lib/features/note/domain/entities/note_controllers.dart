@@ -23,10 +23,7 @@ class NoteFormControllers {
     content.clear();
   }
 
-  void dispose(void Function() listener) {
-    title.removeListener(listener);
-    content.removeListener(listener);
-
+  void dispose() {
     title.dispose();
     content.dispose();
   }

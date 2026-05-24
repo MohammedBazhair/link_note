@@ -24,7 +24,7 @@ class SessionPopupMenu extends ConsumerWidget {
       onSelected: (action) async {
         switch (action) {
           case SessionMenuAction.end:
-            // await controller.endSession();
+          // await controller.endSession();
 
           case SessionMenuAction.leave:
             await controller.leaveSession();
@@ -35,10 +35,12 @@ class SessionPopupMenu extends ConsumerWidget {
             );
             if (data == null) return;
             final note = Note.fromJson(data);
-            ref.read(editorFormControllerProvider.notifier).initForm(note);
+            ref.read(currentNoteControllerProvider.notifier).loadNote(note:  note);
 
           case SessionMenuAction.qrGenearator:
-            final qrData = ref.read(editorFormControllerProvider.notifier).generateQrData();
+            final qrData = ref
+                .read(currentNoteControllerProvider.notifier)
+                .generateQrData();
             await context.pushTo(GenerateQrCodeScreen(data: qrData));
         }
       },
