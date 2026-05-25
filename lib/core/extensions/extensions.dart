@@ -85,16 +85,16 @@ extension ResponsiveContext on BuildContext {
 
   bool get isDesktop => screenWidth >= 1024;
 
-  T responsive<T>({required T mobile, T? tablet, required T desktop}) {
+  Widget responsive({required WidgetBuilder mobile, WidgetBuilder? tablet, required WidgetBuilder desktop}) {
     if (isDesktop) {
-      return desktop;
+      return desktop(this);
     }
 
     if (isTablet) {
-      return tablet ?? desktop;
+      return tablet!=null? tablet(this):  desktop(this);
     }
 
-    return mobile;
+    return mobile(this);
   }
 
   void printDebug() {

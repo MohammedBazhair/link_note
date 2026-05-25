@@ -21,6 +21,7 @@ import '../../features/memory_cache/memory_cache.dart';
 import '../../features/network/connectivity_service.dart';
 import '../../features/network/network_clinet.dart';
 import '../../features/sync/sync_local_data_source.dart';
+import '../controllers/selection_controller.dart';
 
 final networkProvider = Provider((_) {
   final _connection = InternetConnection();
@@ -134,3 +135,6 @@ final syncLocalProvider = Provider((ref) {
   final localCache = ref.read(localDatabaseProvider);
   return SyncLocalDataSourceImpl(localCache);
 });
+
+final selectionControllerProvider =
+    NotifierProvider<SelectionController, Set<String>>(SelectionController.new);

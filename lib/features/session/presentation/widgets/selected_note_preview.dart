@@ -30,9 +30,18 @@ class SelectedNotePreview extends ConsumerWidget {
             final params = SelectedNotePreviewConfig(
               note: note!,
               statusLabel: 'محدد',
-              onButtonPressed: () =>
-                  context.pushTo(NoteEditorScreen(note: note,functionality: CurrentNoteFunctionality.edit)),
-              onCardPressed: () => context.pushTo(NoteEditorScreen(note: note,functionality: CurrentNoteFunctionality.edit)),
+              onButtonPressed: () => context.pushTo(
+                NoteEditorScreen(
+                  note: note,
+                  functionality: CurrentNoteFunctionality.edit,
+                ),
+              ),
+              onCardPressed: () => context.pushTo(
+                NoteEditorScreen(
+                  note: note,
+                  functionality: CurrentNoteFunctionality.edit,
+                ),
+              ),
               textButtonLabel: 'تعديل',
               textButtonIcon: Icons.edit,
             );

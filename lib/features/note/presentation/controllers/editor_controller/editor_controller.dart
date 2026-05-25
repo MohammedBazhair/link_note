@@ -59,8 +59,8 @@ class EditorController extends Notifier<EditorState> {
         hasUndo: _history.canUndo,
       );
       _snapshot = null;
-
       _checkSameInitialState();
+      saveChanges();
     });
   }
 
