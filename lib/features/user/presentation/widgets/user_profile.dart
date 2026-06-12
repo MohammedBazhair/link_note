@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/colors/colors.dart';
-import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/providers/core_providers.dart';
-import '../../domain/entities/profile.dart';
-import '../controllers/user_controller.dart';
-import '../controllers/user_state.dart';
+import 'package:link_note/core/constants/colors/colors.dart';
+import 'package:link_note/core/presentation/providers/core_providers.dart';
+import 'package:link_note/features/user/domain/entities/profile.dart';
+import 'package:link_note/features/user/presentation/controllers/user_controller.dart';
+import 'package:link_note/features/user/user_listeners.dart';
 import 'user_avatar.dart';
 
 class UserProfileWidget extends ConsumerStatefulWidget {
@@ -21,16 +20,7 @@ class _UserProfileWidgetState extends ConsumerState<UserProfileWidget> {
     super.initState();
     userController.loadProfile();
     ref.listenManual(userControllerProvider, (previous, next) {
-      switch (next) {
-        case UserInitialState():
-        case UserUpdateProfileState():
-          context.showSnakbar('تم تحديث البروفايل بنجاح');
-        case UserLoadProfileState():
-        case UserLoadAvatarState():
-          break;
-        case UserErrorState(:final message):
-          context.showSnakbar(message);
-      }
+      userListener(context: context, previous: previous, next: next);
     });
   }
 

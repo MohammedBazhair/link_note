@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -11,7 +10,6 @@ import '../../../features/user/data/datasources/user_local_data_source.dart';
 import '../../../features/user/data/datasources/user_remote_data_source.dart';
 import '../../../features/user/data/repositories/user_repository_impl.dart';
 import '../../../features/user/presentation/controllers/user_controller.dart';
-import '../../../features/user/presentation/controllers/user_state.dart';
 import '../../features/ai/ai_client.dart';
 import '../../features/database/local/secure_cache_service_impl.dart';
 import '../../features/database/remote/remote_database_service.dart';
@@ -68,8 +66,14 @@ final userRepositoryProvider = Provider((ref) {
   final auth = ref.read(supabaseAuthProvider);
   final userRemoteDataSource = ref.read(userRemoteDataSourceProvider);
   final userLocalDataSource = ref.read(userLocalDataSourceProvider);
+  final connectivityService = ref.read(networkProvider);
 
-  return UserRepositoryImpl(userRemoteDataSource, userLocalDataSource, auth);
+  return UserRepositoryImpl(
+    userRemoteDataSource,
+    userLocalDataSource,
+    auth,
+    connectivityService,
+  );
 });
 
 final remoteDatabaseServiceProvider = Provider((ref) {
@@ -105,17 +109,7 @@ final userRemoteDataSourceProvider = Provider((ref) {
   );
 });
 
-final _userControllerProvider = Provider((ref) {
-  final repo = ref.read(userRepositoryProvider);
-  return UserController(repo);
-});
-
-final userControllerProvider = StateNotifierProvider<UserController, UserState>(
-  (ref) {
-    final controller = ref.read(_userControllerProvider);
-    return controller;
-  },
-);
+final userControllerProvider = NotifierProvider(UserController.new);
 
 final authRepositoryProvider = Provider((ref) {
   final remoteAuth = ref.read(authRemoteDataSourceProvider);

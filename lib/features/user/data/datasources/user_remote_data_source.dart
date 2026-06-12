@@ -4,7 +4,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../../../../core/errors/result.dart';
 import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../../../core/features/database/remote/remote_storage_service.dart';
@@ -25,7 +24,7 @@ abstract interface class UserRemoteDataSource {
     String filePath,
   );
 
-  Future<Result<int>> readCredits();
+  Future<int> readCredits();
   Future<void> updateCredits(int credits, String userId);
 }
 
@@ -34,12 +33,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     this._client,
     this._remoteDatabase,
     this._remoteStorage,
-    this._locaCache,
+    this._localCache,
   );
   final SupabaseClient _client;
   final RemoteDatabaseService _remoteDatabase;
   final RemoteStorageService _remoteStorage;
-  final SecureCacheService _locaCache;
+  final SecureCacheService _localCache;
 
   @override
   Future<void> createProfile(ProfileEntity profile) {
@@ -156,36 +155,23 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<Result<int>> readCredits() async {
-    try {
-      final userId = _client.auth.currentUser?.id;
-      if (userId == null) {
-        throw const UserNotLoggedInException(
-          'خطأ.. قم بتسجيل الدخول أولا للاستفادة من الميزات',
-        );
-      }
-      final map = await _remoteDatabase.readRow(
-        id: userId,
-        column: 'id',
-        table: ExternalConsts.profilesTable,
-        selectColumns: ['credits'],
+  Future<int> readCredits() async {
+    final userId = await _localCache.getString(
+      key: ExternalConsts.lastUserIdKey,
+    );
+    if (userId == null) {
+      throw const UserNotLoggedInException(
+        'لابد من تسجيل دخولك أولا لاستعمال الرصيد',
       );
-
-      final credits = (map['credits'] as int);
-      await _locaCache.setString(
-        key: ExternalConsts.creditsKey,
-        value: '$credits',
-      );
-      return Result.ok(credits);
-    } on UserNotLoggedInException catch (_) {
-      rethrow;
-    } catch (_) {
-      final cachedCredits = await _locaCache.getString(
-        key: ExternalConsts.creditsKey,
-      );
-      if (cachedCredits == null) return Result.error('خطأ في جلب عدد النقاط');
-      return Result.ok(int.tryParse(cachedCredits) ?? 0);
     }
+    final map = await _remoteDatabase.readRow(
+      id: userId,
+      column: 'id',
+      table: ExternalConsts.profilesTable,
+      selectColumns: ['credits'],
+    );
+
+    return (map['credits'] as int);
   }
 
   @override

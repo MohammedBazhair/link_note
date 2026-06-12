@@ -24,7 +24,7 @@ Future<void> initializePushNotifications() async {
   // Enable verbose logging for debugging (remove in production)
   // await OneSignal.Debug.setLogLevel(OSLogLevel.none);
   // Initialize with your OneSignal App ID
-  OneSignal.initialize('77e0bc45-9e18-491e-bc41-0d42d7b86c00');
+  await OneSignal.initialize('77e0bc45-9e18-491e-bc41-0d42d7b86c00');
   await Permission.notification.request();
 }
 

@@ -1,15 +1,14 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/widgets/credits_widget.dart';
-import '../../../qr_code/presentation/screens/generate_qr_code_screen.dart';
-import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
-import '../../domain/entities/note.dart';
-import '../../domain/entities/note_popup_action.dart';
-import '../controllers/note_providers.dart';
+import 'package:link_note/core/extensions/extensions.dart';
+import 'package:link_note/features/note/domain/entities/note.dart';
+import 'package:link_note/features/note/domain/entities/note_popup_action.dart';
+import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
+import 'package:link_note/features/qr_code/presentation/screens/generate_qr_code_screen.dart';
+import 'package:link_note/features/qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import 'content_form_field.dart';
+import 'credits_widget.dart';
 import 'note_editor_actions.dart';
 import 'title_form_field.dart';
 

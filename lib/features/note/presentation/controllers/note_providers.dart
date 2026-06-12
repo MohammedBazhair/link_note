@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
-import '../../../user/presentation/controllers/user_providers.dart';
 import '../../data/repositories/note_ai_repository_impl.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/note_controllers.dart';
@@ -77,12 +75,9 @@ final selectableNoteProvider = StateProvider.autoDispose(
 );
 
 final getCreditsProvider = FutureProvider((ref) async {
-  final userDataSource = ref.read(userRemoteDataSourceProvider);
-  final isUserLoggedIn = ref.read(isUserLoggedInProvider);
-  if (!isUserLoggedIn) return 0;
-  final result = await userDataSource.readCredits();
-  if (result.value == null) return 0;
-  return result.value!;
+  final userRepo = ref.read(userRepositoryProvider);
+  final credits = await userRepo.getCredits();
+  return credits;
 });
 
 final editorControllerProvider =

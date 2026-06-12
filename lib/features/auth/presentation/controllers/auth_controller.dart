@@ -26,8 +26,10 @@ class AuthController extends StateNotifier<AuthState> {
 
   Future<void> loginWithUri(Uri uri) async {
     try {
-      final result = await _auth.signInWithUrl(uri);
-      if (result.hasError) throw AuthAppException(result.errorMessage!);
+      final authResponse = await _auth.signInWithUrl(uri);
+      if (authResponse.user == null) {
+        throw const AuthAppException('لا يوجد مستخدم حاليا');
+      }
 
       state = const AuthSuccessfullState();
     } on AuthAppException catch (e) {
@@ -104,7 +106,6 @@ class AuthController extends StateNotifier<AuthState> {
         ? const AuthSuccessfullState()
         : AuthFailedState(error);
   }
-
 
   void reset() {
     state = const AuthInitialState();

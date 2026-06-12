@@ -2,7 +2,6 @@ import 'package:http/http.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../../../../core/errors/result.dart';
 import '../../../../core/features/ai/ai_client.dart';
 import '../../../../core/features/ai/ai_client_params.dart';
 import '../../../user/data/datasources/user_remote_data_source.dart';
@@ -16,24 +15,16 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
   final AiClient _aiClient;
   final UserRemoteDataSource _userRemoteDataSource;
 
-  Future<Result<int>> _getCredits() async {
-    try {
-      final result = await _userRemoteDataSource.readCredits();
-      final credits = result.value;
+  Future<int> _getCredits() async {
+    final credits = await _userRemoteDataSource.readCredits();
 
-      if (credits == null || credits == 0) {
-        throw const CreditsZeroException(
-          'الرصيد غير كافي لاستخدام هذه الميزة يمكنك الانتظار 24 ساعة للحصول على 10 نقاط مجانا',
-        );
-      }
-      return result;
-    } on UserNotLoggedInException catch (_) {
-      rethrow;
-    } on CreditsZeroException catch (_) {
-      rethrow;
-    } catch (_) {
-      rethrow;
+    if (credits == 0) {
+      throw const CreditsZeroException(
+        'الرصيد غير كافي لاستخدام هذه الميزة يمكنك الانتظار 24 ساعة للحصول على 10 نقاط مجانا',
+      );
     }
+
+    return credits;
   }
 
   @override
@@ -43,9 +34,7 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
         throw const SaveNoteFirstException('احفظ الملاحظة أولا');
       }
 
-      final result = await _getCredits();
-
-      final credits = result.value!;
+      final credits = await _getCredits();
 
       final params = AiClientParams(
         apiUrl: ExternalConsts.aiApiUrl,
@@ -72,8 +61,7 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
         throw const SaveNoteFirstException('احفظ الملاحظة أولا');
       }
 
-      final result = await _getCredits();
-      final credits = result.value!;
+      final credits = await _getCredits();
 
       final params = AiClientParams(
         apiUrl: ExternalConsts.aiApiUrl,
@@ -85,7 +73,6 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
 
       await _userRemoteDataSource.updateCredits(credits - 1, note.ownerId!);
       return model.text;
-    
     } on ClientException catch (_) {
       throw const InternetException();
     } catch (e) {

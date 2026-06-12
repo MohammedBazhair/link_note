@@ -25,6 +25,7 @@ abstract interface class AuthRemoteDataSource {
     required String email,
     required String newPassword,
     required String nonce,
+    required OtpType otpType,
   });
 }
 
@@ -85,9 +86,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String newPassword,
     required String nonce,
+    required OtpType otpType,
   }) async {
     try {
-      await _auth.verifyOTP(type: OtpType.recovery, token: nonce, email: email);
+      await _auth.verifyOTP(type: otpType, token: nonce, email: email);
 
       await _auth.updateUser(
         UserAttributes(nonce: nonce, email: email, password: newPassword),

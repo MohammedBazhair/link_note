@@ -27,7 +27,7 @@ linter:
     # ✅ الأداء وجودة الكود
     use_key_in_widget_constructors: true
     sized_box_for_whitespace: true
-    prefer_relative_imports: true
+    prefer_relative_imports: false
     unnecessary_null_checks: true
     unnecessary_lambdas: true
     prefer_function_declarations_over_variables: true

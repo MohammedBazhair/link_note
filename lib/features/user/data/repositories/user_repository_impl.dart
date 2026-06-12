@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,7 @@ import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/extensions/extensions.dart';
+import '../../../../core/features/network/connectivity_service.dart';
 import '../../../auth/data/model/app_user.dart';
 import '../../../auth/domain/entities/sub/auth_provider.dart';
 import '../../domain/entities/get_profile_params.dart';
@@ -17,14 +19,19 @@ import '../datasources/user_remote_data_source.dart';
 import '../models/profile_model.dart';
 
 class UserRepositoryImpl implements UserRepository {
-  UserRepositoryImpl(this._remoteDataSource, this._localDataSource, this._auth);
+  UserRepositoryImpl(
+    this._remoteDataSource,
+    this._localDataSource,
+    this._auth,
+    this._connectivityService,
+  );
   final UserRemoteDataSource _remoteDataSource;
   final UserLocalDataSource _localDataSource;
-    final GoTrueClient  _auth;
- 
+  final GoTrueClient _auth;
+  final ConnectivityService _connectivityService;
 
   @override
-  bool get isUserLoggedIn => _auth.currentUser!= null;
+  bool get isUserLoggedIn => _auth.currentUser != null;
 
   @override
   User? get currentUser => _auth.currentUser;
@@ -40,7 +47,7 @@ class UserRepositoryImpl implements UserRepository {
       final providers = appUser.providers.toSet();
 
       final ProfileEntity profileEntity;
-          final profile = await _remoteDataSource.readProfile(params.userId);
+      final profile = await _remoteDataSource.readProfile(params.userId);
       switch (appUser.provider) {
         case AuthProvider.email:
           profileEntity = profile.copyWith(authProviders: providers);
@@ -50,7 +57,7 @@ class UserRepositoryImpl implements UserRepository {
             username: appUser.name,
             avatarUrl: appUser.avatarUrl,
             authProviders: providers,
-            credits: profile.credits
+            credits: profile.credits,
           );
 
         case AuthProvider.unknown:
@@ -141,7 +148,7 @@ class UserRepositoryImpl implements UserRepository {
             userId: userId,
             username: userId, // استخدام userId كاسم افتراضي
             updatedAt: DateTime.now().toUtc(),
-            credits: 0
+            credits: 0,
           );
         }
       }
@@ -156,9 +163,28 @@ class UserRepositoryImpl implements UserRepository {
             userId: userId,
             username: userId,
             updatedAt: DateTime.now().toUtc(),
-            credits: 0
+            credits: 0,
           ),
       };
+    }
+  }
+
+  @override
+  Future<int> getCredits() async {
+    try {
+      final hasConnection = await _connectivityService.hasConnection();
+
+      if (!hasConnection) {
+        return await _localDataSource.readCredits();
+      }
+
+      final credits = await _remoteDataSource.readCredits();
+      unawaited(_localDataSource.saveCredits(credits));
+     
+      return credits;
+    } catch (e) {
+      Logger.log(error: e);
+      return 0;
     }
   }
 }

@@ -5,6 +5,8 @@ import '../models/profile_model.dart';
 
 abstract interface class UserLocalDataSource {
   Future<void> saveProfile(ProfileEntity profile);
+  Future<void> saveCredits(int credits);
+  Future<int> readCredits();
   Future<ProfileEntity> readProfile();
 }
 
@@ -24,11 +26,30 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<ProfileEntity> readProfile() async {
-    final raw = await _cacheService.getString(key: ExternalConsts.profileUserKey);
+    final raw = await _cacheService.getString(
+      key: ExternalConsts.profileUserKey,
+    );
     if (raw == null) return ProfileEntity.guest();
 
     final model = ProfileModel.fromJson(raw);
 
     return model;
+  }
+
+  @override
+  Future<int> readCredits() async {
+    final raw = await _cacheService.getString(key: ExternalConsts.creditsKey);
+
+    if (raw == null) return 0;
+
+    return int.tryParse(raw) ?? 0;
+  }
+
+  @override
+  Future<void> saveCredits(int credits) {
+    return _cacheService.setString(
+      key: ExternalConsts.creditsKey,
+      value: '$credits',
+    );
   }
 }
