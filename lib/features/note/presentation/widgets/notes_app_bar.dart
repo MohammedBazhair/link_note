@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/features/note/presentation/widgets/form_and_fields/search_note_field.dart';
 import 'package:link_note/features/note/presentation/widgets/notes_contextual_action_bar/notes_contextual_action_bar.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
@@ -17,7 +18,7 @@ class NotesAppBar extends ConsumerWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
         child: ConditionalBuilder(
           condition: isContextualMode,
           builder: (_) => const NotesContextualActionBar(),
@@ -37,8 +38,11 @@ class _NotesDefaultAppBar extends ConsumerWidget {
       selectableNoteProvider.select((s) => s.isSelectable),
     );
 
+    final isSearchMode = ref.watch(
+      searchNoteControllerProvider.select((s) => s.isSearchMode),
+    );
+
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         isSelectable
             ? TextButton.icon(
@@ -50,9 +54,37 @@ class _NotesDefaultAppBar extends ConsumerWidget {
                 onPressed: context.pop,
                 icon: const Icon(Icons.check),
               )
-            : IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+            : ConditionalBuilder(
+                condition: !isSearchMode,
+                builder: (_) => IconButton(
+                  onPressed: ref
+                      .read(searchNoteControllerProvider.notifier)
+                      .enableSearchMode,
+                  icon: const Icon(Icons.search),
+                ),
+                fallback: (_) => const SizedBox.shrink(),
+              ),
 
-        isSelectable ? const Text('حدد ملاحظة') : const Text('الملاحظات'),
+        Expanded(
+          child: ConditionalBuilder(
+            duration: Durations.short1,
+            condition: isSearchMode,
+            builder: (_) =>
+                const SearchNoteField(key: ValueKey('SearchNoteField')),
+            fallback: (_) => isSelectable
+                ? const Text(
+                    'حدد ملاحظة',
+                    key: ValueKey('title1'),
+                    textAlign: TextAlign.center,
+                  )
+                : const Text(
+                    'الملاحظات',
+                    key: ValueKey('title2'),
+
+                    textAlign: TextAlign.center,
+                  ),
+          ),
+        ),
 
         isSelectable
             ? const SizedBox(width: 50)

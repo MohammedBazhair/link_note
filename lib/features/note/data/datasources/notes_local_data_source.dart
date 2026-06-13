@@ -203,7 +203,7 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       is_deleted = 0 AND $_ownerColumn = ? AND 
       (LOWER(title) LIKE LOWER(?) OR LOWER(content) LIKE LOWER(?)) 
      ''',
-      whereArgs: [ownerId, query, query],
+      whereArgs: [ownerId, '%$query%', '%$query%'],
     );
 
     final notes = rows.map(Note.fromMap);

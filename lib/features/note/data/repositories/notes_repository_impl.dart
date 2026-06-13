@@ -1,5 +1,3 @@
-// ignore_for_file: unawaited_futures
-
 import 'dart:async';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
@@ -36,6 +34,7 @@ class NotesRepositoryImpl implements NotesRepository {
       await _local.createNote(note: newNote, skipLocalTracking: hasConnection);
 
       try {
+        // ignore: unawaited_futures
         if (hasConnection) _remote.createNote(newNote);
       } catch (e, st) {
         Logger.log(error: e, stackTrace: st);

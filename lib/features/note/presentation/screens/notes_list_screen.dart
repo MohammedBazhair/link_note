@@ -35,7 +35,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       child: Scaffold(
         key: widget.key,
         appBar: const PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
+          preferredSize: Size.fromHeight(kToolbarHeight + 5),
           child: NotesAppBar(),
         ),
         drawer: const CustomDrawer(),

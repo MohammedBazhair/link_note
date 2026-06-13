@@ -1,7 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
-import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
 import '../../../../core/features/database/remote/remote_database_service.dart';
 import '../../../../core/features/sync/sync_state_model.dart';
@@ -39,7 +38,6 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
       table: _notesTable,
     );
 
-    Logger.log(message: map.toString());
     return map;
   }
 

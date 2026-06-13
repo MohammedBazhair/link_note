@@ -6,6 +6,8 @@ class ConditionalBuilder extends StatelessWidget {
     required this.condition,
     required this.builder,
     required this.fallback,
+    this.duration = Durations.medium2,
+    this.reverseDuration = Durations.medium2,
   });
 
   final bool condition;
@@ -14,8 +16,17 @@ class ConditionalBuilder extends StatelessWidget {
 
   final WidgetBuilder fallback;
 
+  final Duration duration;
+  final Duration reverseDuration;
+
   @override
   Widget build(BuildContext context) {
-    return condition ? builder(context) : fallback(context);
+    return AnimatedSwitcher(
+      duration: duration,
+      switchInCurve: Curves.easeInOut,
+      switchOutCurve: Curves.easeInOut,
+      reverseDuration: reverseDuration,
+      child: condition ? builder(context) : fallback(context),
+    );
   }
 }
