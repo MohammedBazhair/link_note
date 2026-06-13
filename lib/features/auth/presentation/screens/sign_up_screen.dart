@@ -59,7 +59,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       password: passwordController.text,
     );
 
-    await ref.read(authControllerProvider.notifier).signUp(user);
+    await ref.read(authControllerProvider.notifier).signUpWithEmail(user);
   }
 
   @override

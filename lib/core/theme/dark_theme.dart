@@ -59,12 +59,8 @@ ThemeData darkTheme() => ThemeData(
       borderRadius: BorderRadius.circular(25),
       borderSide: const BorderSide(color: Colors.transparent),
     ),
-    errorStyle: const TextStyle(height: 3, color: Color(0xFFE4736B)),
-    helperStyle: const TextStyle(
-      color: Color(0xB1BDBDBD),
-      fontSize: 11,
-      height: 1.5,
-    ),
+    errorStyle: const TextStyle(color: Color(0xFFE4736B), height: 1),
+    helperStyle: const TextStyle(color: Color(0xB1BDBDBD)),
   ),
   iconTheme: const IconThemeData(color: DarkColors.icon),
   iconButtonTheme: IconButtonThemeData(

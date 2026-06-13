@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/note_providers.dart';
-import 'ai_action_button.dart';
+import '../../controllers/note_providers.dart';
+import '../ai_action_button.dart';
 
 class TitleFormField extends ConsumerWidget {
   const TitleFormField({super.key, this.readOnly = false});

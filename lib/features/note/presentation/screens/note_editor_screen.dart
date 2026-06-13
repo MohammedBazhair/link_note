@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/note.dart';
-import '../controllers/current_note_controller/current_note_state.dart';
-import '../controllers/note_providers.dart';
-import '../widgets/editor_form.dart';
+import 'package:link_note/features/note/domain/entities/note.dart';
+import 'package:link_note/features/note/presentation/controllers/current_note_controller/current_note_state.dart';
+import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
+import 'package:link_note/features/note/presentation/widgets/form_and_fields/editor_form.dart';
 
 class NoteEditorScreen extends ConsumerStatefulWidget {
   const NoteEditorScreen({super.key, this.note, required this.functionality});

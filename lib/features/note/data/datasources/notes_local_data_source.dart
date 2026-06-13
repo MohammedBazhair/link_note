@@ -21,6 +21,15 @@ abstract interface class NotesLocalDataSource {
   Stream<RowList> fetchNotesRealTime(String ownerId);
   Future<void> updateNote({required Note note, bool skipLocalTracking = false});
   Future<void> deleteNote({required String id, bool skipLocalTracking = false});
+  Future<void> deleteNotes({
+    required Set<String> ids,
+    bool skipLocalTracking = false,
+  });
+
+  Future<List<Note>> searchNotes({
+    required String query,
+    required String? ownerId,
+  });
 }
 
 class NotesLocalDataSourceImpl implements NotesLocalDataSource {
@@ -152,5 +161,53 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
       Logger.log(error: e, stackTrace: st);
       return null;
     }
+  }
+
+  @override
+  Future<void> deleteNotes({
+    required Set<String> ids,
+    bool skipLocalTracking = false,
+  }) async {
+    if (ids.isEmpty) return;
+
+    final updatedAt = DateTime.now().toUtc().toIso8601String();
+
+    await _db.updateMany(
+      updated: {'is_deleted': 1, 'updated_at': updatedAt},
+      column: _idColumn,
+      valuesIn: ids.toList(),
+      table: _notesTable,
+    );
+
+    if (skipLocalTracking) return;
+
+    Future.forEach(ids, (id) {
+      final change = SyncChangeModel.create(
+        tableName: _notesTable,
+        recordId: id,
+        operation: SyncOperation.delete,
+      );
+      _syncLocal.addChange(change);
+    });
+  }
+
+  @override
+  Future<List<Note>> searchNotes({
+    required String query,
+    required String? ownerId,
+  }) async {
+    final rows = await _db.readRows(
+      table: _notesTable,
+      where:
+          '''
+      is_deleted = 0 AND $_ownerColumn = ? AND 
+      (LOWER(title) LIKE LOWER(?) OR LOWER(content) LIKE LOWER(?)) 
+     ''',
+      whereArgs: [ownerId, query, query],
+    );
+
+    final notes = rows.map(Note.fromMap);
+
+    return notes.toList();
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:link_note/features/note/presentation/controllers/notes_contextual_action_bar_controller/notes_contextual_action_bar_controller.dart';
+import 'package:link_note/features/note/presentation/controllers/search_note_controller/search_note_controller.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../data/repositories/note_ai_repository_impl.dart';
@@ -97,3 +99,11 @@ final noteFormProvider = Provider.autoDispose((ref) {
 
   return formControllers;
 });
+
+final notesContextualActionBarController = NotifierProvider(
+  NotesContextualActionBarController.new,
+);
+
+final searchNoteControllerProvider = NotifierProvider(
+  SearchNoteController.new,
+);

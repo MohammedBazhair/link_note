@@ -8,4 +8,7 @@ abstract interface class NotesRepository {
   Stream<Note?> fetchNoteStream(String noteId);
   Future<void> update(Note note);
   Future<void> delete(Note note);
+  Future<void> deleteNotes(Set<String> notesIds);
+
+  Future<List<Note>> searchNotes(String query);
 }

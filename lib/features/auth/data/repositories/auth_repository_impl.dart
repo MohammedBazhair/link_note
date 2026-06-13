@@ -54,8 +54,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> signInWithGoogle() {
-    return _remote.signInWithGoogle();
+  Future<void> signInWithGoogle() async {
+    final hasConnection = await _networkService.hasConnection();
+
+    if (!hasConnection) throw const InternetException();
+
+    try {
+      await _remote.signInWithGoogle();
+    } catch (e) {
+      throw const AuthAppException(
+        'حصلت مشكلة أثناء محاولة التسجيل عبر حساب قوقل',
+      );
+    }
   }
 
   @override
@@ -135,7 +145,7 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         newPassword: newPassword,
         nonce: nonce,
-        otpType: OtpType.recovery
+        otpType: OtpType.recovery,
       );
     } on AuthRetryableFetchException catch (_) {
       throw const InternetException();

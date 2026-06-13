@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:skeletonizer/skeletonizer.dart';
-import '../../../../core/constants/colors/colors.dart';
-import '../../../../core/extensions/extensions.dart';
+import 'package:link_note/features/note/presentation/widgets/notes_app_bar.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../../core/presentation/widgets/custom_drawer.dart';
 import '../../../../core/presentation/widgets/floating_actions_buttons.dart';
-import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/note_providers.dart';
 import '../widgets/notes_widget.dart';
@@ -39,54 +36,12 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         key: widget.key,
         appBar: const PreferredSize(
           preferredSize: Size.fromHeight(kToolbarHeight),
-          child: NotesListAppBar(),
+          child: NotesAppBar(),
         ),
         drawer: const CustomDrawer(),
         floatingActionButton: const FloatingActionsButtons(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: const NotesStreamBuilder(),
-      ),
-    );
-  }
-}
-
-class NotesListAppBar extends ConsumerWidget {
-  const NotesListAppBar({super.key});
-
-  @override
-  Widget build(BuildContext context, ref) {
-    final isSelectable = ref.watch(
-      selectableNoteProvider.select((s) => s.isSelectable),
-    );
-
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            isSelectable
-                ? TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: DarkColors.primary,
-                      overlayColor: Colors.transparent,
-                    ),
-                    label: const Text('تم'),
-                    onPressed: context.pop,
-                    icon: const Icon(Icons.check),
-                  )
-                : const SizedBox(width: 24),
-
-            isSelectable ? const Text('حدد ملاحظة') : const Text('الملاحظات'),
-
-            isSelectable
-                ? const SizedBox(width: 50)
-                : IconButton(
-                    onPressed: Scaffold.of(context).openDrawer,
-                    icon: const Icon(Icons.menu_rounded),
-                  ),
-          ],
-        ),
       ),
     );
   }
@@ -110,10 +65,7 @@ class NotesStreamBuilder extends ConsumerWidget {
 
       loading: () {
         final fakeNotes = List.generate(8, (index) => Note.fake());
-        return Skeletonizer(
-          effect: StylesConsts.shimmerEffect,
-          child: NotesListView(notes: fakeNotes),
-        );
+        return NotesListView(notes: fakeNotes, isShimmerEnabled: true);
       },
 
       error: (error, stackTrace) {

@@ -135,7 +135,9 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> softDeleteNotes(List<String> ids) {
+  Future<void> softDeleteNotes(List<String> ids)async {
+    if (ids.isEmpty) return;
+    
     final updatedAt = DateTime.now().toUtc().toIso8601String();
     final values = {'is_deleted': 1, 'updated_at': updatedAt};
 

@@ -11,6 +11,7 @@ class CustomEmailField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const FieldLabel(text: 'البريد الإلكتروني'),
 

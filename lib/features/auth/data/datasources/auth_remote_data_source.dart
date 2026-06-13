@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -59,14 +58,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> signInWithGoogle() async {
-    try {
-      await _auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: ExternalConsts.authRedirectUrl,
-      );
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    await _auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: ExternalConsts.authRedirectUrl,
+    );
   }
 
   @override

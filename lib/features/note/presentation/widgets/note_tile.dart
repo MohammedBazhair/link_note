@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/providers/core_providers.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/current_note_controller/current_note_state.dart';
 import '../controllers/note_providers.dart';
@@ -18,25 +18,43 @@ class NoteTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final isSelected =
-        ref.watch(selectableNoteProvider.select((s) => s.noteId)) == note.id;
-    final isHovered = ref.watch(_hoverNoteProvider(note.id));
-    final borderColor = isHovered
-        ? DarkColors.primary.withOpacity(0.3)
-        : Colors.white.withOpacity(0.08);
+    final noteId = note.id;
+    if (noteId == null) return const SizedBox.shrink();
+
+    final isChecked = ref.watch(
+      notesContextualActionBarController.select(
+        (s) => s.selectedNotesIds.contains(noteId),
+      ),
+    );
     return InkWell(
       hoverColor: Colors.transparent,
       overlayColor: const WidgetStatePropertyAll(Colors.transparent),
       onTap: () {
-        context.pushTo(
-          NoteEditorScreen(
-            functionality: CurrentNoteFunctionality.edit,
-            note: note,
-          ),
+        final controller = ref.read(
+          notesContextualActionBarController.notifier,
         );
+        final isContextualMode = ref
+            .read(notesContextualActionBarController)
+            .actionBarOpened;
+
+        if (isContextualMode) {
+          controller.toggleNote(noteId);
+        } else {
+          context.pushTo(
+            NoteEditorScreen(
+              functionality: CurrentNoteFunctionality.edit,
+              note: note,
+            ),
+          );
+        }
+      },
+      onLongPress: () {
+        ref
+            .read(notesContextualActionBarController.notifier)
+            .toggleNote(noteId);
       },
       onHover: (value) =>
-          ref.read(_hoverNoteProvider(note.id).notifier).state = value,
+          ref.read(_hoverNoteProvider(noteId).notifier).state = value,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -45,7 +63,12 @@ class NoteTile extends ConsumerWidget {
             elevation: 2,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
-              side: BorderSide(width: 0.5, color: borderColor),
+              side: BorderSide(
+                width: isChecked ? 0.6 : 0,
+                color: isChecked
+                    ? DarkColors.primary.withAlpha(150)
+                    : Colors.transparent,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,24 +120,44 @@ class NoteTile extends ConsumerWidget {
             ),
           ),
 
-          if (isSelected || isHovered)
-            PositionedDirectional(
-              bottom: 0,
-              end: 0,
-              child: IconButton(
-                onPressed: () {
-                  ref
-                      .read(selectionControllerProvider.notifier)
-                      .toggle(note.id!);
-                },
-                icon: const Icon(
-                  Icons.check_circle,
-                  size: 30,
-                  color: DarkColors.primary,
-                ),
-              ),
-            ),
+          PositionedDirectional(
+            bottom: 0,
+            end: 0,
+            child: NoteCheckButton(noteId: noteId),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class NoteCheckButton extends ConsumerWidget {
+  const NoteCheckButton({super.key, required this.noteId});
+  final String noteId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isHovered = ref.watch(_hoverNoteProvider(noteId));
+
+    final isChecked = ref.watch(
+      notesContextualActionBarController.select(
+        (s) => s.selectedNotesIds.contains(noteId),
+      ),
+    );
+    if (!isChecked && !isHovered) return const SizedBox.shrink();
+
+    return Skeleton.ignore(
+      child: IconButton(
+        onPressed: () {
+          ref
+              .read(notesContextualActionBarController.notifier)
+              .toggleNote(noteId);
+        },
+        icon: Icon(
+          Icons.check_circle,
+          size: 30,
+          color: DarkColors.primary.withAlpha(isHovered ? 230 : 255),
+        ),
       ),
     );
   }

@@ -7,8 +7,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
-import '../../../note/presentation/widgets/content_form_field.dart';
-import '../../../note/presentation/widgets/title_form_field.dart';
+import '../../../note/presentation/widgets/form_and_fields/content_form_field.dart';
+import '../../../note/presentation/widgets/form_and_fields/title_form_field.dart';
 import '../../injection.dart';
 import '../controllers/session_providers.dart';
 

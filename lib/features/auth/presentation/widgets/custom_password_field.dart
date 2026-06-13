@@ -72,15 +72,15 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Password is required';
+              return 'كلمة المرور مطلوبة';
             }
 
             if (value.length < 8) {
-              return 'Password must be at least 8 characters';
+              return 'الباسورد يجب أن يكون على الأقل 8 رموز';
             }
 
             if (confirmPassword != null && value != confirmPassword) {
-              return 'Passwords do not match';
+              return 'كلمات المرور غير متطابقة';
             }
 
             return null;

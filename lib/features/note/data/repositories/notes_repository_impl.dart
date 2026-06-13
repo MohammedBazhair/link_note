@@ -114,7 +114,9 @@ class NotesRepositoryImpl implements NotesRepository {
       return;
     }
 
-    final remoteStream = _mapStreamToNotes(_remote.fetchNotesRealTime(ownerId!));
+    final remoteStream = _mapStreamToNotes(
+      _remote.fetchNotesRealTime(ownerId!),
+    );
 
     final hasConnection = await _network.hasConnection();
 
@@ -134,5 +136,28 @@ class NotesRepositoryImpl implements NotesRepository {
   @override
   Future<Note?> getNoteById(String noteId) {
     return _remote.getNoteById(noteId);
+  }
+
+  @override
+  Future<void> deleteNotes(Set<String> notesIds) async {
+    if (notesIds.isEmpty) return;
+
+    final hasConnection = await _network.hasConnection();
+
+    await _local.deleteNotes(ids: notesIds, skipLocalTracking: hasConnection);
+
+    if (hasConnection) unawaited(_remote.softDeleteNotes(notesIds.toList()));
+  }
+
+  @override
+  Future<List<Note>> searchNotes(String query) async {
+    try {
+      final ownerId = await _cache.getString(key: ExternalConsts.lastUserIdKey);
+
+      return await _local.searchNotes(query: query, ownerId: ownerId);
+    } catch (e,st) {
+      Logger.log(error: e,stackTrace: st);
+      return [];
+    }
   }
 }

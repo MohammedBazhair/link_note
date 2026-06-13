@@ -5,11 +5,11 @@ import 'package:link_note/core/extensions/extensions.dart';
 import 'package:link_note/features/note/domain/entities/note.dart';
 import 'package:link_note/features/note/domain/entities/note_popup_action.dart';
 import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
+import 'package:link_note/features/note/presentation/widgets/credits_widget.dart';
+import 'package:link_note/features/note/presentation/widgets/note_editor_actions.dart';
 import 'package:link_note/features/qr_code/presentation/screens/generate_qr_code_screen.dart';
 import 'package:link_note/features/qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import 'content_form_field.dart';
-import 'credits_widget.dart';
-import 'note_editor_actions.dart';
 import 'title_form_field.dart';
 
 class EditorForm extends ConsumerWidget {

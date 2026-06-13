@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/colors/colors.dart';
-import '../controllers/note_providers.dart';
-import 'ai_action_button.dart';
+import '../../../../../core/constants/colors/colors.dart';
+import '../../controllers/note_providers.dart';
+import '../ai_action_button.dart';
 
 class ContentFormField extends ConsumerWidget {
   const ContentFormField({super.key, this.readOnly = false, this.onChanged});

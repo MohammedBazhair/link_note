@@ -6,8 +6,11 @@ class AuthInitialState extends AuthState {
   const AuthInitialState();
 }
 
+enum AuthLoadingType { signWithGoogle, signWithEmail, signOut, resetPassword }
+
 class AuthLoadingState extends AuthState {
-  const AuthLoadingState();
+  const AuthLoadingState(this.authLoadingType);
+  final AuthLoadingType authLoadingType;
 }
 
 class AuthSuccessfullState extends AuthState {
