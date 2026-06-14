@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:link_note/core/extensions/extensions.dart';
+import 'package:link_note/core/models/snack_bar_action_model.dart';
 import 'package:link_note/features/note/domain/entities/note.dart';
 import 'package:link_note/features/note/domain/entities/note_popup_action.dart';
+import 'package:link_note/features/note/presentation/controllers/current_note_controller/current_note_state.dart';
 import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
 import 'package:link_note/features/note/presentation/widgets/credits_widget.dart';
 import 'package:link_note/features/note/presentation/widgets/note_editor_actions.dart';
@@ -43,9 +45,44 @@ class NoteFormHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final controller = ref.read(currentNoteControllerProvider.notifier);
+
+    ref.listen(currentNoteControllerProvider, (_, state) {
+      final error = state.error;
+      final successMessage = state.successMessage;
+
+      final action = state.currentNoteAction;
+
+      switch (action) {
+        case CurrentNoteAction.delete:
+          if (error != null) context.showSnakbar(error);
+          if (successMessage != null) {
+            context.showSnakbar(
+              successMessage,
+              action: SnackBarActionModel(
+                label: 'تراجع',
+                onPressed: controller.undoDeleteNote,
+              ),
+            );
+            context.pop();
+          }
+          return;
+        case null:
+      }
+      if (error != null) context.showSnakbar(error);
+      if (successMessage != null) {
+        context.showSnakbar(successMessage);
+      }
+    });
     const bigSpacing = 10.0;
     const smallSpacing = 8.0;
     return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          controller.reset();
+          context.pop();
+        },
+      ),
       actions: [
         const SaveNoteButton(),
         const SizedBox(width: bigSpacing),
@@ -75,10 +112,9 @@ class NoteFormHeader extends ConsumerWidget {
                 );
                 if (data == null) return;
                 final note = Note.fromJson(data);
-                controller.loadNote(note:  note);
+                controller.loadNote(note: note);
               case NotePopupAction.deleteNote:
-                final isDeleted = await controller.deleteNote();
-                if (isDeleted) return context.pop();
+                await controller.deleteNote();
             }
           },
           itemBuilder: (context) => NotePopupAction.values

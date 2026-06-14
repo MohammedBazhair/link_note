@@ -75,7 +75,7 @@ class SyncNoteRepositoryImpl implements SyncNoteRepository {
       }
 
       if (deletes.isNotEmpty) {
-        await _remoteNotes.softDeleteNotes(deletes);
+        await _remoteNotes.softDeleteNotes(deletes.toSet());
       }
 
       await _sync.clearTablesChanges(ExternalConsts.notesTable);

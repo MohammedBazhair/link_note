@@ -39,8 +39,8 @@ class NotesListView extends ConsumerWidget {
             final note = notes[index];
             return NoteTile(note: note);
           },
-          mainAxisSpacing:isMobile?5: 15,
-          crossAxisSpacing:isMobile?5: 15,
+          mainAxisSpacing: isMobile ? 5 : 15,
+          crossAxisSpacing: isMobile ? 5 : 15,
           gridDelegate: SliverSimpleGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: isMobile ? 2 : 3,
           ),

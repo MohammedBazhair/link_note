@@ -1,4 +1,5 @@
 import 'package:http/http.dart';
+import 'package:link_note/core/features/network/connectivity_service.dart';
 
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -10,10 +11,15 @@ import '../../domain/repositories/note_ai_repository.dart';
 import '../models/improved_note_model.dart';
 
 class NoteAiRepositoryImpl implements NoteAiRepository {
-  NoteAiRepositoryImpl(this._aiClient, this._userRemoteDataSource);
+  NoteAiRepositoryImpl(
+    this._aiClient,
+    this._userRemoteDataSource,
+    this._connectivityService,
+  );
 
   final AiClient _aiClient;
   final UserRemoteDataSource _userRemoteDataSource;
+  final ConnectivityService _connectivityService;
 
   Future<int> _getCredits() async {
     final credits = await _userRemoteDataSource.readCredits();
@@ -30,6 +36,9 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
   @override
   Future<String> improveNoteTitle(Note note) async {
     try {
+      final hasConnection = await _connectivityService.hasConnection();
+      if (!hasConnection) throw const InternetException();
+
       if (note.ownerId == null) {
         throw const SaveNoteFirstException('احفظ الملاحظة أولا');
       }
@@ -57,6 +66,10 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
   @override
   Future<String> improveNoteContent(Note note) async {
     try {
+      final hasConnection = await _connectivityService.hasConnection();
+
+      if (!hasConnection) throw const InternetException();
+
       if (note.ownerId == null) {
         throw const SaveNoteFirstException('احفظ الملاحظة أولا');
       }

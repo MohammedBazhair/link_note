@@ -59,15 +59,17 @@ class NoteTile extends ConsumerWidget {
         clipBehavior: Clip.none,
         children: [
           Card(
-            color: const Color(0xFF1E2230),
+            color: isChecked
+                ? const Color(0xDA252A3B)
+                : const Color(0xAE1E2230),
             elevation: 2,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
               side: BorderSide(
-                width: isChecked ? 0.6 : 0,
+                width: isChecked ? 1 : 0.3,
                 color: isChecked
-                    ? DarkColors.primary.withAlpha(150)
-                    : Colors.transparent,
+                    ? const Color(0x79021A31)
+                    : const Color(0x7A222327),
               ),
             ),
             child: Column(

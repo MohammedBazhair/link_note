@@ -23,22 +23,23 @@ class NoteController extends StreamNotifier<List<Note>> {
 
   Future<void> _getAllNotes() async {
     final notes = await _notesRepository.getAll(_userId);
+    
     state = AsyncData(notes);
   }
 
-  Future<void> addNote(Note note) async {
+  Future<Note?> addNote(Note note) async {
     final userNote = note.copyWith(ownerId: _userId);
 
     final noteCreated = await _notesRepository.create(userNote);
-    if (noteCreated == null) return;
+    if (noteCreated == null) return null;
 
-    await _getAllNotes();
+    unawaited(_getAllNotes());
+    return noteCreated;
   }
 
   Future<void> updateNote(Note note) async {
-      await _notesRepository.update(note);
-       unawaited(_getAllNotes());
- 
+    await _notesRepository.update(note);
+    unawaited(_getAllNotes());
   }
 
   Future<void> deleteNote(Note note) async {
@@ -49,6 +50,11 @@ class NoteController extends StreamNotifier<List<Note>> {
 
   Future<void> deleteNotes(Set<String> notesIds) async {
     await _notesRepository.deleteNotes(notesIds);
+    await _getAllNotes();
+  }
+
+  Future<void> undoDeleteNotes(Set<String> notesIds) async {
+    await _notesRepository.undoDeleteNotes(notesIds);
     await _getAllNotes();
   }
 

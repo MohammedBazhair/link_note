@@ -19,7 +19,8 @@ abstract interface class NotesRemoteDataSource {
   Stream<Map<String, dynamic>?> fetchNoteStream(String noteId);
   Future<void> updateNote(Note note);
   Future<void> softDeleteNote(String id);
-  Future<void> softDeleteNotes(List<String> ids);
+  Future<void> softDeleteNotes(Set<String> ids);
+  Future<void> undoDeleteNotes(Set<String> notesIds);
 }
 
 class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
@@ -60,14 +61,16 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> updateNote(Note note) {
+  Future<void> updateNote(Note note) async {
     if (note.id == null) return Future.value();
-    return _database.update(
-      updated: note.toMap(),
-      id: note.id!,
-      column: _idColumn,
-      table: _notesTable,
-    );
+
+      await _database.update(
+        updated: note.toMap(),
+        id: note.id!,
+        column: _idColumn,
+        table: _notesTable,
+      );
+    
   }
 
   @override
@@ -133,9 +136,9 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> softDeleteNotes(List<String> ids)async {
+  Future<void> softDeleteNotes(Set<String> ids) async {
     if (ids.isEmpty) return;
-    
+
     final updatedAt = DateTime.now().toUtc().toIso8601String();
     final values = {'is_deleted': 1, 'updated_at': updatedAt};
 
@@ -143,7 +146,22 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
       table: _notesTable,
       data: values,
       column: _idColumn,
-      values: ids,
+      values: ids.toList(),
+    );
+  }
+
+  @override
+  Future<void> undoDeleteNotes(Set<String> notesIds) async {
+    if (notesIds.isEmpty) return;
+
+    final updatedAt = DateTime.now().toUtc().toIso8601String();
+    final values = {'is_deleted': 0, 'updated_at': updatedAt};
+
+    return _database.updateManyByFilter(
+      table: _notesTable,
+      data: values,
+      column: _idColumn,
+      values: notesIds.toList(),
     );
   }
 }

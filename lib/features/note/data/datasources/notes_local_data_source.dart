@@ -25,6 +25,7 @@ abstract interface class NotesLocalDataSource {
     required Set<String> ids,
     bool skipLocalTracking = false,
   });
+  Future<void> undoDeleteNotes({required Set<String> notesIds, bool skipLocalTracking = false});
 
   Future<List<Note>> searchNotes({
     required String query,
@@ -49,7 +50,6 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
     final result = await _db.insertRow(map: note.toMap(), table: _notesTable);
     final noteId = note.id;
 
-    Logger.log(message: noteId);
     if (skipLocalTracking || noteId == null) return result;
 
     final change = SyncChangeModel.create(
@@ -209,5 +209,32 @@ class NotesLocalDataSourceImpl implements NotesLocalDataSource {
     final notes = rows.map(Note.fromMap);
 
     return notes.toList();
+  }
+  
+  @override
+   Future<void> undoDeleteNotes({required Set<String> notesIds, bool skipLocalTracking = false})async{
+    if (notesIds.isEmpty) return;
+
+    final updatedAt = DateTime.now().toUtc().toIso8601String();
+
+    await _db.updateMany(
+      updated: {'is_deleted': 0, 'updated_at': updatedAt},
+      column: _idColumn,
+      valuesIn:notesIds.toList(),
+      table: _notesTable,
+    );
+
+    if (skipLocalTracking) return;
+
+    Future.forEach(notesIds, (id) {
+      final change = SyncChangeModel.create(
+        tableName: _notesTable,
+        recordId: id,
+        operation: SyncOperation.update,
+      );
+      _syncLocal.addChange(change);
+    });
+
+
   }
 }

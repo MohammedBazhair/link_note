@@ -3,16 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:link_note/features/note/presentation/controllers/notes_contextual_action_bar_controller/notes_contextual_action_bar_controller.dart';
 import 'package:link_note/features/note/presentation/controllers/search_note_controller/search_note_controller.dart';
-import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../data/repositories/note_ai_repository_impl.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/note_controllers.dart';
 import '../../domain/entities/selectable_note.dart';
 import 'current_note_controller/current_note_controller.dart';
-import 'current_note_controller/current_note_state.dart';
 import 'editor_controller/editor_controller.dart';
-import 'editor_controller/editor_state.dart';
 import 'note_ai_controller/note_ai_controller.dart';
 import 'note_ai_controller/note_ai_state.dart';
 import 'note_controller/note_controller.dart';
@@ -26,7 +23,12 @@ final noteControllerProvider =
 final noteAiRepositoryProvider = Provider((ref) {
   final aiClient = ref.read(aiCilientProvider);
   final userRemoteDataSource = ref.read(userRemoteDataSourceProvider);
-  return NoteAiRepositoryImpl(aiClient, userRemoteDataSource);
+  final connectivityService = ref.read(networkProvider);
+  return NoteAiRepositoryImpl(
+    aiClient,
+    userRemoteDataSource,
+    connectivityService,
+  );
 });
 
 final noteAiNotiferProvider = NotifierProvider<NoteAiController, NoteAiState>(
@@ -35,10 +37,9 @@ final noteAiNotiferProvider = NotifierProvider<NoteAiController, NoteAiState>(
   },
 );
 
-final currentNoteControllerProvider =
-    NotifierProvider<CurrentNoteController, CurrentNoteState>(() {
-      return CurrentNoteController();
-    });
+final currentNoteControllerProvider = NotifierProvider(
+  CurrentNoteController.new,
+);
 
 final isInNotesListScreen = StateProvider.autoDispose((_) => false);
 
@@ -82,13 +83,11 @@ final getCreditsProvider = FutureProvider((ref) async {
   return credits;
 });
 
-final editorControllerProvider =
-    NotifierProvider.autoDispose<EditorController, EditorState>(
-      EditorController.new,
-    );
+final editorControllerProvider = NotifierProvider.autoDispose(
+  EditorController.new,
+);
 
-final noteFormProvider = Provider.autoDispose((ref) {
-  Logger.log(message: 'run noteFormProvider Provider');
+final noteFormProvider = StateProvider.autoDispose((ref) {
   final formControllers = NoteFormControllers(
     title: TextEditingController(),
     content: TextEditingController(),
@@ -104,6 +103,4 @@ final notesContextualActionBarController = NotifierProvider(
   NotesContextualActionBarController.new,
 );
 
-final searchNoteControllerProvider = NotifierProvider(
-  SearchNoteController.new,
-);
+final searchNoteControllerProvider = NotifierProvider(SearchNoteController.new);

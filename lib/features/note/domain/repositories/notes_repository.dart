@@ -9,6 +9,7 @@ abstract interface class NotesRepository {
   Future<void> update(Note note);
   Future<void> delete(Note note);
   Future<void> deleteNotes(Set<String> notesIds);
+  Future<void> undoDeleteNotes(Set<String> notesIds);
 
   Future<List<Note>> searchNotes(String query);
 }

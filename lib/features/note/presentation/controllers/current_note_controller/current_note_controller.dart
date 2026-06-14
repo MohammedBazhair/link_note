@@ -9,11 +9,15 @@ import 'current_note_state.dart';
 
 class CurrentNoteController extends Notifier<CurrentNoteState> {
   @override
-  CurrentNoteState build() => CurrentNoteState();
+  CurrentNoteState build() {
+    return CurrentNoteState();
+  }
+
+  String? _lastDeletedNoteId;
 
   NoteFormControllers get form => ref.read(noteFormProvider);
 
-  void loadNote({Note? note,  CurrentNoteFunctionality ?functionality}) {
+  void loadNote({Note? note, CurrentNoteFunctionality? functionality}) {
     state = state.copyWith(note: note, currentNoteFunctionality: functionality);
 
     if (note == null) return;
@@ -27,6 +31,15 @@ class CurrentNoteController extends Notifier<CurrentNoteState> {
     );
 
     ref.read(editorControllerProvider.notifier).loadContent(editorContent);
+  }
+
+  void updateNote(EditorContent editorContent) {
+    final updatedNote = state.note?.copyWith(
+      title: editorContent.title,
+      content: editorContent.content,
+    );
+
+    state = state.copyWith(note: updatedNote);
   }
 
   void replaceNote(Note note) {
@@ -45,17 +58,35 @@ class CurrentNoteController extends Notifier<CurrentNoteState> {
     return QrData(name: currentNote.title, qrCodeRaw: currentNote.toJson());
   }
 
-  Future<bool> deleteNote() async {
+  Future<void> deleteNote() async {
     try {
       final currentNote = state.note;
 
       if (currentNote == null) throw Exception('No note to delete');
 
       await ref.read(noteControllerProvider.notifier).deleteNote(currentNote);
-      return true;
+
+      _lastDeletedNoteId = currentNote.id;
+
+      state = state.copyWith(
+        currentNoteAction: CurrentNoteAction.delete,
+        successMessage: 'تم حذف الملاحظة التي بعنوان (${currentNote.title})',
+      );
     } catch (e, st) {
       Logger.log(error: e, stackTrace: st);
-      return false;
+      state = state.copyWith(error: 'حصلت مشكلة أثناء حذف الملاحظة');
     }
+  }
+
+  Future<void> undoDeleteNote() async {
+    if (_lastDeletedNoteId == null) return;
+
+    await ref.read(noteControllerProvider.notifier).undoDeleteNotes({
+      _lastDeletedNoteId!,
+    });
+  }
+
+  void reset() {
+    state = CurrentNoteState();
   }
 }

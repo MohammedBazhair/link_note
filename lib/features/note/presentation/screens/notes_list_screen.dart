@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/extensions/extensions.dart';
+import 'package:link_note/core/models/snack_bar_action_model.dart';
+import 'package:link_note/features/note/presentation/controllers/notes_contextual_action_bar_controller/notes_contextual_action_bar_state.dart';
 import 'package:link_note/features/note/presentation/widgets/notes_app_bar.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/conditional_builder.dart';
@@ -21,10 +24,41 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
   @override
   void initState() {
     super.initState();
+    listenContextualAppBar();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref.read(userControllerProvider.notifier).loadProfile();
       await ref.read(noteControllerProvider.notifier).syncNotes();
       ref.read(isInNotesListScreen.notifier).update((_) => true);
+    });
+  }
+
+  void listenContextualAppBar() {
+    ref.listenManual(notesContextualActionBarController, (_, state) {
+      final successMessage = state.successMessage;
+      final errorMessage = state.errorMessage;
+
+      if (errorMessage != null) {
+        context.showSnakbar(errorMessage);
+      }
+
+      switch (state.currentAction) {
+        case NotesContextualAppBarAction.deleteNotes:
+          context.showSnakbar(
+            successMessage!,
+            action: SnackBarActionModel(
+              label: 'تراجع',
+              onPressed: ref
+                  .read(notesContextualActionBarController.notifier)
+                  .undoDeleteNotes,
+            ),
+          );
+          return;
+        case null:
+      }
+
+      if (successMessage != null) {
+        context.showSnakbar(successMessage);
+      }
     });
   }
 
@@ -62,7 +96,6 @@ class NotesStreamBuilder extends ConsumerWidget {
           fallback: (_) => const NothingNoteWidget(),
         );
       },
-
       loading: () {
         final fakeNotes = List.generate(8, (index) => Note.fake());
         return NotesListView(notes: fakeNotes, isShimmerEnabled: true);

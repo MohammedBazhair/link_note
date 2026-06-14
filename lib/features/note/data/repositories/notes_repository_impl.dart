@@ -30,6 +30,7 @@ class NotesRepositoryImpl implements NotesRepository {
         updatedAt: now,
         ownerId: userId,
       );
+
       final hasConnection = await _network.hasConnection();
       await _local.createNote(note: newNote, skipLocalTracking: hasConnection);
 
@@ -145,7 +146,7 @@ class NotesRepositoryImpl implements NotesRepository {
 
     await _local.deleteNotes(ids: notesIds, skipLocalTracking: hasConnection);
 
-    if (hasConnection) unawaited(_remote.softDeleteNotes(notesIds.toList()));
+    if (hasConnection) unawaited(_remote.softDeleteNotes(notesIds));
   }
 
   @override
@@ -154,9 +155,23 @@ class NotesRepositoryImpl implements NotesRepository {
       final ownerId = await _cache.getString(key: ExternalConsts.lastUserIdKey);
 
       return await _local.searchNotes(query: query, ownerId: ownerId);
-    } catch (e,st) {
-      Logger.log(error: e,stackTrace: st);
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
       return [];
     }
+  }
+
+  @override
+  Future<void> undoDeleteNotes(Set<String> notesIds) async {
+    if (notesIds.isEmpty) return;
+
+    final hasConnection = await _network.hasConnection();
+
+    await _local.undoDeleteNotes(
+      notesIds: notesIds,
+      skipLocalTracking: hasConnection,
+    );
+
+    if (hasConnection) unawaited(_remote.undoDeleteNotes(notesIds));
   }
 }

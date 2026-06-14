@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/utils/undo_redo_history.dart';
 import '../../../domain/entities/editor_content.dart';
@@ -39,6 +37,10 @@ class EditorController extends Notifier<EditorState> {
     );
 
     if (currentEditorContent == newEditorContent) return;
+
+    ref
+        .read(currentNoteControllerProvider.notifier)
+        .updateNote(newEditorContent);
 
     _snapshot ??= currentEditorContent;
     state = state.copyWith(
@@ -110,13 +112,21 @@ class EditorController extends Notifier<EditorState> {
     final noteController = ref.read(noteControllerProvider.notifier);
 
     final currentNoteState = ref.read(currentNoteControllerProvider);
-    if (currentNoteState.note == null) return;
 
     try {
       state = state.copyWith(isSaving: true);
+      final controller = ref.read(currentNoteControllerProvider.notifier);
       switch (currentNoteState.currentNoteFunctionality) {
         case CurrentNoteFunctionality.add:
-          await noteController.addNote(currentNoteState.note!);
+          final newNote = ref.read(noteFormProvider).note;
+          final note = await noteController.addNote(newNote);
+          ref
+              .read(noteFormProvider.notifier)
+              .update((s) => s.copyWith(id: note?.id));
+          controller.loadNote(
+            note: note,
+            functionality: CurrentNoteFunctionality.edit,
+          );
 
         case CurrentNoteFunctionality.edit:
           await noteController.updateNote(currentNoteState.note!);

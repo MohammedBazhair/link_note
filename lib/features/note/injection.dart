@@ -30,12 +30,7 @@ final notesRepositoryProvider = Provider<NotesRepository>((ref) {
   final remote = ref.read(notesRemoteDataSourceProvider);
   final network = ref.read(networkProvider);
   final _cache = ref.read(secureCacheServiceProvider);
-  return NotesRepositoryImpl(
-    remote,
-    localDataSource,
-    network,
-    _cache,
-  );
+  return NotesRepositoryImpl(remote, localDataSource, network, _cache);
 });
 
 final syncNotesRepositoryProvider = Provider<SyncNoteRepository>((ref) {
@@ -56,8 +51,9 @@ final syncNotesRepositoryProvider = Provider<SyncNoteRepository>((ref) {
 final noteAiRepositoryProvider = Provider<NoteAiRepository>((ref) {
   final aiClient = ref.read(aiCilientProvider);
   final userRemote = ref.watch(userRemoteDataSourceProvider);
+  final connectivityService = ref.watch(networkProvider);
 
-  return NoteAiRepositoryImpl(aiClient, userRemote);
+  return NoteAiRepositoryImpl(aiClient, userRemote, connectivityService);
 });
 
 final aiClientProvider = Provider<AiClient>((ref) {
