@@ -26,52 +26,52 @@ class NoteTile extends ConsumerWidget {
         (s) => s.selectedNotesIds.contains(noteId),
       ),
     );
-    return InkWell(
-      hoverColor: Colors.transparent,
-      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-      onTap: () {
-        final controller = ref.read(
-          notesContextualActionBarController.notifier,
-        );
-        final isContextualMode = ref
-            .read(notesContextualActionBarController)
-            .actionBarOpened;
+    return Stack(
+      clipBehavior: Clip.antiAlias,
+      children: [
+        Card(
+          color: isChecked ? const Color(0xDA252A3B) : const Color(0xAE1E2230),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(
+              width: isChecked ? 1 : 0.3,
+              color: isChecked
+                  ? const Color(0x79021A31)
+                  : const Color(0x7A222327),
+            ),
+          ),
+          child: InkWell(
+            hoverColor: Colors.transparent,
+            borderRadius: BorderRadius.circular(15),
+            overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+            onTap: () {
+              final controller = ref.read(
+                notesContextualActionBarController.notifier,
+              );
+              final isContextualMode = ref
+                  .read(notesContextualActionBarController)
+                  .actionBarOpened;
 
-        if (isContextualMode) {
-          controller.toggleNote(noteId);
-        } else {
-          context.pushTo(
-            NoteEditorScreen(
-              functionality: CurrentNoteFunctionality.edit,
-              note: note,
-            ),
-          );
-        }
-      },
-      onLongPress: () {
-        ref
-            .read(notesContextualActionBarController.notifier)
-            .toggleNote(noteId);
-      },
-      onHover: (value) =>
-          ref.read(_hoverNoteProvider(noteId).notifier).state = value,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Card(
-            color: isChecked
-                ? const Color(0xDA252A3B)
-                : const Color(0xAE1E2230),
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-              side: BorderSide(
-                width: isChecked ? 1 : 0.3,
-                color: isChecked
-                    ? const Color(0x79021A31)
-                    : const Color(0x7A222327),
-              ),
-            ),
+              if (isContextualMode) {
+                controller.toggleNote(noteId);
+              } else {
+                context.pushTo(
+                  NoteEditorScreen(
+                    functionality: CurrentNoteFunctionality.edit,
+                    note: note,
+                  ),
+                );
+              }
+            },
+            onLongPress: () {
+              ref
+                  .read(notesContextualActionBarController.notifier)
+                  .toggleNote(noteId);
+            },
+            onHover: (value) =>
+                ref.read(_hoverNoteProvider(noteId).notifier).state = value,
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -121,14 +121,14 @@ class NoteTile extends ConsumerWidget {
               ],
             ),
           ),
+        ),
 
-          PositionedDirectional(
-            bottom: 0,
-            end: 0,
-            child: NoteCheckButton(noteId: noteId),
-          ),
-        ],
-      ),
+        PositionedDirectional(
+          bottom: 0,
+          end: 0,
+          child: NoteCheckButton(noteId: noteId),
+        ),
+      ],
     );
   }
 }

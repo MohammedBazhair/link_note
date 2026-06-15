@@ -27,6 +27,7 @@ class AuthController extends Notifier<AuthState> {
 
   Future<void> loginWithUri(Uri uri) async {
     try {
+      print('loginWithUri called');
       final authResponse = await _auth.signInWithUrl(uri);
       if (authResponse.user == null) {
         throw const AuthAppException('لا يوجد مستخدم حاليا');

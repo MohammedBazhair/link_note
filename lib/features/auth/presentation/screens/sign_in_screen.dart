@@ -63,6 +63,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
     final _appLinks = AppLinks();
 
     _subscribtionsLinks = _appLinks.uriLinkStream.listen((uri) async {
+       Logger.log(message:  'URI = $uri');
       await ref.read(authControllerProvider.notifier).loginWithUri(uri);
     });
   }
@@ -98,9 +99,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
     }
   }
 
+  bool get isDesktop => context.isDesktop;
+
   @override
   Widget build(BuildContext context) {
-    context.printDebug();
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -158,9 +160,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
                               shrinkWrap: true,
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: context.isDesktop ? 2 : 1,
-                                    mainAxisSpacing: 24,
-                                    crossAxisSpacing: 24,
+                                    crossAxisCount: isDesktop ? 2 : 1,
+                                    mainAxisSpacing: isDesktop ? 24 : 12,
+                                    crossAxisSpacing: isDesktop ? 24 : 12,
                                     mainAxisExtent: 130,
                                   ),
 

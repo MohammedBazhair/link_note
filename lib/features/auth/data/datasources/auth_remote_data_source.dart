@@ -1,3 +1,4 @@
+import 'package:link_note/core/constants/internal_constants/log.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -58,6 +59,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> signInWithGoogle() async {
+    Logger.log(
+      message:
+          'Session before login = ${Supabase.instance.client.auth.currentSession}',
+    );
+    final response = await Supabase.instance.client.auth.getOAuthSignInUrl(
+      provider: OAuthProvider.google,
+      redirectTo: ExternalConsts.authRedirectUrl,
+    );
+
+    Logger.log(message: response.url);
+
     await _auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: ExternalConsts.authRedirectUrl,

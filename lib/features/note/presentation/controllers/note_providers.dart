@@ -11,14 +11,10 @@ import '../../domain/entities/selectable_note.dart';
 import 'current_note_controller/current_note_controller.dart';
 import 'editor_controller/editor_controller.dart';
 import 'note_ai_controller/note_ai_controller.dart';
-import 'note_ai_controller/note_ai_state.dart';
 import 'note_controller/note_controller.dart';
 import 'note_controller/sync_notes_controller.dart';
 
-final noteControllerProvider =
-    StreamNotifierProvider<NoteController, List<Note>>(() {
-      return NoteController();
-    });
+final noteControllerProvider = StreamNotifierProvider(NoteController.new);
 
 final noteAiRepositoryProvider = Provider((ref) {
   final aiClient = ref.read(aiCilientProvider);
@@ -31,11 +27,7 @@ final noteAiRepositoryProvider = Provider((ref) {
   );
 });
 
-final noteAiNotiferProvider = NotifierProvider<NoteAiController, NoteAiState>(
-  () {
-    return NoteAiController();
-  },
-);
+final noteAiNotiferProvider = NotifierProvider(NoteAiController.new);
 
 final currentNoteControllerProvider = NotifierProvider(
   CurrentNoteController.new,

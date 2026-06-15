@@ -101,7 +101,7 @@ class NotesRepositoryImpl implements NotesRepository {
   Stream<List<Note>> fetchNotesRealTime(String? userId) async* {
     final ownerId =
         userId ?? await _cache.getString(key: ExternalConsts.lastUserIdKey);
-
+    Logger.log(message: ownerId);
     final hasOwnerId = ownerId?.isNotEmpty ?? false;
 
     final localStream = hasOwnerId
@@ -129,6 +129,10 @@ class NotesRepositoryImpl implements NotesRepository {
         .fetchNoteStream(noteId)
         .map((m) {
           return m != null ? Note.fromMap(m) : null;
+        })
+        .where((n) {
+          if (n == null) return false;
+          return !n.isDeleted;
         })
         .handleError((e) {});
   }

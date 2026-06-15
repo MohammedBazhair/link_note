@@ -70,6 +70,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthResponse> signInWithUrl(Uri uri) async {
+    Logger.log(message: 
+      'Session after callback = ${Supabase.instance.client.auth.currentSession}',
+    );
     final code = uri.queryParameters['code'];
     if (code == null) throw ArgumentError.notNull();
 
