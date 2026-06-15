@@ -46,3 +46,24 @@ class AlreadyRunnedException extends AppException {
 class PermissionsException extends AppException {
   const PermissionsException(super.message);
 }
+
+class CreateSessionException extends AppException {
+  const CreateSessionException([super.message= 'فشل إنشاء الجلسة، يرجى المحاولة مرة أخرى.']);
+}
+
+class AddMemberToSessionException extends AppException {
+  const AddMemberToSessionException([super.message= 'تعذر إضافة العضو إلى الجلسة. يرجى إعادة المحاولة.']);
+}
+
+class RemoveMemberFromSessionException extends AppException {
+  const RemoveMemberFromSessionException([super.message= 'تعذر حذف العضو من الجلسة. يرجى إعادة المحاولة.']);
+}
+
+class RemoveSessionException extends AppException {
+  const RemoveSessionException([super.message= 'تعذر إزالة الجلسة. يرجى إعادة المحاولة.']);
+}
+
+class GetSessionException extends AppException {
+  const GetSessionException([super.message= 'تعذر العثور على الجلسة، قد تكون غير موجودة أو تم إزالتها.',
+  ]);
+}

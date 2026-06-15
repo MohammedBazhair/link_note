@@ -68,8 +68,15 @@ class Note {
     return '$years/$months $hours:$minuts';
   }
 
-  String toJson() {
-    return jsonEncode(toMap());
+  String toJson() => jsonEncode(toMap());
+
+  String toQrJson() {
+    final map = {
+      'title': title,
+      'content': content,
+    };
+
+    return jsonEncode(map);
   }
 
   @override

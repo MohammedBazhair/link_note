@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../constants/assets/app_assets.dart';
-import '../../constants/colors/colors.dart';
-import '../widgets/credits_widget.dart';
+import 'package:link_note/core/constants/assets/app_assets.dart';
+import 'package:link_note/core/constants/colors/colors.dart';
+import 'package:link_note/features/note/presentation/widgets/credits_widget.dart';
 
 class AboutAppScreen extends StatelessWidget {
   const AboutAppScreen({super.key});

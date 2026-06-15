@@ -1,13 +1,9 @@
-// ignore_for_file: unawaited_futures
-
 import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/constants/internal_constants/typedef.dart';
-import '../../../../core/features/database/local/cache_service.dart';
+import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../../../core/features/network/connectivity_service.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/repositories/notes_repository.dart';
@@ -19,24 +15,27 @@ class NotesRepositoryImpl implements NotesRepository {
   final NotesRemoteDataSource _remote;
   final NotesLocalDataSource _local;
   final ConnectivityService _network;
-  final LocalCacheService _cache;
+  final SecureCacheService _cache;
 
   @override
   Future<Note?> create(Note note) async {
     try {
       final now = DateTime.now().toUtc();
       final userId =
-          note.ownerId ?? _cache.getString(key: ExternalConsts.lastUserIdKey);
+          note.ownerId ??
+          await _cache.getString(key: ExternalConsts.lastUserIdKey);
 
       final newNote = note.copyWith(
         id: note.id ?? const Uuid().v4(),
         updatedAt: now,
         ownerId: userId,
       );
+
       final hasConnection = await _network.hasConnection();
       await _local.createNote(note: newNote, skipLocalTracking: hasConnection);
 
       try {
+        // ignore: unawaited_futures
         if (hasConnection) _remote.createNote(newNote);
       } catch (e, st) {
         Logger.log(error: e, stackTrace: st);
@@ -50,7 +49,16 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<List<Note>> getAll() => _local.readNotes(includeDeleted: false);
+  Future<List<Note>> getAll(String? userId) async {
+    final ownerId =
+        userId ?? await _cache.getString(key: ExternalConsts.lastUserIdKey);
+
+    if (ownerId?.isEmpty ?? true) {
+      return Future.value([]);
+    }
+
+    return _local.readNotes(ownerId: ownerId!, includeDeleted: false);
+  }
 
   @override
   Future<void> update(Note note) async {
@@ -91,25 +99,26 @@ class NotesRepositoryImpl implements NotesRepository {
 
   @override
   Stream<List<Note>> fetchNotesRealTime(String? userId) async* {
-    final localStream = _mapStreamToNotes(_local.fetchNotesRealTime());
+    final ownerId =
+        userId ?? await _cache.getString(key: ExternalConsts.lastUserIdKey);
+    Logger.log(message: ownerId);
+    final hasOwnerId = ownerId?.isNotEmpty ?? false;
+
+    final localStream = hasOwnerId
+        ? _mapStreamToNotes(_local.fetchNotesRealTime(ownerId!))
+        : Stream.value(<Note>[]);
 
     // If no user id provided, fallback to local stream only.
-    if (userId == null || userId.isEmpty) {
+    if (!hasOwnerId) {
       yield* localStream;
       return;
     }
 
-    final remoteStream = _mapStreamToNotes(_remote.fetchNotesRealTime(userId));
+    final remoteStream = _mapStreamToNotes(
+      _remote.fetchNotesRealTime(ownerId!),
+    );
 
-    // Safely check network availability. If the connectivity check fails
-    // for any reason, fall back to the local stream instead of throwing.
-    bool hasConnection = false;
-    try {
-      hasConnection = await _network.hasConnection();
-    } catch (e) {
-      debugPrint('Connectivity check failed: $e');
-      hasConnection = false;
-    }
+    final hasConnection = await _network.hasConnection();
 
     yield* (hasConnection ? remoteStream : localStream);
   }
@@ -121,11 +130,52 @@ class NotesRepositoryImpl implements NotesRepository {
         .map((m) {
           return m != null ? Note.fromMap(m) : null;
         })
+        .where((n) {
+          if (n == null) return false;
+          return !n.isDeleted;
+        })
         .handleError((e) {});
   }
 
   @override
   Future<Note?> getNoteById(String noteId) {
-    return _remote.getNoteById(noteId);
+    return _local.getNoteById(noteId);
+  }
+
+  @override
+  Future<void> deleteNotes(Set<String> notesIds) async {
+    if (notesIds.isEmpty) return;
+
+    final hasConnection = await _network.hasConnection();
+
+    await _local.deleteNotes(ids: notesIds, skipLocalTracking: hasConnection);
+
+    if (hasConnection) unawaited(_remote.softDeleteNotes(notesIds));
+  }
+
+  @override
+  Future<List<Note>> searchNotes(String query) async {
+    try {
+      final ownerId = await _cache.getString(key: ExternalConsts.lastUserIdKey);
+
+      return await _local.searchNotes(query: query, ownerId: ownerId);
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+      return [];
+    }
+  }
+
+  @override
+  Future<void> undoDeleteNotes(Set<String> notesIds) async {
+    if (notesIds.isEmpty) return;
+
+    final hasConnection = await _network.hasConnection();
+
+    await _local.undoDeleteNotes(
+      notesIds: notesIds,
+      skipLocalTracking: hasConnection,
+    );
+
+    if (hasConnection) unawaited(_remote.undoDeleteNotes(notesIds));
   }
 }

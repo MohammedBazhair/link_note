@@ -1,3 +1,5 @@
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 import '../../constants/external_constants/external_constants.dart';
 import '../../constants/internal_constants/log.dart';
 import '../database/local/local_database_service.dart';
@@ -6,6 +8,7 @@ import 'sync_state_model.dart';
 
 abstract class SyncLocalDataSource {
   Future<void> addChange(SyncChangeModel change);
+  Future<void> addChanges(List<SyncChangeModel> changes);
 
   Future<List<SyncChangeModel>> getTableChanges(String table);
 
@@ -23,15 +26,20 @@ class SyncLocalDataSourceImpl implements SyncLocalDataSource {
   final LocalDatabaseService _db;
 
   @override
-  Future<void> addChange(SyncChangeModel change) async {
+  Future<void> addChange(SyncChangeModel change, {Batch? batch}) async {
     final existing = await _db.readRowsWhere(
       table: ExternalConsts.syncChangesTable,
       filters: {'table_name': change.tableName, 'record_id': change.recordId},
     );
 
-    if (existing.isEmpty) {
-      await _db.insertRow(table: ExternalConsts.syncChangesTable, map: change.toMap());
-
+    if (existing.isEmpty && batch == null) {
+      await _db.insertRow(
+        table: ExternalConsts.syncChangesTable,
+        map: change.toMap(),
+      );
+      return;
+    } else if (existing.isEmpty && batch != null) {
+      batch.insert(ExternalConsts.syncChangesTable, change.toMap());
       return;
     }
 
@@ -41,7 +49,7 @@ class SyncLocalDataSourceImpl implements SyncLocalDataSource {
 
     if (oldChange.operation == SyncOperation.insert &&
         change.operation == SyncOperation.delete) {
-      await deleteChange(oldChange.id!);
+      await deleteChange(oldChange.id!, batch: batch);
       return;
     }
 
@@ -57,12 +65,22 @@ class SyncLocalDataSourceImpl implements SyncLocalDataSource {
 
     final updatedValues = {'operation': newOperation.name};
 
-    await _db.update(
-      table: ExternalConsts.syncChangesTable,
-      updated: updatedValues,
-      column: 'id',
-      value: oldChange.id,
-    );
+    if (batch == null) {
+      await _db.update(
+        table: ExternalConsts.syncChangesTable,
+        updated: updatedValues,
+        column: 'id',
+        value: oldChange.id,
+      );
+    } else {
+      batch.update(
+        ExternalConsts.syncChangesTable,
+        updatedValues,
+        where: 'id = ?',
+        whereArgs: [oldChange.id],
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
 
   @override
@@ -81,8 +99,19 @@ class SyncLocalDataSourceImpl implements SyncLocalDataSource {
   }
 
   @override
-  Future<void> deleteChange(int id) async {
-    await _db.deleteWhere(table: 'sync_changes', filters: {'id': id});
+  Future<void> deleteChange(int id, {Batch? batch}) async {
+    if (batch == null) {
+      await _db.deleteWhere(
+        table: ExternalConsts.syncChangesTable,
+        filters: {'id': id},
+      );
+    } else {
+      batch.delete(
+        ExternalConsts.syncChangesTable,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
   }
 
   @override
@@ -111,10 +140,24 @@ class SyncLocalDataSourceImpl implements SyncLocalDataSource {
 
   @override
   Future<SyncStateModel?> getLastSynced(String tableName) async {
-    final maps = await _db.readRowsWhere(table: 'sync_state', filters: {'table_name': tableName});
-    
+    final maps = await _db.readRowsWhere(
+      table: 'sync_state',
+      filters: {'table_name': tableName},
+    );
+
     if (maps.isEmpty) return null;
 
     return SyncStateModel.fromMap(maps.first);
+  }
+
+  @override
+  Future<void> addChanges(List<SyncChangeModel> changes) async {
+    if (changes.isEmpty) return;
+
+    final batch = _db.createBatch();
+
+    await Future.wait(changes.map(addChange));
+
+    await batch.commit(noResult: true);
   }
 }

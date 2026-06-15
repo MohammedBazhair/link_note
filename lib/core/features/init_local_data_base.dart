@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:path/path.dart';
@@ -38,6 +39,10 @@ Future<Database> _initDatabase() async {
 
 Future<String> getDatabaseFilePath() async {
   try {
+    if(!kDebugMode){
+      final dbPath = await getDatabasesPath();
+      return join(dbPath, ExternalConsts.databaseName);
+    }
     final dbPath = await getExternalStorageDirectory();
     if (dbPath == null) throw Exception();
     return join(dbPath.path, ExternalConsts.databaseName);

@@ -1,22 +1,22 @@
 import 'dart:io';
-
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../upload_file/helpers/helpers.dart';
 import '../../domain/entities/get_profile_params.dart';
 import '../../domain/entities/profile.dart';
 import '../../domain/repositories/user_repository.dart';
 import 'user_state.dart';
 
-class UserController extends StateNotifier<UserState> {
-  UserController(this._userRepository) : super(UserInitialState());
-  final UserRepository _userRepository;
+class UserController extends Notifier<UserState> {
+  @override
+  UserState build() => UserInitialState();
 
   bool get isUserLoggedIn => _userRepository.isUserLoggedIn;
 
   User? get currentUser => _userRepository.currentUser;
+  UserRepository get _userRepository => ref.read(userRepositoryProvider);
 
   Future<void> loadProfile() async {
     try {

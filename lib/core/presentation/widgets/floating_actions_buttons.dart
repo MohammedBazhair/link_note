@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../features/note/presentation/controllers/current_note_controller/current_note_state.dart';
 import '../../../features/note/presentation/controllers/note_providers.dart';
 import '../../../features/note/presentation/screens/note_editor_screen.dart';
 import '../../../features/session/presentation/screens/session_entry_screen.dart';
 import '../../extensions/extensions.dart';
 
-final _isClicked = StateProvider.autoDispose((ref) => false);
+final isFloatingActiosClicked = StateProvider.autoDispose((ref) => false);
 
 class FloatingActionsButtons extends ConsumerWidget {
   const FloatingActionsButtons({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isClicked = ref.watch(_isClicked);
+    final isClicked = ref.watch(isFloatingActiosClicked);
     final isSelectable = ref.watch(
       selectableNoteProvider.select((s) => s.isSelectable),
     );
@@ -43,7 +44,7 @@ class FloatingActionsButtons extends ConsumerWidget {
                 backgroundColor: Colors.blue.shade500,
                 shape: const CircleBorder(),
                 onPressed: () {
-                  ref.read(_isClicked.notifier).state = false;
+                  ref.read(isFloatingActiosClicked.notifier).state = false;
                   context.pushTo(const SessionEntryScreen());
                 },
                 tooltip: 'إدارة الجلسة',
@@ -64,11 +65,11 @@ class FloatingActionsButtons extends ConsumerWidget {
                 heroTag: null,
                 shape: const CircleBorder(),
                 onPressed: () {
-                  ref.read(_isClicked.notifier).state = false;
+                  ref.read(isFloatingActiosClicked.notifier).state = false;
                   ref
                       .read(selectableNoteProvider.notifier)
                       .update((s) => s.copyWith(noteId: ''));
-                  context.pushTo(const NoteEditorScreen());
+                  context.pushTo(const NoteEditorScreen(functionality: CurrentNoteFunctionality.add));
                 },
                 tooltip: 'إنشاء ملاحظة',
                 child: const Icon(Icons.add_rounded),
@@ -81,7 +82,7 @@ class FloatingActionsButtons extends ConsumerWidget {
             backgroundColor: isClicked ? Colors.red.shade300 : null,
             shape: const CircleBorder(),
             onPressed: () =>
-                ref.read(_isClicked.notifier).update((state) => !state),
+                ref.read(isFloatingActiosClicked.notifier).update((state) => !state),
 
             child: isClicked
                 ? const Icon(Icons.close_rounded)

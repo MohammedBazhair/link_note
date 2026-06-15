@@ -1,5 +1,7 @@
-import 'package:flutter_riverpod/legacy.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/errors/exceptions.dart';
+import 'package:link_note/core/presentation/providers/core_providers.dart';
+import 'package:link_note/features/session/injection.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/entities/session_member.dart';
@@ -7,87 +9,72 @@ import '../../domain/entities/sub/session_member_role.dart';
 import '../../domain/repository/session_repository.dart';
 import 'session_state.dart';
 
+class SessionController extends Notifier<SessionState> {
+  @override
+  SessionState build() {
+    return const InitialSessionState();
+  }
 
-class SessionController extends StateNotifier<SessionState> {
-  SessionController(this._sessionRepository)
-    : super(const InitialSessionState());
-  final SessionRepository _sessionRepository;
+   SessionRepository get _sessionRepository=> ref.read(sessionRepositoryProvider);
 
   Future<void> createSession(Session session) async {
     try {
       state = const LoadingSessionState();
       if (state.session != null) {
-        state = ErrorSessionState(
-          message: 'Cannot start a new session. End the current session first.',
+        throw const CreateSessionException(
+          'لا يمكنك أنشاء أكثر من جلسة في نفس الوقت',
         );
-        return;
       }
 
-      final result = await _sessionRepository.createSession(session);
-      if (result.hasError) throw Exception(result.errorMessage);
-
-      final createdSession = result.value;
-      if (createdSession?.id == null) throw ArgumentError.notNull();
+      final createdSession = await _sessionRepository.createSession(session);
 
       final member = SessionMember(
-        sessionId: createdSession!.id!,
+        sessionId: createdSession.id!,
         memberId: createdSession.hostId,
         role: SessionMemberRole.host,
       );
 
-      await _addMemberToSession(member, createdSession);
+      await _sessionRepository.addMemberToSession(member);
+
       state = CreateSessionState(
         session: createdSession,
         currentMember: member,
       );
-    } catch (e) {
-      state = ErrorSessionState(message: e.toString());
+    } on AppException catch (e) {
+      state = ErrorSessionState(message: e.message);
     }
-  }
-
-  Future<void> _addMemberToSession(
-    SessionMember member,
-    Session session,
-  ) async {
-    await _sessionRepository.addMemberToSession(
-      member: member,
-      session: session,
-    );
   }
 
   Stream<List<SessionMember>> fetchMembersOfSession() {
     final sessionId = state.session?.id;
     if (sessionId == null) return const Stream.empty();
 
-    return _sessionRepository.getMembersStream(sessionId).handleError((e) {});
+    return _sessionRepository.getMembersStream(sessionId).handleError((e, st) {
+      Logger.log(error: e, stackTrace: st);
+    });
   }
 
-  Future<void> joinSessionByCode({
-    required String sessionCode,
-    required String memberId,
-  }) async {
+  Future<void> joinSessionByCode({required String sessionCode}) async {
     try {
+      final memberId = ref.read(userControllerProvider).profile.userId;
+
       state = const LoadingSessionState();
 
-      final result = await _sessionRepository.getSessionByCode(
+      final session = await _sessionRepository.getSessionByCode(
         sessionCode: sessionCode,
       );
 
-      if (result.hasError) throw Exception(result.errorMessage);
-
-      final session = result.value;
-
       final member = SessionMember(
-        sessionId: session!.id!,
+        sessionId: session.id!,
         memberId: memberId,
         role: SessionMemberRole.member,
       );
 
-      Logger.log(message: member.toString());
-      Logger.log(message: session.toString());
+      await _sessionRepository.addMemberToSession(member);
 
-      await _addMemberToSession(member, session);
       state = JoinSessionState(session: session, currentMember: member);
+    } on AppException catch (e) {
+      state = ErrorSessionState(message: e.message);
     } catch (e) {
       state = ErrorSessionState(
         message: 'فشل الانضمام إلى الجلسة، الرجاء إدخال كود الجلسة المطلوبة',
@@ -98,35 +85,27 @@ class SessionController extends StateNotifier<SessionState> {
 
   Future<void> leaveSession() async {
     try {
-      if (state.currentMember == null || state.session == null) {
-        return;
-      }
+      final currentMember = state.currentMember;
 
-      if (state.currentMember!.isHost) {
-        await endSession();
-        return;
-      }
+      if (currentMember == null) return;
 
-      final error = await _sessionRepository.removeMember(
-        member: state.currentMember!,
-        session: state.session!,
-      );
-      if (error != null) throw Exception();
+      await _sessionRepository.leaveSession(currentMember);
+
       state = const MemberLeavedSessionState();
-    } catch (e) {
-      Logger.log(error: e);
-      state = ErrorSessionState(
-        message: 'Failed to leave the session, please try again.',
-      );
+    } on AppException catch (e) {
+      state = ErrorSessionState(message: e.message);
     }
   }
 
   Future<void> endSession() async {
-    if (state.session == null) return;
-    final error = await _sessionRepository.deleteSession(state.session);
+    try {
+      final sessionId = state.session?.id;
+      if (sessionId == null) return;
 
-    state = (error == null)
-        ? const EndedSessionState()
-        : ErrorSessionState(message: error);
+      await _sessionRepository.deleteSession(sessionId);
+      state = const EndedSessionState();
+    } on AppException catch (e) {
+      state = ErrorSessionState(message: e.message);
+    }
   }
 }

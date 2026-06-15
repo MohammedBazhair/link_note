@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../../core/presentation/widgets/loading_button.dart';
 import '../../../qr_code/presentation/screens/scanner_qr_code_screen.dart';
 import '../../injection.dart';
@@ -52,12 +51,9 @@ class JoinSessionForm extends StatelessWidget {
                   return;
                 }
 
-                final userId = ref.read(userControllerProvider).profile.userId;
-
                 await ref
                     .read(sessionControllerProvider.notifier)
-                    .joinSessionByCode(memberId: userId, sessionCode: code);
-
+                    .joinSessionByCode(sessionCode: code);
               },
             );
           },

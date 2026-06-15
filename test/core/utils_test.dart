@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:link_note/core/utils.dart';
+import 'package:link_note/core/services/cipher_service.dart';
 
 void main() {
   test('خوارزميات التشفير هل تطلع نفس النتيجة لنفس المدخلات', () {

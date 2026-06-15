@@ -1,81 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/extensions/extensions.dart';
-import '../../domain/entities/note.dart';
-import '../controllers/note_providers.dart';
-import '../widgets/editor_form.dart';
-import '../widgets/save_dialog.dart';
+import 'package:link_note/features/note/domain/entities/note.dart';
+import 'package:link_note/features/note/presentation/controllers/current_note_controller/current_note_state.dart';
+import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
+import 'package:link_note/features/note/presentation/widgets/form_and_fields/editor_form.dart';
 
 class NoteEditorScreen extends ConsumerStatefulWidget {
-  const NoteEditorScreen({super.key, this.note});
+  const NoteEditorScreen({super.key, this.note, required this.functionality});
   final Note? note;
+  final CurrentNoteFunctionality functionality;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorState();
 }
 
 class _NoteEditorState extends ConsumerState<NoteEditorScreen> {
-  bool get isEditing => widget.note != null;
-
   @override
   void initState() {
     super.initState();
-    ref.read(editorFormProvider).initForm(widget.note);
-  }
+    final form = ref.read(noteFormProvider);
 
-  GlobalKey<FormState> get formKey => ref.read(editorFormProvider).formKey;
+    ref.listenManual(editorControllerProvider, (_, next) {
+      final editorContnet = next.editorContent;
+      if (form.title.text != editorContnet.title) {
+        form.title.text = editorContnet.title;
+      }
 
-  bool get isFormValid => formKey.currentState?.validate() ?? false;
-
-  Future<void> onSubmit() async {
-    if (!isFormValid) return;
-    final noteController = ref.read(noteControllerProvider.notifier);
-    final editorState = ref.read(editorFormProvider);
-
-    final note = Note(
-      id: widget.note?.id,
-      ownerId: widget.note?.ownerId,
-      title: editorState.titleController.text,
-      content: editorState.contentController.text,
-      updatedAt: DateTime.now().toUtc(),
-    );
-
-    if (isEditing) {
-      await noteController.updateNote(note);
-    } else {
-      await noteController.addNote(note);
-    }
-    context.pop();
-  }
-
-  Future<void> onPopInvoke() async {
-    final anyChanges = ref.read(editorFormProvider).hasChanges;
-    if (!isFormValid || !anyChanges) return context.pop();
-
-    final isWantToSave = await showDialog<bool?>(
-      context: context,
-      builder: (context) => const SaveDialog(),
-    );
-    if (isWantToSave == null) return;
-
-    isWantToSave ? await onSubmit() : context.pop();
+      if (form.content.text != editorContnet.content) {
+        form.content.text = editorContnet.content;
+      }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(currentNoteControllerProvider.notifier)
+          .loadNote(note: widget.note, functionality: widget.functionality);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        await onPopInvoke();
-      },
-      child: const Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight),
-          child: NoteFormHeader(),
-        ),
-        body: Padding(padding: EdgeInsets.all(18), child: EditorForm()),
+    return const Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: NoteFormHeader(),
       ),
+      body: Padding(padding: EdgeInsets.all(18), child: EditorForm()),
     );
   }
 }

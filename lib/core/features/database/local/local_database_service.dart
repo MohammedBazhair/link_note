@@ -3,6 +3,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../../../constants/internal_constants/typedef.dart';
 
 abstract interface class LocalDatabaseService {
+  Batch createBatch();
+
   Future<int> insertRow({
     required Map<String, dynamic> map,
     required String table,
@@ -28,12 +30,24 @@ abstract interface class LocalDatabaseService {
     List<Object?>? whereArgs,
   });
 
-  Stream<RowList> readRowsRealTime({required String table});
+  Stream<RowList> readRowsRealTime({
+    required String table,
+    String? orderBy,
+    String? where,
+    List<Object?>? whereArgs,
+  });
 
   Future<int> update({
     required Map<String, dynamic> updated,
     required dynamic value,
     required String column,
+    required String table,
+  });
+
+  Future<int> updateMany({
+    required Map<String, dynamic> updated,
+    required String column,
+    required List<String> valuesIn,
     required String table,
   });
 
@@ -53,6 +67,9 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
   LocalDatabaseServiceImpl(this._database);
   final Database _database;
 
+  @override
+  Batch createBatch() => _database.batch();
+  
   @override
   Future<int> insertRow({
     required Map<String, dynamic> map,
@@ -90,6 +107,24 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
       orderBy: orderBy,
       where: where,
       whereArgs: whereArgs,
+    );
+  }
+
+  @override
+  Future<int> updateMany({
+    required Map<String, dynamic> updated,
+    required String column,
+    required List<dynamic> valuesIn,
+    required String table,
+  }) async {
+    if (valuesIn.isEmpty) return 0;
+    final placeholders = List.filled(valuesIn.length, '?').join(',');
+
+    return _database.update(
+      table,
+      updated,
+      where: '$column IN ($placeholders)',
+      whereArgs: valuesIn,
     );
   }
 
@@ -135,8 +170,18 @@ class LocalDatabaseServiceImpl implements LocalDatabaseService {
   }
 
   @override
-  Stream<RowList> readRowsRealTime({required String table}) {
-    final future = readRows(table: table);
+  Stream<RowList> readRowsRealTime({
+    required String table,
+    String? orderBy,
+    String? where,
+    List<Object?>? whereArgs,
+  }) {
+    final future = readRows(
+      table: table,
+      orderBy: orderBy,
+      where: where,
+      whereArgs: whereArgs,
+    );
     return Stream.fromFuture(future);
   }
 

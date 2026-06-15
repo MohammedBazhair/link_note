@@ -22,36 +22,45 @@ class NoteController extends StreamNotifier<List<Note>> {
   }
 
   Future<void> _getAllNotes() async {
-    final notes = await _notesRepository.getAll();
+    final notes = await _notesRepository.getAll(_userId);
+
     state = AsyncData(notes);
   }
 
-  Future<void> addNote(Note note) async {
+  Future<Note?> addNote(Note note) async {
     final userNote = note.copyWith(ownerId: _userId);
 
     final noteCreated = await _notesRepository.create(userNote);
-    if (noteCreated == null) return;
+    if (noteCreated == null) return null;
 
-    await _getAllNotes();
+    unawaited(_getAllNotes());
+    return noteCreated;
   }
 
   Future<void> updateNote(Note note) async {
-    try {
-      await _notesRepository.update(note);
-      await _getAllNotes();
-    } catch (e, st) {
-      Logger.log(error: e, stackTrace: st);
-    }
+    await _notesRepository.update(note);
+    unawaited(_getAllNotes());
+
+    if (note.id == null) return;
+    final familyExists = ref.exists(getNoteByIdProvider(note.id!));
+
+    if (familyExists) ref.invalidate(getNoteByIdProvider(note.id!));
   }
 
   Future<void> deleteNote(Note note) async {
-    try {
-      if (note.id == null) return;
-      await _notesRepository.delete(note);
-      await _getAllNotes();
-    } catch (e, st) {
-      Logger.log(error: e, stackTrace: st);
-    }
+    if (note.id == null) return;
+    await _notesRepository.delete(note);
+    await _getAllNotes();
+  }
+
+  Future<void> deleteNotes(Set<String> notesIds) async {
+    await _notesRepository.deleteNotes(notesIds);
+    await _getAllNotes();
+  }
+
+  Future<void> undoDeleteNotes(Set<String> notesIds) async {
+    await _notesRepository.undoDeleteNotes(notesIds);
+    await _getAllNotes();
   }
 
   Stream<Note?> fetchSingleNoteRealtime(String noteId) {

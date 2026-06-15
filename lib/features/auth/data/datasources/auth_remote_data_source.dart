@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:link_note/core/constants/internal_constants/log.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -25,6 +25,7 @@ abstract interface class AuthRemoteDataSource {
     required String email,
     required String newPassword,
     required String nonce,
+    required OtpType otpType,
   });
 }
 
@@ -58,14 +59,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> signInWithGoogle() async {
-    try {
-      await _auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: ExternalConsts.authRedirectUrl,
-      );
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    Logger.log(
+      message:
+          'Session before login = ${Supabase.instance.client.auth.currentSession}',
+    );
+    final response = await Supabase.instance.client.auth.getOAuthSignInUrl(
+      provider: OAuthProvider.google,
+      redirectTo: ExternalConsts.authRedirectUrl,
+    );
+
+    Logger.log(message: response.url);
+
+    await _auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: ExternalConsts.authRedirectUrl,
+    );
   }
 
   @override
@@ -85,9 +93,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String newPassword,
     required String nonce,
+    required OtpType otpType,
   }) async {
     try {
-      await _auth.verifyOTP(type: OtpType.recovery, token: nonce, email: email);
+      await _auth.verifyOTP(type: otpType, token: nonce, email: email);
 
       await _auth.updateUser(
         UserAttributes(nonce: nonce, email: email, password: newPassword),

@@ -10,7 +10,6 @@ ThemeData darkTheme() => ThemeData(
     fontFamily: ExternalConsts.fontFamily,
   ),
   fontFamily: ExternalConsts.fontFamily,
-
   drawerTheme: const DrawerThemeData(backgroundColor: Color(0xFF151825)),
   appBarTheme: const AppBarThemeData(
     centerTitle: true,
@@ -20,6 +19,22 @@ ThemeData darkTheme() => ThemeData(
     iconTheme: IconThemeData(color: Colors.white),
     actionsPadding: EdgeInsets.symmetric(horizontal: 12),
     leadingWidth: 56,
+  ),
+  searchBarTheme: SearchBarThemeData(
+    backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+    overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+    elevation: const WidgetStatePropertyAll(0),
+    padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 15)),
+    textStyle: const WidgetStatePropertyAll(
+      TextStyle(fontSize: 12, color: Color.fromARGB(255, 171, 191, 194)),
+    ),
+    shape: WidgetStatePropertyAll(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+
+    hintStyle: WidgetStatePropertyAll(
+      TextStyle(color: const Color(0xFF95B5B7).withAlpha(200), fontSize: 13),
+    ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
@@ -59,12 +74,8 @@ ThemeData darkTheme() => ThemeData(
       borderRadius: BorderRadius.circular(25),
       borderSide: const BorderSide(color: Colors.transparent),
     ),
-    errorStyle: const TextStyle(height: 3, color: Color(0xFFE4736B)),
-    helperStyle: const TextStyle(
-      color: Color(0xB1BDBDBD),
-      fontSize: 11,
-      height: 1.5,
-    ),
+    errorStyle: const TextStyle(color: Color(0xFFE4736B), height: 1),
+    helperStyle: const TextStyle(color: Color(0xB1BDBDBD)),
   ),
   iconTheme: const IconThemeData(color: DarkColors.icon),
   iconButtonTheme: IconButtonThemeData(

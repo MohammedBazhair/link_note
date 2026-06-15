@@ -1,12 +1,11 @@
 import 'dart:io';
-
-import '../../../../core/constants/external_constants/external_constants.dart';
-import '../../../../core/constants/internal_constants/log.dart';
-import '../../../../core/errors/result.dart';
-import '../../../../core/features/database/remote/remote_database_service.dart';
-import '../../domain/entities/session.dart';
-import '../../domain/entities/session_member.dart';
-import '../../domain/repository/session_repository.dart';
+import 'package:link_note/core/constants/external_constants/external_constants.dart';
+import 'package:link_note/core/constants/internal_constants/log.dart';
+import 'package:link_note/core/errors/exceptions.dart';
+import 'package:link_note/core/features/database/remote/remote_database_service.dart';
+import 'package:link_note/features/session/domain/entities/session.dart';
+import 'package:link_note/features/session/domain/entities/session_member.dart';
+import 'package:link_note/features/session/domain/repository/session_repository.dart';
 
 class SessionRepositoryImpl implements SessionRepository {
   SessionRepositoryImpl(this._remoteDatabase);
@@ -14,7 +13,7 @@ class SessionRepositoryImpl implements SessionRepository {
   final RemoteDatabaseService _remoteDatabase;
 
   @override
-  Future<Result<Session>> createSession(Session session) async {
+  Future<Session> createSession(Session session) async {
     try {
       await _remoteDatabase.deleteWhere(
         filters: {'host_id': session.hostId},
@@ -26,100 +25,106 @@ class SessionRepositoryImpl implements SessionRepository {
         table: ExternalConsts.sessionsTable,
       );
 
-      return Result.ok(Session.fromMap(rawSession));
+      return Session.fromMap(rawSession);
     } on SocketException catch (_) {
-      return Result.error(
-        'Failed to create session, please check your internet connection.',
+      throw const InternetException(
+        'فشل إنشاء الجلسة، يرجى التحقق من اتصالك بالإنترنت.',
       );
-    } on Exception catch (_) {
-      return Result.error('Failed to create session, please try again.');
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+      throw const CreateSessionException();
     }
   }
 
   @override
-  Future<String?> addMemberToSession({
-    required SessionMember member,
-    required Session session,
-  }) async {
+  Future<void> addMemberToSession(SessionMember member) async {
     try {
-      Logger.log(message: 'Adding member to session');
-      final map = await _remoteDatabase.insertRow(
+      await _remoteDatabase.insertRow(
         map: member.toMap(),
         table: ExternalConsts.sessionMembersTable,
       );
-      Logger.log(message: map.toString());
-      return null;
-    } catch (e) {
-      Logger.log(error: e);
-      return 'Failed to add member to session. Please try again, or check your internet connection.';
+    } on SocketException catch (_) {
+      throw const InternetException(
+        'فشل إضافة العضو للجلسة، يرجى التحقق من اتصالك بالإنترنت.',
+      );
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+      throw const AddMemberToSessionException();
     }
   }
 
   @override
-  Future<String?> deleteSession(Session? session) async {
+  Future<void> deleteSession(String sessionId) async {
     try {
-      if (session == null || session.id == null) {
-        return 'Session ID is null. Cannot delete session.';
+      if (sessionId.isEmpty) {
+        throw const RemoveSessionException();
       }
 
       await _remoteDatabase.delete(
-        id: session.id!,
+        id: sessionId,
         column: 'id',
         table: ExternalConsts.sessionsTable,
       );
-      return null;
-    } catch (_) {
-      return 'Failed to delete session. Please try again, or check your internet connection.';
+    } on SocketException catch (_) {
+      throw const InternetException(
+        'فشلت عملية إزالة الجلسة، يرجى التحقق من اتصالك بالإنترنت.',
+      );
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+      throw const RemoveSessionException();
     }
   }
 
   @override
-  Future<String?> removeMember({
-    required SessionMember member,
-    required Session session,
-  }) async {
+  Future<void> removeMember(SessionMember member) async {
     try {
-      if (session.id == null) {
-        return 'Session is not found, Cannot remove member from it.';
+      if (member.sessionId.isEmpty) {
+        throw const RemoveMemberFromSessionException();
       }
 
-      final filters = {'session_id': session.id!, 'member_id': member.memberId};
+      final filters = {
+        'session_id': member.sessionId,
+        'member_id': member.memberId,
+      };
 
       await _remoteDatabase.deleteWhere(
         table: ExternalConsts.sessionMembersTable,
         filters: filters,
       );
-      return null;
-    } catch (e) {
-      return 'Failed to remove member from session. Please try again, or check your internet connection.';
+    } on SocketException catch (_) {
+      throw const InternetException(
+        'فشلت عملية إزالة العضو من الجلسة، يرجى التحقق من اتصالك بالإنترنت.',
+      );
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+      throw const RemoveMemberFromSessionException();
     }
   }
 
   @override
-  Future<Result<Session>> getSessionByCode({
-    required String sessionCode,
-  }) async {
+  Future<Session> getSessionByCode({required String sessionCode}) async {
     try {
       final map = await _remoteDatabase.readRowsWhere(
         table: ExternalConsts.sessionsTable,
         filters: {'session_code': sessionCode},
       );
 
-      if (map.isEmpty) {
-        return Result.error(
-          'The session is not found, enter another session code.',
-        );
-      }
+      if (map.isEmpty) throw Exception();
+
       final session = Session.fromMap(map.first);
+
       if (session.id == null) {
-        return Result.error('Failed to get the session without id.');
+        throw const GetSessionException('حدث خطأ في قراءة بيانات الجلسة.');
       }
 
-      return Result.ok(session);
+      return session;
     } on SocketException catch (_) {
-      return Result.error('Check your connection first to get the session');
-    } on Exception catch (_) {
-      return Result.error('Failed to get the session, try again later');
+      throw const InternetException(
+        'تعذر جلب بيانات الجلسة، يرجى التحقق من اتصالك بالإنترنت.',
+      );
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+      throw const GetSessionException();
     }
   }
 
@@ -146,5 +151,16 @@ class SessionRepositoryImpl implements SessionRepository {
       });
       return members;
     });
+  }
+
+  @override
+  Future<void> leaveSession(SessionMember member) async {
+  if (member.isHost) {
+    await deleteSession(member.sessionId);
+    return;
+  }
+  
+  await removeMember(member);
+
   }
 }

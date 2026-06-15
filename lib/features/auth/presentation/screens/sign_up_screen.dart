@@ -1,17 +1,15 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/widgets/field_label.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 import '../widgets/auth_button.dart';
+import '../widgets/auth_switcher_text.dart';
 import '../widgets/custom_email_field.dart';
 import '../widgets/custom_fullname_field.dart';
 import '../widgets/custom_password_field.dart';
@@ -61,7 +59,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       password: passwordController.text,
     );
 
-    await ref.read(authControllerProvider.notifier).signUp(user);
+    await ref.read(authControllerProvider.notifier).signUpWithEmail(user);
   }
 
   @override
@@ -81,7 +79,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(Assets.imagesBackground),
-            fit: BoxFit.fill,
+            fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
@@ -127,73 +125,49 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
                             const SizedBox(height: 80),
 
-                            // الاسم
-                            const FieldLabel(text: 'الاسم الكامل'),
-                            const SizedBox(height: 8),
-                            CustomFullNameField(nameController: nameController),
+                            GridView(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: context.isDesktop ? 2 : 1,
+                                    crossAxisSpacing: 24,
+                                    mainAxisSpacing: 24,
+                                    mainAxisExtent: 130,
+                                  ),
+                              children: [
+                                CustomFullNameField(
+                                  nameController: nameController,
+                                ),
 
-                            const SizedBox(height: 25),
+                                CustomEmailField(emailController),
 
-                            // البريد
-                            const FieldLabel(text: 'البريد الإلكتروني'),
+                                CustomPasswordField(
+                                  controller: passwordController,
+                                  hintText: 'أدخل كلمة المرور',
+                                ),
 
-                            const SizedBox(height: 8),
-
-                            CustomEmailField(emailController),
-                            const SizedBox(height: 25),
-
-                            // كلمة المرور
-                            const FieldLabel(text: 'كلمة المرور'),
-                            const SizedBox(height: 8),
-
-                            CustomPasswordField(
-                              controller: passwordController,
-                              hintText: 'أدخل كلمة المرور',
-                            ),
-
-                            const SizedBox(height: 25),
-
-                            // تأكيد كلمة المرور
-                            const FieldLabel(text: 'تأكيد الباسورد'),
-                            const SizedBox(height: 8),
-
-                            CustomPasswordField(
-                              originalController: passwordController,
-                              controller: confirmPasswordController,
-                              hintText: 'أعد إدخال كلمة المرور',
-                              onSubmit: onSubmit,
-                              textInputAction: TextInputAction.done,
+                                CustomPasswordField(
+                                  originalController: passwordController,
+                                  controller: confirmPasswordController,
+                                  hintText: 'أعد إدخال كلمة المرور',
+                                  onSubmit: onSubmit,
+                                  textInputAction: TextInputAction.done,
+                                  isConfirmField: true,
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 35),
 
-                            // زر إنشاء الحساب
                             AuthButton(text: 'إنشاء حساب', onPressed: onSubmit),
 
                             const SizedBox(height: 15),
 
-                            // العودة لتسجيل الدخول
-                            RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                text: 'لديك حساب بالفعل؟',
-                                children: [
-                                  const TextSpan(text: '  '),
-                                  TextSpan(
-                                    text: 'سجل الدخول',
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        context.pushReplacementTo(
-                                          const SignInScreen(),
-                                        );
-                                      },
-                                    style: const TextStyle(
-                                      color: Color(0xFF00FFFF),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            AuthSwitcherText(
+                              text: 'لديك حساب بالفعل؟',
+                              actionText: 'سجل الدخول',
+                              builder: (_) => const SignInScreen(),
                             ),
                           ],
                         ),

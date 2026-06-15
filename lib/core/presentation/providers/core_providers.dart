@@ -1,20 +1,17 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../../features/user/data/datasources/user_local_data_source.dart';
 import '../../../features/user/data/datasources/user_remote_data_source.dart';
 import '../../../features/user/data/repositories/user_repository_impl.dart';
 import '../../../features/user/presentation/controllers/user_controller.dart';
-import '../../../features/user/presentation/controllers/user_state.dart';
 import '../../features/ai/ai_client.dart';
-import '../../features/database/local/cache_service.dart';
+import '../../features/database/local/secure_cache_service_impl.dart';
 import '../../features/database/remote/remote_database_service.dart';
 import '../../features/database/remote/remote_storage_service.dart';
 import '../../features/init_local_data_base.dart';
@@ -24,7 +21,7 @@ import '../../features/network/network_clinet.dart';
 import '../../features/sync/sync_local_data_source.dart';
 
 final networkProvider = Provider((_) {
-  final _connection= Connectivity();
+  final _connection = InternetConnection();
   return ConnectivityServiceImpl(_connection);
 });
 
@@ -48,7 +45,7 @@ final networkCilientProvider = Provider((ref) {
 });
 
 final aiCilientProvider = Provider((ref) {
-  final functionsClient  = ref.read(supabaseProvider).client.functions;
+  final functionsClient = ref.read(supabaseProvider).client.functions;
 
   return AiClientImpl(functionsClient);
 });
@@ -60,7 +57,7 @@ final authRemoteDataSourceProvider = Provider((ref) {
 });
 
 final userLocalDataSourceProvider = Provider((ref) {
-  final localCache = ref.read(localCacheServiceProvider);
+  final localCache = ref.read(secureCacheServiceProvider);
   return UserLocalDataSourceImpl(localCache);
 });
 
@@ -68,8 +65,14 @@ final userRepositoryProvider = Provider((ref) {
   final auth = ref.read(supabaseAuthProvider);
   final userRemoteDataSource = ref.read(userRemoteDataSourceProvider);
   final userLocalDataSource = ref.read(userLocalDataSourceProvider);
+  final connectivityService = ref.read(networkProvider);
 
-  return UserRepositoryImpl(userRemoteDataSource, userLocalDataSource, auth);
+  return UserRepositoryImpl(
+    userRemoteDataSource,
+    userLocalDataSource,
+    auth,
+    connectivityService,
+  );
 });
 
 final remoteDatabaseServiceProvider = Provider((ref) {
@@ -82,20 +85,21 @@ final remoteStorageServiceProvider = Provider((ref) {
   return RemoteStorageServiceImpl(supabaseStorage);
 });
 
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  return throw Exception('sharedPreferencesProvider is not implemented');
+final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
+  const storage = FlutterSecureStorage();
+  return storage;
 });
 
-final localCacheServiceProvider = Provider((ref) {
-  final prefs = ref.read(sharedPreferencesProvider);
-  return LocalCacheServiceImpl(prefs);
+final secureCacheServiceProvider = Provider((ref) {
+  final secure = ref.read(secureStorageProvider);
+  return SecureCacheServiceImpl(secure);
 });
 
 final userRemoteDataSourceProvider = Provider((ref) {
   final supabaseClinet = ref.read(supabaseProvider).client;
   final remoteDatabaseService = ref.read(remoteDatabaseServiceProvider);
   final remoteStorageService = ref.read(remoteStorageServiceProvider);
-  final localCacheService = ref.read(localCacheServiceProvider);
+  final localCacheService = ref.read(secureCacheServiceProvider);
   return UserRemoteDataSourceImpl(
     supabaseClinet,
     remoteDatabaseService,
@@ -104,34 +108,24 @@ final userRemoteDataSourceProvider = Provider((ref) {
   );
 });
 
-final _userControllerProvider = Provider((ref) {
-  final repo = ref.read(userRepositoryProvider);
-  return UserController(repo);
-});
-
-final userControllerProvider = StateNotifierProvider<UserController, UserState>(
-  (ref) {
-    final controller = ref.read(_userControllerProvider);
-    return controller;
-  },
-);
+final userControllerProvider = NotifierProvider(UserController.new);
 
 final authRepositoryProvider = Provider((ref) {
   final remoteAuth = ref.read(authRemoteDataSourceProvider);
   final network = ref.read(networkProvider);
-  final localCacheService = ref.read(localCacheServiceProvider);
-  return AuthRepositoryImpl(remoteAuth, network, localCacheService);
+  final _cache = ref.read(secureCacheServiceProvider);
+  return AuthRepositoryImpl(remoteAuth, network, _cache);
 });
 
 Future<List<Override>> getOverrides() async {
-  final prefs = await SharedPreferences.getInstance();
   final dbOverride = await getOverrideDatabase();
-  return [sharedPreferencesProvider.overrideWithValue(prefs), dbOverride];
+  return [dbOverride];
 }
 
-final memoryCacheProvider = Provider((ref)=> MemoryCache());
+final memoryCacheProvider = Provider((ref) => MemoryCache());
 
 final syncLocalProvider = Provider((ref) {
   final localCache = ref.read(localDatabaseProvider);
   return SyncLocalDataSourceImpl(localCache);
 });
+

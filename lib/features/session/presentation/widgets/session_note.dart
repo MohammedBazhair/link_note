@@ -1,14 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/utils/debouncer.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/presentation/widgets/conditional_builder.dart';
 import '../../../note/domain/entities/note.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
-import '../../../note/presentation/widgets/content_form_field.dart';
-import '../../../note/presentation/widgets/title_form_field.dart';
+import '../../../note/presentation/widgets/form_and_fields/content_form_field.dart';
+import '../../../note/presentation/widgets/form_and_fields/title_form_field.dart';
 import '../../injection.dart';
 import '../controllers/session_providers.dart';
 
@@ -20,21 +19,20 @@ class SessionNoteEditor extends ConsumerStatefulWidget {
 }
 
 class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
-  Timer? _updateDebounceTimer;
+  final _updateDebounce = Debouncer(milliseconds: 2500);
 
   void scheduleNoteUpdate() {
-    _updateDebounceTimer?.cancel();
-    _updateDebounceTimer = Timer(
-      const Duration(seconds: 2),
-      () => ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote),
-    );
+    _updateDebounce.run(() {
+      if (currentEditedNote == null) return;
+      ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote!);
+    });
   }
 
-  Note get currentEditedNote => ref.read(editorFormProvider).note;
+  Note? get currentEditedNote => ref.read(currentNoteControllerProvider).note;
 
   @override
   void dispose() {
-    _updateDebounceTimer?.cancel();
+    _updateDebounce.dispose();
     super.dispose();
   }
 
@@ -70,7 +68,6 @@ class SessionNoteForm extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final formState = ref.watch(editorFormProvider);
     final isHost = ref.watch(
       sessionControllerProvider.select((s) => s.currentMember?.isHost ?? false),
     );
@@ -78,17 +75,12 @@ class SessionNoteForm extends ConsumerWidget {
     return Column(
       spacing: 16,
       children: [
-        TitleFormField(
-          controller: formState.titleController,
-          readOnly: !isHost,
-          onChanged: (_) => onNoteChanged?.call(),
-        ),
+        TitleFormField(readOnly: !isHost),
 
         Expanded(
           child: ContentFormField(
-            controller: formState.contentController,
             readOnly: !isHost,
-            onChanged: (_) => onNoteChanged?.call(),
+            onChanged: () => onNoteChanged?.call(),
           ),
         ),
       ],

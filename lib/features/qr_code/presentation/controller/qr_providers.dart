@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -20,7 +18,3 @@ final qrControllerProvider = StateNotifierProvider<QrController, QrState>((
   return QrController(mobileController);
 });
 
-
-final timerDebounceProvider = StateProvider<Timer?>((ref) {
-  return null;
-});

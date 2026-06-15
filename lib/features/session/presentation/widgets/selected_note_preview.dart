@@ -4,7 +4,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/widgets/conditional_builder.dart';
+import '../../../note/presentation/controllers/current_note_controller/current_note_state.dart';
 import '../../../note/presentation/controllers/note_providers.dart';
 import '../../../note/presentation/screens/note_editor_screen.dart';
 import '../../domain/entities/selected_note_preview_config.dart';
@@ -15,29 +15,36 @@ class SelectedNotePreview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final noteId = ref.watch(selectableNoteProvider).noteId;
-    const fallbackChild = Center(child: Text('لم يتم اختيار ملاحظة بعد'));
-    if (noteId == null) return fallbackChild;
+
+    if (noteId == null) {
+      return const _NoNoteSelected();
+    }
 
     final asyncNote = ref.watch(getNoteByIdProvider(noteId));
 
     return asyncNote.when(
       data: (note) {
-        return ConditionalBuilder(
-          condition: note != null,
-          fallback: (_) => fallbackChild,
-          builder: (_) {
-            final params = SelectedNotePreviewConfig(
-              note: note!,
-              statusLabel: 'محدد',
-              onButtonPressed: () =>
-                  context.pushTo(NoteEditorScreen(note: note)),
-              onCardPressed: () => context.pushTo(NoteEditorScreen(note: note)),
-              textButtonLabel: 'تعديل',
-              textButtonIcon: Icons.edit,
-            );
-            return SelectedNotePreviewCard(params);
-          },
+        if (note == null) return const _NoNoteSelected();
+
+        final params = SelectedNotePreviewConfig(
+          note: note,
+          statusLabel: 'محدد',
+          onButtonPressed: () => context.pushTo(
+            NoteEditorScreen(
+              note: note,
+              functionality: CurrentNoteFunctionality.edit,
+            ),
+          ),
+          onCardPressed: () => context.pushTo(
+            NoteEditorScreen(
+              note: note,
+              functionality: CurrentNoteFunctionality.edit,
+            ),
+          ),
+          textButtonLabel: 'تعديل',
+          textButtonIcon: Icons.edit,
         );
+        return SelectedNotePreviewCard(params);
       },
       loading: () {
         return Skeletonizer(
@@ -45,9 +52,18 @@ class SelectedNotePreview extends ConsumerWidget {
         );
       },
       error: (_, __) {
-        return fallbackChild;
+        return const _NoNoteSelected();
       },
     );
+  }
+}
+
+class _NoNoteSelected extends StatelessWidget {
+  const _NoNoteSelected();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('لم يتم اختيار ملاحظة بعد'));
   }
 }
 

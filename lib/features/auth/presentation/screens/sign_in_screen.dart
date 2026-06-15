@@ -9,12 +9,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/presentation/widgets/field_label.dart';
+import '../../../../core/presentation/widgets/centered_divider_text.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
 import '../../auth_listeners.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 import '../widgets/auth_button.dart';
+import '../widgets/auth_switcher_text.dart';
 import '../widgets/custom_email_field.dart';
 import '../widgets/custom_password_field.dart';
 import '../widgets/sign_google_button.dart';
@@ -62,6 +63,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
     final _appLinks = AppLinks();
 
     _subscribtionsLinks = _appLinks.uriLinkStream.listen((uri) async {
+       Logger.log(message:  'URI = $uri');
       await ref.read(authControllerProvider.notifier).loginWithUri(uri);
     });
   }
@@ -97,6 +99,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
     }
   }
 
+  bool get isDesktop => context.isDesktop;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,7 +108,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(Assets.imagesBackground),
-            fit: BoxFit.fill,
+            fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
@@ -150,23 +154,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
 
                             const SizedBox(height: 80),
 
-                            const FieldLabel(text: 'البريد الإلكتروني'),
+                            GridView(
+                              physics: const NeverScrollableScrollPhysics(),
 
-                            const SizedBox(height: 8),
+                              shrinkWrap: true,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: isDesktop ? 2 : 1,
+                                    mainAxisSpacing: isDesktop ? 24 : 12,
+                                    crossAxisSpacing: isDesktop ? 24 : 12,
+                                    mainAxisExtent: 130,
+                                  ),
 
-                            CustomEmailField(_emailController),
+                              children: [
+                                CustomEmailField(_emailController),
 
-                            const SizedBox(height: 25),
-
-                            const FieldLabel(text: 'كلمة المرور'),
-
-                            const SizedBox(height: 8),
-
-                            CustomPasswordField(
-                              controller: _passwordController,
-                              hintText: 'أدخل كلمة المرور',
-                              onSubmit: onSubmit,
-                              textInputAction: TextInputAction.done,
+                                CustomPasswordField(
+                                  controller: _passwordController,
+                                  hintText: 'أدخل كلمة المرور',
+                                  onSubmit: onSubmit,
+                                  textInputAction: TextInputAction.done,
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 25),
@@ -195,34 +204,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
                             ),
 
                             const SizedBox(height: 15),
+                            const CenteredDividerText(text: 'أو'),
+                            const SizedBox(height: 15),
 
                             const SignGoogleButton(),
 
                             const SizedBox(height: 25),
 
-                            // الانتقال إلى التسجيل
-                            RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                text: 'ليس لديك حساب؟ ',
-                                children: [
-                                  const TextSpan(text: '  '),
-
-                                  TextSpan(
-                                    text: 'سجل الآن',
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        context.pushReplacementTo(
-                                          const SignUpScreen(),
-                                        );
-                                      },
-                                    style: const TextStyle(
-                                      color: Color(0xFF00FFFF),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            AuthSwitcherText(
+                              text: 'ليس لديك حساب؟',
+                              actionText: 'سجل الآن',
+                              builder: (_) => const SignUpScreen(),
                             ),
                           ],
                         ),

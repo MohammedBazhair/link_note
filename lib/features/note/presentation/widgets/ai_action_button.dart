@@ -7,10 +7,11 @@ class AiActionButton extends ConsumerWidget {
   const AiActionButton({
     super.key,
     required this.isProcessing,
-    required this.onPressed,
+    required this.onPressed, required this.tooltip,
   });
   final bool isProcessing;
   final VoidCallback onPressed;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -22,7 +23,7 @@ class AiActionButton extends ConsumerWidget {
         child: const CircularProgressIndicator(strokeWidth: 1.2),
       ),
       secondChild: IconButton(
-        tooltip: 'استعمال AI للتحسين',
+        tooltip: tooltip,
         onPressed: onPressed,
         icon: SvgPicture.asset(Assets.iconsWandStars, width: 24),
       ),

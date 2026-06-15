@@ -1,15 +1,28 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-
+import 'package:link_note/core/models/snack_bar_action_model.dart';
 import '../constants/external_constants/external_constants.dart';
+import '../constants/internal_constants/log.dart';
 
 extension ShowSnackbar on BuildContext {
-  void showSnakbar(String msg) {
+  void showSnakbar(String msg, {SnackBarActionModel? action}) {
     ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(content: Text(msg), duration: const Duration(seconds: 2)),
+      SnackBar(
+        content: Text(msg),
+        action: action != null
+            ? SnackBarAction(
+                label: action.label,
+                onPressed: action.onPressed,
+                textColor: Colors.white,
+              )
+            : null,
+        duration: const Duration(seconds: 2),
+        dismissDirection: DismissDirection.horizontal,
+      ),
+
       snackBarAnimationStyle: const AnimationStyle(
         duration: Duration(milliseconds: 400),
+        reverseDuration: Duration(milliseconds: 600),
         curve: Curves.easeInCirc,
       ),
     );
@@ -68,5 +81,48 @@ extension DurationFormats on Duration {
     final minutes = inMinutes;
     final seconds = inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
+  }
+}
+
+extension ResponsiveContext on BuildContext {
+  MediaQueryData get _mediaQuery => MediaQuery.of(this);
+
+  double get screenWidth => _mediaQuery.size.width;
+
+  double get screenHeight => _mediaQuery.size.height;
+
+  bool get isMobile => screenWidth < 600;
+
+  bool get isTablet => screenWidth >= 600 && screenWidth < 1024;
+
+  bool get isDesktop => screenWidth >= 1024;
+
+  Widget responsive({
+    required WidgetBuilder mobile,
+    WidgetBuilder? tablet,
+    required WidgetBuilder desktop,
+  }) {
+    if (isDesktop) {
+      return desktop(this);
+    }
+
+    if (isTablet) {
+      return tablet != null ? tablet(this) : desktop(this);
+    }
+
+    return mobile(this);
+  }
+
+  void printDebug() {
+    Logger.log(
+      message:
+          '''
+Screen Width: $screenWidth
+Screen Height: $screenHeight
+Is Desktop: $isDesktop
+Is Mobile: $isMobile
+Is Tablet: $isTablet
+''',
+    );
   }
 }

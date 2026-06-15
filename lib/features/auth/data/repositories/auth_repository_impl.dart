@@ -1,11 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/errors/exceptions.dart';
-import '../../../../core/errors/result.dart';
-import '../../../../core/features/database/local/cache_service.dart';
+import '../../../../core/features/database/local/cache_service_interface.dart';
 import '../../../../core/features/network/connectivity_service.dart';
 import '../../../user/domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -15,7 +12,11 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._remote, this._networkService, this._cache);
   final AuthRemoteDataSource _remote;
   final ConnectivityService _networkService;
-  final LocalCacheService _cache;
+  final SecureCacheService _cache;
+
+  void _saveUserId(String userId) async {
+    await _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
+  }
 
   @override
   Future<String?> signUp(UserEntity user) async {
@@ -23,10 +24,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _remote.signUp(user);
       if (response.user == null) throw const AuthException('no id found');
 
-      await _cache.setString(
-        key: ExternalConsts.lastUserIdKey,
-        value: response.user!.id,
-      );
+      final userId = response.user!.id;
+      _saveUserId(userId);
       return null; // تم التسجيل بنجاح
     } on AuthException catch (e) {
       return _mapSupabaseSignUpError(e.message);
@@ -44,12 +43,8 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _remote.signIn(email: email, password: password);
       final userId = response.user?.id;
 
-      if (userId != null) {
-        await _cache.setString(
-          key: ExternalConsts.lastUserIdKey,
-          value: userId,
-        );
-      }
+      if (userId != null) _saveUserId(userId);
+
       return null;
     } on AuthApiException catch (e) {
       return _mapSupabaseSignInError(e.message);
@@ -59,18 +54,42 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> signOut() async {
-    await _cache.remove(key: ExternalConsts.lastUserIdKey);
-    return _remote.signOut();
-  }
-
-  @override
   Future<void> signInWithGoogle() async {
+    final hasConnection = await _networkService.hasConnection();
+
+    if (!hasConnection) throw const InternetException();
+
     try {
       await _remote.signInWithGoogle();
     } catch (e) {
-      debugPrint(e.toString());
+      throw const AuthAppException(
+        'حصلت مشكلة أثناء محاولة التسجيل عبر حساب قوقل',
+      );
     }
+  }
+
+  @override
+  Future<AuthResponse> signInWithUrl(Uri uri) async {
+    Logger.log(message: 
+      'Session after callback = ${Supabase.instance.client.auth.currentSession}',
+    );
+    final code = uri.queryParameters['code'];
+    if (code == null) throw ArgumentError.notNull();
+
+    final authResponse = await _remote.exchangeCodeForAuthSession(code);
+
+    final userId = authResponse.user?.id;
+
+    if (userId == null) throw ArgumentError.notNull();
+
+    await _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
+    return authResponse;
+  }
+
+  @override
+  Future<void> signOut() async {
+    await _cache.remove(key: ExternalConsts.lastUserIdKey);
+    return _remote.signOut();
   }
 
   String _mapSupabaseSignInError(String message) {
@@ -106,25 +125,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Result<AuthResponse>> signInWithUrl(Uri uri) async {
-    try {
-      final code = uri.queryParameters['code'];
-      if (code == null) throw ArgumentError.notNull();
-
-      final authResponse = await _remote.exchangeCodeForAuthSession(code);
-
-      final userId = authResponse.user?.id;
-
-      if (userId == null) throw ArgumentError.notNull();
-
-      await _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
-      return Result.ok(authResponse);
-    } catch (e) {
-      return Result.error('فشل تسجيل الدخول، يرجى المحاولة مرة أخرى');
-    }
-  }
-
-  @override
   Future<void> resetPassword(String email) async {
     try {
       await _remote.resetPassword(email);
@@ -148,6 +148,7 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         newPassword: newPassword,
         nonce: nonce,
+        otpType: OtpType.recovery,
       );
     } on AuthRetryableFetchException catch (_) {
       throw const InternetException();

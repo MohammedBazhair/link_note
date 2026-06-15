@@ -1,24 +1,18 @@
-import '../../../../core/errors/result.dart';
 import '../entities/session.dart';
 import '../entities/session_member.dart';
 
 abstract interface class SessionRepository {
-  Future<Result<Session>> createSession(Session session);
+  Future<Session> createSession(Session session);
 
-  Future<String?> deleteSession(Session? session);
+  Future<void> deleteSession(String sessionId);
 
-  Future<void> addMemberToSession({
-    required SessionMember member,
-    required Session session,
-  });
+  Future<void> addMemberToSession(SessionMember member);
 
-  Future<String?> removeMember({
-    required SessionMember member,
-    required Session session,
-  });
+  Future<void> removeMember(SessionMember member);
 
-  Future<Result<Session>> getSessionByCode({required String sessionCode});
+  Future<Session> getSessionByCode({required String sessionCode});
 
   Stream<List<SessionMember>> getMembersStream(String sessionId);
 
+  Future<void> leaveSession(SessionMember member);
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/constants/colors/colors.dart';
+import 'package:link_note/features/note/note_ai_listener.dart';
+import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-
-import '../../../features/note/presentation/controllers/note_ai_controller/note_ai_state.dart';
-import '../../../features/note/presentation/controllers/note_providers.dart';
-import '../../constants/colors/colors.dart';
-import '../../extensions/extensions.dart';
 
 class CreditsWidget extends ConsumerWidget {
   const CreditsWidget({super.key});
@@ -13,16 +11,7 @@ class CreditsWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     ref.listen(noteAiNotiferProvider, (_, state) {
-      switch (state) {
-        case ShowMessageAiNoteState(:final message):
-          context.showSnakbar(message);
-
-        case SuccessAiNoteState():
-          // تحديث الـ credits بعد نجاح العملية وتحديثها في الـ database
-          ref.invalidate(getCreditsProvider);
-        case UpdatingAiNoteState():
-        case ResetAiNoteState():
-      }
+      noteAiListener(context: context, state: state, ref: ref);
     });
     final creditsAsync = ref.watch(getCreditsProvider);
 
@@ -47,7 +36,6 @@ class _CreditsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 20,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: DarkColors.primary.withOpacity(0.15),

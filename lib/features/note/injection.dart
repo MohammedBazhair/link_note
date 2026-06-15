@@ -11,7 +11,6 @@ import 'data/repositories/sync_note_repository_impl.dart';
 import 'domain/repositories/note_ai_repository.dart';
 import 'domain/repositories/notes_repository.dart';
 import 'domain/repositories/sync_note_repository.dart';
-import 'presentation/controllers/note_ai_controller/note_ai_controller.dart';
 
 final notesRemoteDataSourceProvider = Provider((ref) {
   final remoteDatabaseService = ref.read(remoteDatabaseServiceProvider);
@@ -20,34 +19,28 @@ final notesRemoteDataSourceProvider = Provider((ref) {
 });
 
 final notesLocalDataSourceProvider = Provider<NotesLocalDataSource>((ref) {
-  final localCacheService = ref.read(localCacheServiceProvider);
   final localDatabase = ref.read(localDatabaseProvider);
   final syncLocal = ref.read(syncLocalProvider);
 
-  return NotesLocalDataSourceImpl(localDatabase, localCacheService, syncLocal);
+  return NotesLocalDataSourceImpl(localDatabase, syncLocal);
 });
 
 final notesRepositoryProvider = Provider<NotesRepository>((ref) {
   final localDataSource = ref.read(notesLocalDataSourceProvider);
   final remote = ref.read(notesRemoteDataSourceProvider);
   final network = ref.read(networkProvider);
-  final localCacheService = ref.read(localCacheServiceProvider);
-  return NotesRepositoryImpl(
-    remote,
-    localDataSource,
-    network,
-    localCacheService,
-  );
+  final _cache = ref.read(secureCacheServiceProvider);
+  return NotesRepositoryImpl(remote, localDataSource, network, _cache);
 });
 
 final syncNotesRepositoryProvider = Provider<SyncNoteRepository>((ref) {
-  final _localCache = ref.read(localCacheServiceProvider);
+  final _cache = ref.read(secureCacheServiceProvider);
   final _sync = ref.read(syncLocalProvider);
   final _connectivity = ref.read(networkProvider);
   final _localNotes = ref.read(notesLocalDataSourceProvider);
   final _remoteNotes = ref.read(notesRemoteDataSourceProvider);
   return SyncNoteRepositoryImpl(
-    _localCache,
+    _cache,
     _sync,
     _connectivity,
     _localNotes,
@@ -58,13 +51,9 @@ final syncNotesRepositoryProvider = Provider<SyncNoteRepository>((ref) {
 final noteAiRepositoryProvider = Provider<NoteAiRepository>((ref) {
   final aiClient = ref.read(aiCilientProvider);
   final userRemote = ref.watch(userRemoteDataSourceProvider);
+  final connectivityService = ref.watch(networkProvider);
 
-  return NoteAiRepositoryImpl(aiClient, userRemote);
-});
-
-final noteAiControllerProvider = Provider<NoteAiController>((ref) {
-  final aiRepo = ref.read(noteAiRepositoryProvider);
-  return NoteAiController(aiRepo);
+  return NoteAiRepositoryImpl(aiClient, userRemote, connectivityService);
 });
 
 final aiClientProvider = Provider<AiClient>((ref) {

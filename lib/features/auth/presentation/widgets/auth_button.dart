@@ -13,8 +13,10 @@ class AuthButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final isLoading = ref.watch(authControllerProvider) is AuthLoadingState;
-
+    final state = ref.watch(authControllerProvider);
+    final loadingState = state is AuthLoadingState ? state : null;
+    final isLoading =
+        loadingState?.authLoadingType == AuthLoadingType.signWithEmail;
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       child: isLoading ? const CustomProgressWidget() : Text(text),

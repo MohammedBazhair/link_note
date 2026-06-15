@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/note_providers.dart';
-import 'ai_action_button.dart';
+import '../../controllers/note_providers.dart';
+import '../ai_action_button.dart';
 
-class TitleFormField extends StatelessWidget {
-  const TitleFormField({
-    super.key,
-    required this.controller,
-    this.onChanged,
-    this.readOnly = false,
-  });
-  final TextEditingController controller;
-  final ValueChanged<String>? onChanged;
+class TitleFormField extends ConsumerWidget {
+  const TitleFormField({super.key, this.readOnly = false});
   final bool readOnly;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
+    final titleController = ref.watch(noteFormProvider).title;
+    final textDirection = ref.watch(
+      editorControllerProvider.select((s) => s.titleDirection),
+    );
+
     return TextFormField(
-      controller: controller,
+      textDirection: textDirection,
+      controller: titleController,
       readOnly: readOnly,
       textInputAction: TextInputAction.newline,
       minLines: 1,
@@ -30,6 +29,11 @@ class TitleFormField extends StatelessWidget {
         fontWeight: FontWeight.w500,
       ),
       cursorColor: const Color(0x809CDEBC),
+      onChanged: (title) {
+        final historyController = ref.read(editorControllerProvider.notifier);
+
+        historyController.updateEditorContent(title: title);
+      },
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         hintText: 'العنوان...',
@@ -41,24 +45,26 @@ class TitleFormField extends StatelessWidget {
             : Consumer(
                 builder: (_, ref, __) {
                   final aiController = ref.read(noteAiNotiferProvider.notifier);
-                  final note = ref.watch(editorFormProvider).note;
 
                   final isProcessing = ref.watch(
                     noteAiNotiferProvider.select((s) => s.isTitleProcessing),
                   );
 
                   return AiActionButton(
+                    tooltip: 'تحسين العنوان عبر AI',
                     isProcessing: isProcessing,
                     onPressed: () async {
+                      final note = ref.read(currentNoteControllerProvider).note;
+                      if (note == null) return;
+
                       final title = await aiController.improveTitle(note);
-                      controller.text = title;
-                      onChanged?.call(title);
+
+                      titleController.text = title;
                     },
                   );
                 },
               ),
       ),
-      onChanged: onChanged,
     );
   }
 }

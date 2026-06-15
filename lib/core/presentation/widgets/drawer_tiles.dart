@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/presentation/widgets/loading_widget.dart';
+import 'package:link_note/features/auth/auth_listeners.dart';
+import 'package:link_note/features/auth/presentation/controllers/auth_state.dart';
 
 import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../features/auth/presentation/screens/sign_in_screen.dart';
@@ -75,13 +78,21 @@ class SignOutTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    ref.listen(authControllerProvider, (previous, next) {
+      authListener(context: context, previous: previous, next: next, ref: ref);
+    });
+    final state = ref.watch(authControllerProvider);
+    final loadingState = state is AuthLoadingState ? state : null;
+    final isLoading = loadingState?.authLoadingType == AuthLoadingType.signOut;
+
     return IconButton(
       iconSize: 30,
-      onPressed: () async {
-        await ref.read(authControllerProvider.notifier).signOut();
-        await context.pushReplacementTo(const SignInScreen());
-      },
-      icon: const Icon(Icons.login_outlined),
+      onPressed: isLoading
+          ? null
+          : ref.read(authControllerProvider.notifier).signOut,
+      icon: isLoading
+          ? const LoadingWidget()
+          : const Icon(Icons.login_outlined),
     );
   }
 }
