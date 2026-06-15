@@ -1,4 +1,8 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/constants/internal_constants/log.dart';
+import 'package:link_note/features/auth/domain/entities/auth_state_event.dart';
+import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/presentation/providers/core_providers.dart';
 import '../../../user/domain/entities/user.dart';
@@ -10,10 +14,37 @@ final authControllerProvider = NotifierProvider<AuthController, AuthState>(
 );
 
 class AuthController extends Notifier<AuthState> {
+  late StreamSubscription<AuthStateEvent?> _onAuthChanged;
+
   AuthRepository get _auth => ref.read(authRepositoryProvider);
 
   @override
-  AuthState build() => const AuthInitialState();
+  AuthState build() {
+    _onAuthChanged = _auth.onAuthStateChanged().listen(
+      _handleAuthChanges,
+      onError: (e, st) {
+        Logger.log(error: e, stackTrace: st);
+      },
+    );
+
+    ref.onDispose(_onAuthChanged.cancel);
+    return const AuthInitialState();
+  }
+
+  void _handleAuthChanges(AuthStateEvent? authEvent) async {
+    switch (authEvent) {
+      case AuthStateEvent.initialSession:
+        state = const AuthInitialState();
+      case AuthStateEvent.signedIn:
+        state = const AuthSuccessfullState();
+        _auth.saveUserId();
+      case AuthStateEvent.signedOut:
+        state = const AuthSignOutState();
+        _auth.removerUserId();
+        ref.invalidate(noteControllerProvider);
+      case null:
+    }
+  }
 
   Future<void> loginWithGoogle() async {
     try {
@@ -21,21 +52,7 @@ class AuthController extends Notifier<AuthState> {
 
       await _auth.signInWithGoogle();
     } on AppException catch (e) {
-      _handleState(e.message);
-    }
-  }
-
-  Future<void> loginWithUri(Uri uri) async {
-    try {
-      print('loginWithUri called');
-      final authResponse = await _auth.signInWithUrl(uri);
-      if (authResponse.user == null) {
-        throw const AuthAppException('لا يوجد مستخدم حاليا');
-      }
-
-      state = const AuthSuccessfullState();
-    } on AuthAppException catch (e) {
-      _handleState(e.message);
+      state = AuthFailedState(e.message);
     }
   }
 
@@ -43,18 +60,22 @@ class AuthController extends Notifier<AuthState> {
     required String email,
     required String password,
   }) async {
-    state = const AuthLoadingState(AuthLoadingType.signWithEmail);
-    final error = await _auth.signIn(email: email, password: password);
-
-    _handleState(error);
+    try {
+      state = const AuthLoadingState(AuthLoadingType.signWithEmail);
+      await _auth.signIn(email: email, password: password);
+    } on AppException catch (e) {
+      state = AuthFailedState(e.message);
+    }
   }
 
   Future<void> signUpWithEmail(UserEntity user) async {
-    state = const AuthLoadingState(AuthLoadingType.signWithEmail);
+    try {
+      state = const AuthLoadingState(AuthLoadingType.signWithEmail);
 
-    final error = await _auth.signUp(user);
-
-    _handleState(error);
+      await _auth.signUp(user);
+    } on AppException catch (e) {
+      state = AuthFailedState(e.message);
+    }
   }
 
   Future<void> signOut() async {
@@ -62,8 +83,8 @@ class AuthController extends Notifier<AuthState> {
       state = const AuthLoadingState(AuthLoadingType.signOut);
       await _auth.signOut();
       state = const AuthSignOutState();
-    } catch (e) {
-      _handleState('حدث خطأ في الخروج حاول مرة أخرى');
+    } on AppException catch (e) {
+      state = AuthFailedState(e.message);
     }
   }
 
@@ -101,12 +122,6 @@ class AuthController extends Notifier<AuthState> {
     } finally {
       reset();
     }
-  }
-
-  void _handleState(String? error) {
-    state = error == null
-        ? const AuthSuccessfullState()
-        : AuthFailedState(error);
   }
 
   void reset() {

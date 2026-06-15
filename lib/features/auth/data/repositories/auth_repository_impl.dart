@@ -1,3 +1,4 @@
+import 'package:link_note/features/auth/domain/entities/auth_state_event.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/constants/internal_constants/log.dart';
@@ -14,42 +15,49 @@ class AuthRepositoryImpl implements AuthRepository {
   final ConnectivityService _networkService;
   final SecureCacheService _cache;
 
-  void _saveUserId(String userId) async {
-    await _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
+  @override
+  void saveUserId() {
+    final userId = _remote.currentUserId;
+    if (userId == null) return;
+
+    _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
   }
 
   @override
-  Future<String?> signUp(UserEntity user) async {
-    try {
-      final response = await _remote.signUp(user);
-      if (response.user == null) throw const AuthException('no id found');
+  void removerUserId() {
+    _cache.remove(key: ExternalConsts.lastUserIdKey);
+  }
 
-      final userId = response.user!.id;
-      _saveUserId(userId);
-      return null; // تم التسجيل بنجاح
+  @override
+  Future<void> signUp(UserEntity user) async {
+    try {
+      final hasConnection = await _networkService.hasConnection();
+      if (!hasConnection) throw const InternetException();
+
+      final response = await _remote.signUp(user);
+
+      if (response.user == null) {
+        throw const AuthAppException('المستخدم غير مسجل دخول');
+      }
     } on AuthException catch (e) {
-      return _mapSupabaseSignUpError(e.message);
-    } catch (e) {
-      return 'من فضلك تحقق من اتصالك بالإنترنت';
+      final resultMessage = _mapSupabaseSignUpError(e.message);
+      throw AuthAppException(resultMessage);
     }
   }
 
   @override
-  Future<String?> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     try {
+      final hasConnection = await _networkService.hasConnection();
+      if (!hasConnection) throw const InternetException();
+
       final response = await _remote.signIn(email: email, password: password);
+
       final userId = response.user?.id;
-
-      if (userId != null) _saveUserId(userId);
-
-      return null;
-    } on AuthApiException catch (e) {
-      return _mapSupabaseSignInError(e.message);
-    } catch (e) {
-      return 'من فضلك تحقق من اتصالك بالإنترنت';
+      if (userId == null) throw AuthApiException('المستخدم غير مسجل دخول');
+    } on AuthException catch (e) {
+      final resultMessage = _mapSupabaseSignInError(e.message);
+      throw AuthAppException(resultMessage);
     }
   }
 
@@ -69,27 +77,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AuthResponse> signInWithUrl(Uri uri) async {
-    Logger.log(message: 
-      'Session after callback = ${Supabase.instance.client.auth.currentSession}',
-    );
-    final code = uri.queryParameters['code'];
-    if (code == null) throw ArgumentError.notNull();
-
-    final authResponse = await _remote.exchangeCodeForAuthSession(code);
-
-    final userId = authResponse.user?.id;
-
-    if (userId == null) throw ArgumentError.notNull();
-
-    await _cache.setString(key: ExternalConsts.lastUserIdKey, value: userId);
-    return authResponse;
-  }
-
-  @override
   Future<void> signOut() async {
-    await _cache.remove(key: ExternalConsts.lastUserIdKey);
-    return _remote.signOut();
+    try {
+      await _remote.signOut();
+    } catch (e, st) {
+      Logger.log(error: e, stackTrace: st);
+
+      if (_remote.currentUserId != null) return;
+      throw const AuthAppException('حسلت هناك مشكلة أثناء محاولة تسجيل الخروح');
+    }
   }
 
   String _mapSupabaseSignInError(String message) {
@@ -156,5 +152,10 @@ class AuthRepositoryImpl implements AuthRepository {
       Logger.log(message: 'here');
       rethrow;
     }
+  }
+
+  @override
+  Stream<AuthStateEvent?> onAuthStateChanged() {
+    return _remote.onAuthStateChanged();
   }
 }

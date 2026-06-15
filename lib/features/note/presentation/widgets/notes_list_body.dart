@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/constants/internal_constants/log.dart';
 import 'package:link_note/core/presentation/widgets/conditional_builder.dart';
 import 'package:link_note/features/note/domain/entities/note.dart';
 import 'package:link_note/features/note/presentation/controllers/note_providers.dart';
@@ -35,7 +36,9 @@ class _NotesStreamBuilder extends ConsumerWidget {
     final notesAsync = ref.watch(noteControllerProvider);
 
     return notesAsync.when(
+      skipLoadingOnReload: false,
       data: (notes) {
+        print('data');
         return ConditionalBuilder(
           condition: notes.isNotEmpty,
           builder: (_) => NotesListView(notes: notes),
@@ -43,11 +46,13 @@ class _NotesStreamBuilder extends ConsumerWidget {
         );
       },
       loading: () {
+        print('loading');
         final fakeNotes = List.generate(8, (index) => Note.fake());
         return NotesListView(notes: fakeNotes, isShimmerEnabled: true);
       },
 
       error: (error, stackTrace) {
+        Logger.log(error: error, stackTrace: stackTrace);
         return const Center(child: Text('حدث خطأ ما'));
       },
     );

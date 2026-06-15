@@ -22,8 +22,13 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
     super.initState();
     listenContextualAppBar();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       await ref.read(userControllerProvider.notifier).loadProfile();
+
+      if (!mounted) return;
       await ref.read(noteControllerProvider.notifier).syncNotes();
+
+      if (!mounted) return;
       ref.read(isInNotesListScreen.notifier).update((_) => true);
     });
   }

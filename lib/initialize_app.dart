@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:protocol_handler/protocol_handler.dart';
@@ -22,10 +23,10 @@ Future<void> initializePushNotifications() async {
     return;
   }
   // Enable verbose logging for debugging (remove in production)
-  // await OneSignal.Debug.setLogLevel(OSLogLevel.none);
+   await OneSignal.Debug.setLogLevel(kDebugMode ? OSLogLevel.verbose:OSLogLevel.none);
   // Initialize with your OneSignal App ID
   await OneSignal.initialize('77e0bc45-9e18-491e-bc41-0d42d7b86c00');
-  await Permission.notification.request();
+  await OneSignal.Notifications.requestPermission(true);
 }
 
 void initializeDesktopDatabase() {

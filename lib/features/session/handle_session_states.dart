@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:link_note/core/presentation/widgets/loading_widget.dart';
 
 import '../../core/extensions/extensions.dart';
-import '../../core/presentation/widgets/custom_progress_widget.dart';
 import 'presentation/controllers/session_state.dart';
 import 'presentation/screens/active_session_screen.dart';
 
@@ -40,7 +40,7 @@ Future<void> handleSessionStates(
       await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const CustomProgressWidget(),
+        builder: (context) => const LoadingWidget(),
       );
   }
 }
