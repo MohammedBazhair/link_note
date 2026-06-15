@@ -135,7 +135,7 @@ class NotesRepositoryImpl implements NotesRepository {
 
   @override
   Future<Note?> getNoteById(String noteId) {
-    return _remote.getNoteById(noteId);
+    return _local.getNoteById(noteId);
   }
 
   @override

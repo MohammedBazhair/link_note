@@ -18,7 +18,7 @@ class NotesAppBar extends ConsumerWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         child: ConditionalBuilder(
           condition: isContextualMode,
           builder: (_) => const NotesContextualActionBar(),

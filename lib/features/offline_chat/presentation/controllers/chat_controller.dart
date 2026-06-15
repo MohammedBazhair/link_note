@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/utils/debouncer.dart';
 
 import '../../../audio/presentation/controller/audio_provider.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
@@ -10,7 +11,7 @@ import 'chat_state.dart';
 
 class ChatController extends Notifier<ChatState> {
   StreamSubscription<Message>? _messageSubscription;
-  Timer? _notificationTimer;
+  final _notificationDebounce = Debouncer(milliseconds: 3000);
 
   @override
   ChatState build() {
@@ -26,7 +27,7 @@ class ChatController extends Notifier<ChatState> {
 
     ref.onDispose(() {
       _messageSubscription?.cancel();
-      _notificationTimer?.cancel();
+      _notificationDebounce.dispose();
     });
 
     // Populate initial state from repository history
@@ -36,7 +37,7 @@ class ChatController extends Notifier<ChatState> {
     );
   }
 
-  void _onMessageReceived(Message message) async {
+  void _onMessageReceived(Message message) {
     final isNewChatRoom = state.isNewChatRoom(message.chatId);
     final myFriendsIds = isNewChatRoom
         ? [...state.myChatFriendsIds, message.senderUserId]
@@ -64,11 +65,9 @@ class ChatController extends Notifier<ChatState> {
       myChatFriendsIds: myFriendsIds,
     );
 
-    // Handle notification sound with throttling
-    if (_notificationTimer?.isActive ?? false) return;
-
-    _notificationTimer = Timer(const Duration(seconds: 3), () {});
-    await ref.read(audioControllerProvider.notifier).playBell();
+    _notificationDebounce.run(
+      ref.read(audioControllerProvider.notifier).playBell,
+    );
   }
 
   void sendText({
@@ -76,7 +75,9 @@ class ChatController extends Notifier<ChatState> {
     required String text,
     String? replyToMessageId,
   }) {
-    ref.read(chatRepository).sendText(
+    ref
+        .read(chatRepository)
+        .sendText(
           peerUserId: peerId,
           text: text,
           replyToMessageId: replyToMessageId,
@@ -88,7 +89,9 @@ class ChatController extends Notifier<ChatState> {
     required String filePath,
     String? replyToMessageId,
   }) {
-    ref.read(chatRepository).sendImage(
+    ref
+        .read(chatRepository)
+        .sendImage(
           peerUserId: peerId,
           filePath: filePath,
           replyToMessageId: replyToMessageId,
@@ -100,7 +103,9 @@ class ChatController extends Notifier<ChatState> {
     required String filePath,
     String? replyToMessageId,
   }) {
-    ref.read(chatRepository).sendVoiceRecord(
+    ref
+        .read(chatRepository)
+        .sendVoiceRecord(
           peerUserId: peerId,
           filePath: filePath,
           replyToMessageId: replyToMessageId,

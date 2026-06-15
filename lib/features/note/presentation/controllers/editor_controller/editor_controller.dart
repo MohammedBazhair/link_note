@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/utils/debouncer.dart';
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/utils/undo_redo_history.dart';
 import '../../../domain/entities/editor_content.dart';
@@ -11,7 +12,7 @@ class EditorController extends Notifier<EditorState> {
   final _history = UndoRedoHistory<EditorContent>();
 
   EditorContent? _firstSnapshot;
-  Timer? _debounce;
+  final _debounce = Debouncer(milliseconds: 500);
   EditorContent? _snapshot;
 
   @override
@@ -49,9 +50,7 @@ class EditorController extends Notifier<EditorState> {
       isSaved: false,
     );
 
-    _debounce?.cancel();
-
-    _debounce = Timer(const Duration(milliseconds: 500), () {
+    _debounce.run(() {
       if (!ref.mounted) return;
 
       if (_snapshot != currentEditorContent) _history.push(_snapshot!);
@@ -67,7 +66,7 @@ class EditorController extends Notifier<EditorState> {
   }
 
   void commitSnapshot() {
-    _debounce?.cancel();
+    _debounce.dispose();
 
     if (_snapshot == null) return;
 

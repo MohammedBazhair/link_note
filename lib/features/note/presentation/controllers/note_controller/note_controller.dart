@@ -23,7 +23,7 @@ class NoteController extends StreamNotifier<List<Note>> {
 
   Future<void> _getAllNotes() async {
     final notes = await _notesRepository.getAll(_userId);
-    
+
     state = AsyncData(notes);
   }
 
@@ -40,6 +40,11 @@ class NoteController extends StreamNotifier<List<Note>> {
   Future<void> updateNote(Note note) async {
     await _notesRepository.update(note);
     unawaited(_getAllNotes());
+
+    if (note.id == null) return;
+    final familyExists = ref.exists(getNoteByIdProvider(note.id!));
+
+    if (familyExists) ref.invalidate(getNoteByIdProvider(note.id!));
   }
 
   Future<void> deleteNote(Note note) async {

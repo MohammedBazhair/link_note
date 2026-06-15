@@ -27,20 +27,10 @@ class CreateSessionForm extends ConsumerWidget {
             ref
                 .read(selectableNoteProvider.notifier)
                 .update((s) => s.copyWith(isSelectable: true));
-            showModalBottomSheet(
+            showDialog(
               context: context,
-
-              builder: (context) => Container(
-                padding: const EdgeInsets.only(top: 15),
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(25),
-                  ),
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                ),
-                child: const NotesListScreen(),
-              ),
+              fullscreenDialog: true,
+              builder: (context) => const NotesListScreen(),
             );
           },
           child: const Text('اختر ملاحظة'),

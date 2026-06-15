@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/utils/debouncer.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/presentation/widgets/conditional_builder.dart';
@@ -20,11 +19,10 @@ class SessionNoteEditor extends ConsumerStatefulWidget {
 }
 
 class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
-  Timer? _updateDebounceTimer;
+  final _updateDebounce = Debouncer(milliseconds: 2500);
 
   void scheduleNoteUpdate() {
-    _updateDebounceTimer?.cancel();
-    _updateDebounceTimer = Timer(const Duration(seconds: 2), () {
+    _updateDebounce.run(() {
       if (currentEditedNote == null) return;
       ref.read(noteControllerProvider.notifier).updateNote(currentEditedNote!);
     });
@@ -34,7 +32,7 @@ class _SessionNoteEditorState extends ConsumerState<SessionNoteEditor> {
 
   @override
   void dispose() {
-    _updateDebounceTimer?.cancel();
+    _updateDebounce.dispose();
     super.dispose();
   }
 

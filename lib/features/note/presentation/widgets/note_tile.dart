@@ -158,7 +158,7 @@ class NoteCheckButton extends ConsumerWidget {
         icon: Icon(
           Icons.check_circle,
           size: 30,
-          color: DarkColors.primary.withAlpha(isHovered ? 230 : 255),
+          color: isHovered ? Colors.grey[300] : DarkColors.primary,
         ),
       ),
     );

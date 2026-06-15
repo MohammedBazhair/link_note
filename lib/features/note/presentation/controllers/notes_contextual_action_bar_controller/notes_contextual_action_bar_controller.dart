@@ -13,11 +13,15 @@ class NotesContextualActionBarController
   final _deletedNotesHistory = <String>{};
 
   void closeActionBar() {
-    state = state.copyWith(actionBarOpened: false);
+    state = const NotesContextualActionBarState();
   }
 
   void toggleNote(String noteId) {
-    final copiedSelected = {...state.selectedNotesIds};
+    final isSingleSelection = ref.read(selectableNoteProvider).isSelectable;
+
+    final copiedSelected = isSingleSelection
+        ? <String>{}
+        : {...state.selectedNotesIds};
 
     if (copiedSelected.contains(noteId)) {
       copiedSelected.remove(noteId);
@@ -25,10 +29,18 @@ class NotesContextualActionBarController
       copiedSelected.add(noteId);
     }
 
+    final openActionBar = !isSingleSelection && copiedSelected.isNotEmpty;
+
     state = state.copyWith(
       selectedNotesIds: copiedSelected,
-      actionBarOpened: copiedSelected.isNotEmpty,
+      actionBarOpened: openActionBar,
     );
+
+    if (isSingleSelection) {
+      ref
+          .read(selectableNoteProvider.notifier)
+          .update((s) => s.copyWith(noteId: noteId));
+    }
   }
 
   Future<void> deleteSelectedNotes() async {

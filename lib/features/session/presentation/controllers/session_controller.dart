@@ -7,7 +7,6 @@ import '../../domain/entities/sub/session_member_role.dart';
 import '../../domain/repository/session_repository.dart';
 import 'session_state.dart';
 
-
 class SessionController extends StateNotifier<SessionState> {
   SessionController(this._sessionRepository)
     : super(const InitialSessionState());
@@ -18,12 +17,13 @@ class SessionController extends StateNotifier<SessionState> {
       state = const LoadingSessionState();
       if (state.session != null) {
         state = ErrorSessionState(
-          message: 'Cannot start a new session. End the current session first.',
+          message: 'لا يمكنك أنشاء أكثر من جلسة في نفس الوقت',
         );
         return;
       }
 
       final result = await _sessionRepository.createSession(session);
+      print(result.errorMessage);
       if (result.hasError) throw Exception(result.errorMessage);
 
       final createdSession = result.value;
@@ -82,9 +82,6 @@ class SessionController extends StateNotifier<SessionState> {
         memberId: memberId,
         role: SessionMemberRole.member,
       );
-
-      Logger.log(message: member.toString());
-      Logger.log(message: session.toString());
 
       await _addMemberToSession(member, session);
       state = JoinSessionState(session: session, currentMember: member);

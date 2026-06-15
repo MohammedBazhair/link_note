@@ -18,6 +18,10 @@ class _SearchNoteFieldState extends ConsumerState<SearchNoteField> {
     super.dispose();
   }
 
+  void _closeSearchMode() {
+    ref.read(searchNoteControllerProvider.notifier).closeSearchMode();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -27,25 +31,17 @@ class _SearchNoteFieldState extends ConsumerState<SearchNoteField> {
         hintText: 'بحث...',
         textInputAction: TextInputAction.search,
         autoFocus: true,
-        onTapOutside: (_) {
-          ref.read(searchNoteControllerProvider.notifier).closeSearchMode();
-        },
+
         leading: const Icon(Icons.search, color: Color(0xFF95B5B7)),
 
         onChanged: ref.read(searchNoteControllerProvider.notifier).search,
         trailing: [
-          ValueListenableBuilder(
-            valueListenable: _controller,
-            builder: (context, value, child) {
-              if (value.text.isEmpty) return const SizedBox.shrink();
-              return child!;
-            },
-            child: IconButton(
-              color: const Color(0xFF95B5B7),
-              iconSize: 20,
-              onPressed: _controller.clear,
-              icon: const Icon(Icons.close),
-            ),
+          IconButton(
+            tooltip: 'إغلاق وضع البحث',
+            color: const Color(0xFF95B5B7),
+            iconSize: 20,
+            onPressed: _closeSearchMode,
+            icon: const Icon(Icons.close),
           ),
         ],
       ),
