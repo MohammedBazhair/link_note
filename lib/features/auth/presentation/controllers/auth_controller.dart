@@ -31,7 +31,7 @@ class AuthController extends Notifier<AuthState> {
     return const AuthInitialState();
   }
 
-  void _handleAuthChanges(AuthStateEvent? authEvent) async {
+  void _handleAuthChanges(AuthStateEvent? authEvent)  {
     switch (authEvent) {
       case AuthStateEvent.initialSession:
         state = const AuthInitialState();
@@ -41,7 +41,7 @@ class AuthController extends Notifier<AuthState> {
       case AuthStateEvent.signedOut:
         state = const AuthSignOutState();
         _auth.removerUserId();
-        ref.invalidate(noteControllerProvider);
+        ref.invalidate(noteControllerProvider, asReload: true);
       case null:
     }
   }

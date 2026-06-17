@@ -15,7 +15,6 @@ class NoteController extends StreamNotifier<List<Note>> {
 
   @override
   Stream<List<Note>> build() {
-    print('invalidate');
     return _notesRepository.fetchNotesRealTime(_userId);
   }
 

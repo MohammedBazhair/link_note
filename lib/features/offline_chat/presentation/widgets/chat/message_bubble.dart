@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
@@ -12,8 +10,8 @@ import 'message_text.dart';
 import 'reply_message_widget.dart';
 import 'tail_message_paint.dart';
 
-class MessageWidget extends ConsumerWidget {
-  const MessageWidget({
+class MessageBubble extends ConsumerWidget {
+  const MessageBubble({
     super.key,
     required this.isMe,
     required this.message,
@@ -31,58 +29,69 @@ class MessageWidget extends ConsumerWidget {
     final backgroundColor = isMe
         ? Colors.blue.shade800
         : const Color(0xFF343147);
+    final layerLink = ref.read(layerLinkProvider(message.id));
+    final portalController = ref.read(overlayPortalController);
 
-    return Align(
-      alignment: isMe
-          ? AlignmentDirectional.centerStart
-          : AlignmentDirectional.centerEnd,
-      child: Dismissible(
-        key: ValueKey(message.id),
-        direction: DismissDirection.endToStart,
-        dismissThresholds: const {DismissDirection.endToStart: 0.5},
-        confirmDismiss: (direction) {
-          ref.read(replyToMessageProvider.notifier).state = message;
-
-          return Future.value(false);
+    return CompositedTransformTarget(
+      link: layerLink,
+      child: GestureDetector(
+        onTap: () {
+          ref.read(currentLayerLinkProvider.notifier).state= layerLink;
+          portalController.show();
         },
+        child: Align(
+          alignment: isMe
+              ? AlignmentDirectional.centerStart
+              : AlignmentDirectional.centerEnd,
+          child: Dismissible(
+            key: ValueKey(message.id),
+            direction: DismissDirection.endToStart,
+            dismissThresholds: const {DismissDirection.endToStart: 0.5},
+            confirmDismiss: (direction) {
+              ref.read(replyToMessageProvider.notifier).state = message;
 
-        child: CustomPaint(
-          painter: hasTail
-              ? TailMessagePaint(
-                  isMe: isMe,
-                  color: backgroundColor,
-                  textDirection: Directionality.of(context),
-                )
-              : null,
-          child: IntrinsicWidth(
-            child: Container(
-              padding: EdgeInsets.all(
-                message.type == MessageType.image ? 3 : 8,
-              ),
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                borderRadius: !hasTail
-                    ? BorderRadius.circular(13)
-                    : BorderRadiusDirectional.only(
-                        topStart: const Radius.circular(13),
-                        topEnd: const Radius.circular(13),
-                        bottomStart: isMe
-                            ? Radius.zero
-                            : const Radius.circular(13),
-                        bottomEnd: !isMe
-                            ? Radius.zero
-                            : const Radius.circular(13),
-                      ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 15,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (repliedMessage != null)
-                    ReplyMessageWidget(repliedMessage: repliedMessage!),
-                  MessageContnetWidget(message: message, isMe: isMe),
-                ],
+              return Future.value(false);
+            },
+
+            child: CustomPaint(
+              painter: hasTail
+                  ? TailMessagePaint(
+                      isMe: isMe,
+                      color: backgroundColor,
+                      textDirection: Directionality.of(context),
+                    )
+                  : null,
+              child: IntrinsicWidth(
+                child: Container(
+                  padding: EdgeInsets.all(
+                    message.type == MessageType.image ? 3 : 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: !hasTail
+                        ? BorderRadius.circular(13)
+                        : BorderRadiusDirectional.only(
+                            topStart: const Radius.circular(13),
+                            topEnd: const Radius.circular(13),
+                            bottomStart: isMe
+                                ? Radius.zero
+                                : const Radius.circular(13),
+                            bottomEnd: !isMe
+                                ? Radius.zero
+                                : const Radius.circular(13),
+                          ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 15,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (repliedMessage != null)
+                        ReplyMessageWidget(repliedMessage: repliedMessage!),
+                      MessageContnetWidget(message: message, isMe: isMe),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
