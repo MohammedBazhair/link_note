@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:link_note/core/utils/debouncer.dart';
+import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 
 import '../../../audio/presentation/controller/audio_provider.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
@@ -45,7 +46,14 @@ class ChatController extends Notifier<ChatState> {
 
     // Immunitably update the chat rooms map
     final currentMessages = state.chatRooms[message.chatId]?.messages ?? {};
-    final updatedMessages = {...currentMessages, message.id: message};
+    final updatedMessages = {...currentMessages};
+
+    updatedMessages.update(message.id, (current) {
+      if (message.type == MessageType.reactionEmoji) {
+        return current.copyWith(reactionEmoji: message.reactionEmoji);
+      }
+      return current;
+    }, ifAbsent: () => message);
 
     final updatedChatRooms = {...state.chatRooms};
     updatedChatRooms.update(
@@ -109,6 +117,33 @@ class ChatController extends Notifier<ChatState> {
           peerUserId: peerId,
           filePath: filePath,
           replyToMessageId: replyToMessageId,
+        );
+  }
+
+  void sendReactionEmoji({
+    required String chatId,
+    required String peerId,
+    required ReactionEmoji reactionEmoji,
+    required String messageId,
+  }) {
+    final currentMessage = state.chatRooms[chatId]?.messages[messageId];
+    if (currentMessage == null) return;
+
+    final chatRooms = {...state.chatRooms};
+    chatRooms.update(chatId, (chatRoom) {
+      final copiedMessages = {...chatRoom.messages};
+      copiedMessages[messageId] = currentMessage.copyWith(
+        reactionEmoji: reactionEmoji,
+      );
+      return chatRoom.copyWith(messages: copiedMessages);
+    });
+
+    ref
+        .read(chatRepository)
+        .sendEmoji(
+          peerUserId: peerId,
+          reactionEmoji: reactionEmoji,
+          messageId: messageId,
         );
   }
 }

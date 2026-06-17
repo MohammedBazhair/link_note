@@ -11,16 +11,13 @@ import '../../data/services/chat_session_manager.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/entities/nearby_identity.dart';
 import 'chat_controller.dart';
-import 'chat_state.dart';
 import 'nearby_discovery_controller.dart';
 import 'nearby_providers.dart';
 import 'nearby_state.dart';
 
 typedef ChatMessagesMap = Map<String, Message>;
 
-final chatControllerProvider = NotifierProvider<ChatController, ChatState>(() {
-  return ChatController();
-});
+final chatControllerProvider = NotifierProvider(ChatController.new);
 
 final nearbyDiscoveryControllerProvider =
     NotifierProvider<NearbyDiscoveryController, NearbyState>(() {
@@ -119,7 +116,7 @@ final overlayPortalController = Provider((ref) {
   return controller;
 });
 
-final layerLinkProvider = Provider.family<LayerLink,String>((ref,messageId) {
+final layerLinkProvider = Provider.family<LayerLink, String>((ref, messageId) {
   return LayerLink();
 });
 

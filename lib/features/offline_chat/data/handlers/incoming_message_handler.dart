@@ -64,6 +64,13 @@ class IncomingMessageHandler {
           );
         }
         return null;
+      case MessageType.reactionEmoji:
+return Message.fromPacket(
+          packet: packet,
+          myId: _identityManager.localIdentity.uuid,
+          senderId: packet.senderUserId,
+          
+        );
     }
   }
 }

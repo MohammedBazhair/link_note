@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/features/offline_chat/presentation/widgets/chat/reaction_popup.dart';
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/widgets/voice_message_bubble.dart';
@@ -36,7 +37,7 @@ class MessageBubble extends ConsumerWidget {
       link: layerLink,
       child: GestureDetector(
         onTap: () {
-          ref.read(currentLayerLinkProvider.notifier).state= layerLink;
+          ref.read(currentLayerLinkProvider.notifier).state = layerLink;
           portalController.show();
         },
         child: Align(
@@ -53,46 +54,68 @@ class MessageBubble extends ConsumerWidget {
               return Future.value(false);
             },
 
-            child: CustomPaint(
-              painter: hasTail
-                  ? TailMessagePaint(
-                      isMe: isMe,
-                      color: backgroundColor,
-                      textDirection: Directionality.of(context),
-                    )
-                  : null,
-              child: IntrinsicWidth(
-                child: Container(
-                  padding: EdgeInsets.all(
-                    message.type == MessageType.image ? 3 : 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: !hasTail
-                        ? BorderRadius.circular(13)
-                        : BorderRadiusDirectional.only(
-                            topStart: const Radius.circular(13),
-                            topEnd: const Radius.circular(13),
-                            bottomStart: isMe
-                                ? Radius.zero
-                                : const Radius.circular(13),
-                            bottomEnd: !isMe
-                                ? Radius.zero
-                                : const Radius.circular(13),
-                          ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 15,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (repliedMessage != null)
-                        ReplyMessageWidget(repliedMessage: repliedMessage!),
-                      MessageContnetWidget(message: message, isMe: isMe),
-                    ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomPaint(
+                  painter: hasTail
+                      ? TailMessagePaint(
+                          isMe: isMe,
+                          color: backgroundColor,
+                          textDirection: Directionality.of(context),
+                        )
+                      : null,
+                  child: IntrinsicHeight(
+                    child: Container(
+                      padding: EdgeInsets.all(
+                        message.type == MessageType.image ? 3 : 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: !hasTail
+                            ? BorderRadius.circular(13)
+                            : BorderRadiusDirectional.only(
+                                topStart: const Radius.circular(13),
+                                topEnd: const Radius.circular(13),
+                                bottomStart: isMe
+                                    ? Radius.zero
+                                    : const Radius.circular(13),
+                                bottomEnd: !isMe
+                                    ? Radius.zero
+                                    : const Radius.circular(13),
+                              ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 15,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (repliedMessage != null)
+                            ReplyMessageWidget(repliedMessage: repliedMessage!),
+                          MessageContnetWidget(message: message, isMe: isMe),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                if (message.reactionEmoji != null)
+                  Container(
+                    height: 30,
+                    width: double.infinity,
+                    alignment: AlignmentDirectional.topEnd,
+                    child: Transform.translate(
+                      offset: const Offset(10, -10),
+                      child: EmojiIcon(
+                        size: 14,
+                        reaction: message.reactionEmoji!,
+                        onPressed: print,
+                        backgroundColor: backgroundColor,
+                        borderColor: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -129,6 +152,8 @@ class MessageContnetWidget extends StatelessWidget {
           image: null,
           time: message.time,
         );
+      case MessageType.reactionEmoji:
+        return const Stack();
     }
   }
 }

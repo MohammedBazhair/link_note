@@ -55,7 +55,7 @@ class TestReactionPage extends ConsumerWidget {
               type: MessageType.text,
               time: DateTime.now(),
               chatId: 'chatId',
-              text: 'Testing Message $index',
+              text: 'Testing Message $index' * index * index,
             );
             return MessageBubble(isMe: false, message: message, hasTail: true);
           },

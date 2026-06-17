@@ -176,6 +176,8 @@ class _RepliedContent extends StatelessWidget {
             );
           },
         );
+      case MessageType.reactionEmoji:
+        return const Stack();
     }
   }
 }

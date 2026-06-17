@@ -18,4 +18,8 @@ enum ReactionEmoji {
   const ReactionEmoji(this.emoji);
 
   final String emoji;
+
+  static ReactionEmoji fromString(String name) {
+    return ReactionEmoji.values.byName(name);
+  }
 }

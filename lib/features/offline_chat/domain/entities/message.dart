@@ -1,4 +1,7 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+
+import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 
 import '../../data/models/packet.dart';
 
@@ -6,7 +9,8 @@ enum MessageType {
   handshake(1),
   text(2),
   image(3),
-  voice(4);
+  voice(4),
+  reactionEmoji(5);
 
   const MessageType(this.typeCode);
   static MessageType fromValue(int v) {
@@ -26,6 +30,7 @@ class Message {
     required this.type,
     this.replyToMessageId,
     this.text,
+    this.reactionEmoji,
     this.filePath,
     required this.time,
     required this.chatId,
@@ -48,7 +53,7 @@ class Message {
         type: packet.messageType,
         text: utf8.decode(packet.payload),
         time: timeNow,
-        replyToMessageId: replyToMessageId
+        replyToMessageId: replyToMessageId,
       ),
       MessageType.image => Message(
         id: messageId,
@@ -57,7 +62,7 @@ class Message {
         type: packet.messageType,
         filePath: 'received_image_${DateTime.now().millisecondsSinceEpoch}.png',
         time: timeNow,
-        replyToMessageId: replyToMessageId
+        replyToMessageId: replyToMessageId,
       ),
       MessageType.handshake => Message(
         id: messageId,
@@ -75,6 +80,13 @@ class Message {
         time: timeNow,
         replyToMessageId: replyToMessageId,
       ),
+      MessageType.reactionEmoji => Message(
+        id: messageId,
+        senderUserId: senderId,
+        type: packet.messageType,
+        time: timeNow,
+        chatId: chatId,
+      ),
     };
   }
 
@@ -91,11 +103,36 @@ class Message {
   final String senderUserId;
   final MessageType type;
   final String? text;
+  final ReactionEmoji? reactionEmoji;
   final String? filePath;
   final DateTime time;
 
   @override
   String toString() {
     return 'Message(id: $id, chatId: $chatId, senderUserId: $senderUserId, type: $type, text: $text, imagePath: $filePath, time: $time)';
+  }
+
+  Message copyWith({
+    String? id,
+    String? replyToMessageId,
+    String? chatId,
+    String? senderUserId,
+    MessageType? type,
+    String? text,
+    ReactionEmoji? reactionEmoji,
+    String? filePath,
+    DateTime? time,
+  }) {
+    return Message(
+      id: id ?? this.id,
+      replyToMessageId: replyToMessageId ?? this.replyToMessageId,
+      chatId: chatId ?? this.chatId,
+      senderUserId: senderUserId ?? this.senderUserId,
+      type: type ?? this.type,
+      text: text ?? this.text,
+      reactionEmoji: reactionEmoji ?? this.reactionEmoji,
+      filePath: filePath ?? this.filePath,
+      time: time ?? this.time,
+    );
   }
 }

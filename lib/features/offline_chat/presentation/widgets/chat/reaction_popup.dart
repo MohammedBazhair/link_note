@@ -10,38 +10,58 @@ class ReactionPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      height: 60,
-      width: 350,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(40),
-      ),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        reverse: true,
-        itemCount: ReactionEmoji.values.length,
-        itemBuilder: (context, index) {
-          final reaction = ReactionEmoji.values[index];
-          final duration = Duration(milliseconds: 200 + 100 * index);
-          return TweenAnimationBuilder(
-            tween: Tween<double>(begin: 0.0, end: 1.0),
-            duration: duration,
-            curve: Curves.fastOutSlowIn,
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value,
-                child: Transform.translate(
-                  offset: Offset(0, 20 * (1 - value)),
-                  child: child,
-                ),
-              );
-            },
-            child: EmojiIcon(reaction: reaction, onSelected: onSelected),
-          );
-        },
+    return TweenAnimationBuilder(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Durations.medium1,
+      curve: Curves.easeIn,
+      builder: (context, value, child) {
+        final dy = 1 - value;
+        return Opacity(
+          opacity: value,
+          child: AnimatedScale(
+            scale: 0.9 + (0.1 * value),
+            duration: Durations.short1,
+            child: AnimatedSlide(
+              offset: Offset(0, dy),
+              duration: Durations.short1,
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        alignment: Alignment.center,
+        height: 60,
+        width: 350,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(40),
+        ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          itemCount: ReactionEmoji.values.length,
+          itemBuilder: (context, index) {
+            final reaction = ReactionEmoji.values[index];
+            final duration = Duration(milliseconds: 300 + 100 * index);
+            return TweenAnimationBuilder(
+              tween: Tween<double>(begin: 0.0, end: 1.0),
+              duration: duration,
+              curve: Curves.easeOut,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value,
+                  child: Transform.translate(
+                    offset: Offset(0, 30 * (1 - value)),
+                    child: child,
+                  ),
+                );
+              },
+              child: EmojiIcon(reaction: reaction, onPressed: onSelected),
+            );
+          },
+        ),
       ),
     );
   }
@@ -52,22 +72,36 @@ class EmojiIcon extends ConsumerWidget {
     super.key,
     required this.reaction,
     this.size = 16,
-    required this.onSelected,
+    this.backgroundColor,
+    this.borderColor,
+    required this.onPressed,
   });
   final ReactionEmoji reaction;
   final double size;
-  final void Function(ReactionEmoji reaction) onSelected;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final void Function(ReactionEmoji reaction) onPressed;
 
   @override
   Widget build(BuildContext context, ref) {
     final controller = ref.read(overlayPortalController);
-    return IconButton(
-      onPressed: () {
-        onSelected(reaction);
+    return InkWell(
+      borderRadius: BorderRadius.circular(50),
+      onTap: () {
+        onPressed(reaction);
         controller.hide();
       },
 
-      icon: Text(reaction.emoji, style: TextStyle(fontSize: size)),
+      child: CircleAvatar(
+        radius: size + (size * 0.13),
+        backgroundColor: borderColor ?? Colors.transparent,
+        child: CircleAvatar(
+          radius: size,
+
+          backgroundColor: backgroundColor ?? Colors.transparent,
+          child: Text(reaction.emoji, style: TextStyle(fontSize: size * 1.2)),
+        ),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
@@ -158,5 +159,23 @@ class ChatSendingHandler {
     await _connectionManager.sendBytes(session.peerAddress, metadataPacket);
 
     return message;
+  }
+
+  Future<void> sendReactionEmoji({
+    required String peerUserId,
+    required ReactionEmoji reactionEmoji,
+    required String messageId,
+  }) async {
+    final session = _sessionManager.resolveSession(peerUserId);
+    if (session == null) return;
+
+    final packet = Protocol.buildPacket(
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.reactionEmoji,
+      payload: Uint8List.fromList(utf8.encode(reactionEmoji.name)),
+      messageId: messageId,
+    );
+
+    await _connectionManager.sendBytes(session.peerAddress, packet);
   }
 }
