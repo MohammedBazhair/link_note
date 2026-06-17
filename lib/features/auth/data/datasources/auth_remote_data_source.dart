@@ -1,4 +1,4 @@
-import 'package:link_note/core/constants/internal_constants/log.dart';
+import 'package:link_note/features/auth/domain/entities/auth_state_event.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -6,6 +6,7 @@ import '../../../user/data/datasources/user_remote_data_source.dart';
 import '../../../user/domain/entities/user.dart';
 
 abstract interface class AuthRemoteDataSource {
+  String? get currentUserId;
   Future<AuthResponse> signUp(UserEntity user);
 
   Future<AuthResponse> signIn({
@@ -17,7 +18,7 @@ abstract interface class AuthRemoteDataSource {
 
   Future<void> signInWithGoogle();
 
-  Future<AuthResponse> exchangeCodeForAuthSession(String code);
+  Stream<AuthStateEvent?> onAuthStateChanged();
 
   Future<void> resetPassword(String email);
 
@@ -33,6 +34,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this._auth, this._userRemote);
   final GoTrueClient _auth;
   final UserRemoteDataSource _userRemote;
+
+  @override
+  String? get currentUserId => _auth.currentUser?.id;
 
   @override
   Future<AuthResponse> signUp(UserEntity user) {
@@ -53,34 +57,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> signOut() {
-    return _auth.signOut();
+  Future<void> signOut() async {
+    await _auth.signOut();
   }
 
   @override
   Future<void> signInWithGoogle() async {
-    Logger.log(
-      message:
-          'Session before login = ${Supabase.instance.client.auth.currentSession}',
-    );
-    final response = await Supabase.instance.client.auth.getOAuthSignInUrl(
-      provider: OAuthProvider.google,
-      redirectTo: ExternalConsts.authRedirectUrl,
-    );
-
-    Logger.log(message: response.url);
-
     await _auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: ExternalConsts.authRedirectUrl,
     );
-  }
-
-  @override
-  Future<AuthResponse> exchangeCodeForAuthSession(String code) async {
-    final response = await _auth.exchangeCodeForSession(code);
-
-    return AuthResponse(session: response.session, user: response.session.user);
   }
 
   @override
@@ -103,6 +89,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     } on AuthException catch (_) {
       throw const OtpWrongException('الرمز المدخل غير صحيح');
+    }
+  }
+
+  @override
+  Stream<AuthStateEvent?> onAuthStateChanged() {
+    return _auth.onAuthStateChange.map((state) {
+      return _mapAuthEvent(state.event);
+    });
+  }
+
+  AuthStateEvent? _mapAuthEvent(AuthChangeEvent event) {
+    switch (event) {
+      case AuthChangeEvent.initialSession:
+        return AuthStateEvent.initialSession;
+
+      case AuthChangeEvent.signedIn:
+        return AuthStateEvent.signedIn;
+
+      case AuthChangeEvent.signedOut:
+        return AuthStateEvent.signedOut;
+
+      default:
+        return null;
     }
   }
 }

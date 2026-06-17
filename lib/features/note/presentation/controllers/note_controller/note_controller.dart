@@ -9,15 +9,12 @@ import '../../../injection.dart';
 import '../note_providers.dart';
 
 class NoteController extends StreamNotifier<List<Note>> {
-  late final NotesRepository _notesRepository;
-  late final UserRepository _userRepository;
-
   String? get _userId => _userRepository.currentUser?.id;
+  NotesRepository get _notesRepository => ref.read(notesRepositoryProvider);
+  UserRepository get _userRepository => ref.read(userRepositoryProvider);
 
   @override
   Stream<List<Note>> build() {
-    _notesRepository = ref.read(notesRepositoryProvider);
-    _userRepository = ref.read(userRepositoryProvider);
     return _notesRepository.fetchNotesRealTime(_userId);
   }
 
@@ -78,5 +75,9 @@ class NoteController extends StreamNotifier<List<Note>> {
       Logger.log(error: e, stackTrace: st);
     }
     await _getAllNotes();
+  }
+
+  void reset() {
+    state = const AsyncData([]);
   }
 }

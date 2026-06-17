@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../data/handlers/chat_handshake_handler.dart';
@@ -112,3 +113,14 @@ final chatSessionManagerProvider = Provider((ref) {
   return ChatSessionManager(_connectionManager, _identityManager);
 });
 //
+
+final overlayPortalController = Provider((ref) {
+  final controller = OverlayPortalController();
+  return controller;
+});
+
+final layerLinkProvider = Provider.family<LayerLink,String>((ref,messageId) {
+  return LayerLink();
+});
+
+final currentLayerLinkProvider = StateProvider<LayerLink?>((ref) => null);

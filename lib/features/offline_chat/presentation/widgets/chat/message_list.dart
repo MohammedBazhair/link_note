@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../controllers/chat_providers.dart';
-import 'message_content.dart';
+import 'message_bubble.dart';
 
 class MessageList extends ConsumerStatefulWidget {
   const MessageList({super.key, required this.chatId, required this.myId});
@@ -98,7 +98,7 @@ class _ChatMessages extends StatelessWidget {
             chatMessages.values.elementAt(index - 1).senderUserId !=
                 msg.senderUserId;
 
-        return MessageWidget(
+        return MessageBubble(
           isMe: isMe,
           message: msg,
           hasTail: hasTail,

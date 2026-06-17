@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:link_note/core/presentation/widgets/loading_widget.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
-import '../../../../core/presentation/widgets/custom_progress_widget.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 
@@ -27,7 +27,7 @@ class SignGoogleButton extends ConsumerWidget {
           : ref.read(authControllerProvider.notifier).loginWithGoogle,
       label: const Text('المتابعة عبر Google'),
       icon: isLoading
-          ? const CustomProgressWidget()
+          ? const LoadingWidget(size: 20)
           : SvgPicture.asset(Assets.iconsGoogle, width: 24),
     );
   }

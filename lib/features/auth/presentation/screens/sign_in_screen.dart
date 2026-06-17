@@ -1,13 +1,9 @@
-import 'dart:async';
-
-import 'package:app_links/app_links.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/assets/app_assets.dart';
-import '../../../../core/constants/internal_constants/log.dart';
 import '../../../../core/extensions/extensions.dart';
 import '../../../../core/presentation/widgets/centered_divider_text.dart';
 import '../../../../core/presentation/widgets/home_button.dart';
@@ -35,13 +31,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late final ProviderSubscription<AuthState> _authSubscription;
-  late final StreamSubscription<Uri> _subscribtionsLinks;
+  // late final StreamSubscription<Uri> _subscribtionsLinks;
 
   @override
   void initState() {
     super.initState();
     listenAuthStates();
-    initDeepLink();
+    // initDeepLink();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -59,14 +55,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
     });
   }
 
-  void initDeepLink() {
-    final _appLinks = AppLinks();
+  // void initDeepLink() {
+  //   final _appLinks = AppLinks();
 
-    _subscribtionsLinks = _appLinks.uriLinkStream.listen((uri) async {
-       Logger.log(message:  'URI = $uri');
-      await ref.read(authControllerProvider.notifier).loginWithUri(uri);
-    });
-  }
+  //   _subscribtionsLinks = _appLinks.uriLinkStream.listen((uri) async {
+  //     Logger.log(message: 'URI = $uri');
+  //     await ref.read(authControllerProvider.notifier).handleOAuthCallback(uri);
+  //   });
+  // }
 
   void onSubmit() async {
     final isValid = _formKey.currentState?.validate() ?? false;
@@ -86,7 +82,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
     _emailController.dispose();
     _passwordController.dispose();
     _authSubscription.close();
-    _subscribtionsLinks.cancel();
+    // _subscribtionsLinks.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -95,7 +91,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ref.read(authControllerProvider.notifier).reset();
-      Logger.log(message: 'resumed');
     }
   }
 

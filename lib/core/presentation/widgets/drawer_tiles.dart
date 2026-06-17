@@ -91,7 +91,7 @@ class SignOutTile extends ConsumerWidget {
           ? null
           : ref.read(authControllerProvider.notifier).signOut,
       icon: isLoading
-          ? const LoadingWidget()
+          ? const LoadingWidget(size: 20)
           : const Icon(Icons.login_outlined),
     );
   }

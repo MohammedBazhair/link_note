@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/presentation/widgets/loading_widget.dart';
 
-import '../../../../core/presentation/widgets/custom_progress_widget.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 
@@ -19,7 +19,7 @@ class AuthButton extends ConsumerWidget {
         loadingState?.authLoadingType == AuthLoadingType.signWithEmail;
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
-      child: isLoading ? const CustomProgressWidget() : Text(text),
+      child: isLoading ? const LoadingWidget() : Text(text),
     );
   }
 }
