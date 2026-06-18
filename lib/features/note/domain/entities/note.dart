@@ -25,6 +25,7 @@ class Note {
   }
   factory Note.fake() {
     return Note(
+      id: 'id',
       updatedAt: DateTime(2025),
       title: 'title tutjmn',
       content: 'asfafsfafjhkgjkgkjgjj',

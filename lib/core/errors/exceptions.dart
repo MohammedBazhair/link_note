@@ -48,22 +48,35 @@ class PermissionsException extends AppException {
 }
 
 class CreateSessionException extends AppException {
-  const CreateSessionException([super.message= 'فشل إنشاء الجلسة، يرجى المحاولة مرة أخرى.']);
+  const CreateSessionException([
+    super.message = 'فشل إنشاء الجلسة، يرجى المحاولة مرة أخرى.',
+  ]);
 }
 
 class AddMemberToSessionException extends AppException {
-  const AddMemberToSessionException([super.message= 'تعذر إضافة العضو إلى الجلسة. يرجى إعادة المحاولة.']);
+  const AddMemberToSessionException([
+    super.message = 'تعذر إضافة العضو إلى الجلسة. يرجى إعادة المحاولة.',
+  ]);
 }
 
 class RemoveMemberFromSessionException extends AppException {
-  const RemoveMemberFromSessionException([super.message= 'تعذر حذف العضو من الجلسة. يرجى إعادة المحاولة.']);
+  const RemoveMemberFromSessionException([
+    super.message = 'تعذر حذف العضو من الجلسة. يرجى إعادة المحاولة.',
+  ]);
 }
 
 class RemoveSessionException extends AppException {
-  const RemoveSessionException([super.message= 'تعذر إزالة الجلسة. يرجى إعادة المحاولة.']);
+  const RemoveSessionException([
+    super.message = 'تعذر إزالة الجلسة. يرجى إعادة المحاولة.',
+  ]);
 }
 
 class GetSessionException extends AppException {
-  const GetSessionException([super.message= 'تعذر العثور على الجلسة، قد تكون غير موجودة أو تم إزالتها.',
+  const GetSessionException([
+    super.message = 'تعذر العثور على الجلسة، قد تكون غير موجودة أو تم إزالتها.',
   ]);
+}
+
+class AiServiceException extends AppException {
+  const AiServiceException(super.message);
 }

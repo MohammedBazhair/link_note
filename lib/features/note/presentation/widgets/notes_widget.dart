@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:link_note/core/theme/styles_consts.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../../core/constants/colors/colors.dart';
 import '../../../../core/extensions/extensions.dart';
-import '../../../../core/theme/styles_consts.dart';
 import '../../domain/entities/note.dart';
 import '../controllers/note_providers.dart';
 import 'note_tile.dart';
@@ -14,16 +14,15 @@ class NotesListView extends ConsumerWidget {
   const NotesListView({
     super.key,
     required this.notes,
-    this.isShimmerEnabled = false,
+     this.isShimmerLoading=false,
   });
   final List<Note> notes;
-  final bool isShimmerEnabled;
-
+  final bool isShimmerLoading;
   @override
   Widget build(BuildContext context, ref) {
     final isMobile = context.isMobile;
     return Skeletonizer(
-      enabled: isShimmerEnabled,
+      enabled: isShimmerLoading,
       effect: StylesConsts.shimmerEffect,
       child: RefreshIndicator(
         color: DarkColors.primary,
