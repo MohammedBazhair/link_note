@@ -31,14 +31,14 @@ class MessageBubble extends ConsumerWidget {
         ? Colors.blue.shade800
         : const Color(0xFF343147);
     final layerLink = ref.read(layerLinkProvider(message.id));
-    final portalController = ref.read(overlayPortalController);
-
+    final reactionController = ref.read(
+      reactionEmojiControllerProvider.notifier,
+    );
     return CompositedTransformTarget(
       link: layerLink,
       child: GestureDetector(
-        onTap: () {
-          ref.read(currentLayerLinkProvider.notifier).state = layerLink;
-          portalController.show();
+        onLongPress: () {
+          reactionController.showReactionPopup(layerLink, message.id);
         },
         child: Align(
           alignment: isMe
@@ -109,7 +109,10 @@ class MessageBubble extends ConsumerWidget {
                       child: EmojiIcon(
                         size: 14,
                         reaction: message.reactionEmoji!,
-                        onPressed: print,
+                        onPressed: () {
+                          print('onPressed');
+                          // TODO: Remove Emoji On Tap
+                        },
                         backgroundColor: backgroundColor,
                         borderColor: Theme.of(context).scaffoldBackgroundColor,
                       ),

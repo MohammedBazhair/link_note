@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:link_note/features/offline_chat/presentation/controllers/reaction_emoji_controller.dart';
 import '../../data/handlers/chat_handshake_handler.dart';
 import '../../data/handlers/chat_sending_handler.dart';
 import '../../data/handlers/image_transfer_handler.dart';
@@ -111,13 +112,11 @@ final chatSessionManagerProvider = Provider((ref) {
 });
 //
 
-final overlayPortalController = Provider((ref) {
-  final controller = OverlayPortalController();
-  return controller;
-});
+final reactionEmojiControllerProvider = NotifierProvider(
+  ReactionEmojiController.new,
+);
 
 final layerLinkProvider = Provider.family<LayerLink, String>((ref, messageId) {
   return LayerLink();
 });
 
-final currentLayerLinkProvider = StateProvider<LayerLink?>((ref) => null);

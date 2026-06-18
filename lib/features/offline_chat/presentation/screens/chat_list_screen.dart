@@ -1,9 +1,6 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:link_note/features/offline_chat/presentation/screens/test_reaction_page.dart';
-
 import '../../../../core/extensions/extensions.dart';
 import '../../../auth/presentation/screens/sign_in_screen.dart';
 import '../../../user/presentation/controllers/user_providers.dart';
@@ -20,7 +17,6 @@ class ChatListScreen extends ConsumerWidget {
     if (myUserId == null) return const AuthenticationRequiredScreen();
 
     final chatUserIds = ref.watch(getMyFriendsIdsProvider);
-    if (myUserId != 'Testing') return const TestReactionPage();
     
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,

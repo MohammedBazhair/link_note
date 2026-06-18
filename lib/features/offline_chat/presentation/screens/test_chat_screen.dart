@@ -19,7 +19,7 @@ class TestChatScreen extends StatelessWidget {
 
           children: [
             Expanded(
-              child: MessageList(chatId: '', myId: 'user_1'),
+              child: MessageList(peerId: '', myId: 'user_1'),
             ),
 
             ChatInput(peerId: ''),

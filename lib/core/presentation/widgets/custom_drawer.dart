@@ -51,7 +51,7 @@ class CustomDrawer extends ConsumerWidget {
                           const SignUpTile(),
                         ],
                         const NotesTile(),
-                        if (!Platform.isAndroid) const ChatsTile(),// TODO: hide on Win
+                        if (!Platform.isWindows) const ChatsTile(),
                         // const ImageMemoriesTile(),
                         if (isUserLogin) ...[const ManageSessionTile()],
                         const AboutAppTile(),

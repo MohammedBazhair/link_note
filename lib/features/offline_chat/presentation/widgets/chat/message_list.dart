@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 import 'message_bubble.dart';
+import 'reaction_popup.dart';
 
 class MessageList extends ConsumerStatefulWidget {
-  const MessageList({super.key, required this.chatId, required this.myId});
-  final String chatId;
+  const MessageList({super.key, required this.peerId, required this.myId});
+  final String peerId;
   final String myId;
 
   @override
@@ -18,7 +20,7 @@ class _MessageListState extends ConsumerState<MessageList> {
   @override
   void initState() {
     super.initState();
-    ref.listenManual(getChatMessagesProvider(widget.chatId), (
+    ref.listenManual(getChatMessagesProvider(chatId), (
       oldMessages,
       newMessages,
     ) {
@@ -47,18 +49,56 @@ class _MessageListState extends ConsumerState<MessageList> {
     super.dispose();
   }
 
+  String get chatId => Message.buildChatId(widget.myId,widget.peerId);
+
   @override
   Widget build(BuildContext context) {
-    final chatMessages = ref.watch(getChatMessagesProvider(widget.chatId));
+    final chatMessages = ref.watch(getChatMessagesProvider(chatId));
 
     if (chatMessages.isEmpty) {
       return const Center(child: Text('لا توجد رسائل بعد'));
     }
+    final reactionController = ref.read(
+      reactionEmojiControllerProvider.notifier,
+    );
+    return OverlayPortal(
+      controller: reactionController.portalController,
+      overlayChildBuilder: (context) {
+        final currentLink = ref.watch(
+          reactionEmojiControllerProvider.select((s) => s.currentLayerLink),
+        );
 
-    return _ChatMessages(
-      scrollController: _scrollController,
-      myId: widget.myId,
-      chatMessages: chatMessages,
+        if (currentLink == null) return const SizedBox.shrink();
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: reactionController.hideReactionPopup,
+                child: const ColoredBox(color: Colors.transparent),
+              ),
+            ),
+            CompositedTransformFollower(
+              link: currentLink,
+              offset: const Offset(0, -60),
+              child: Material(
+                color: Colors.transparent,
+                child: ReactionPopup(
+                  onSelected: (reaction) => reactionController.onEmojiSelected(
+                    chatId: chatId,
+                    peerId: widget.peerId,
+                    reaction: reaction,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      child: _ChatMessages(
+        scrollController: _scrollController,
+        myId: widget.myId,
+        chatMessages: chatMessages,
+      ),
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
-import 'package:link_note/features/offline_chat/presentation/controllers/chat_providers.dart';
 
 class ReactionPopup extends StatelessWidget {
   const ReactionPopup({super.key, required this.onSelected});
@@ -58,7 +57,9 @@ class ReactionPopup extends StatelessWidget {
                   ),
                 );
               },
-              child: EmojiIcon(reaction: reaction, onPressed: onSelected),
+              child: EmojiIcon(reaction: reaction, onPressed: (){
+
+              }),
             );
           },
         ),
@@ -74,23 +75,19 @@ class EmojiIcon extends ConsumerWidget {
     this.size = 16,
     this.backgroundColor,
     this.borderColor,
-    required this.onPressed,
+    this.onPressed,
   });
   final ReactionEmoji reaction;
   final double size;
   final Color? backgroundColor;
   final Color? borderColor;
-  final void Function(ReactionEmoji reaction) onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context, ref) {
-    final controller = ref.read(overlayPortalController);
     return InkWell(
       borderRadius: BorderRadius.circular(50),
-      onTap: () {
-        onPressed(reaction);
-        controller.hide();
-      },
+      onTap: onPressed,
 
       child: CircleAvatar(
         radius: size + (size * 0.13),
