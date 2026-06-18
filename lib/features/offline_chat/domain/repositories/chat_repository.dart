@@ -37,9 +37,10 @@ abstract class ChatRepository {
     String? replyToMessageId,
   });
 
+  /// If [reactionEmoji] is null, the existing reaction is removed.
   void sendEmoji({
     required String peerUserId,
-    required ReactionEmoji reactionEmoji,
+    ReactionEmoji? reactionEmoji,
     required String messageId,
   });
 

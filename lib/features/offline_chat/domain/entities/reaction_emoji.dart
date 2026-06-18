@@ -19,7 +19,12 @@ enum ReactionEmoji {
 
   final String emoji;
 
-  static ReactionEmoji fromString(String name) {
-    return ReactionEmoji.values.byName(name);
+  static ReactionEmoji? fromString(String name) {
+    try {
+      if (name.trim().isEmpty) return null;
+      return ReactionEmoji.values.byName(name);
+    } catch (e) {
+      return null;
+    }
   }
 }

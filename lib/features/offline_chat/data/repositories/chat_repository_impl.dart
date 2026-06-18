@@ -267,13 +267,18 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   void sendEmoji({
     required String peerUserId,
-    required ReactionEmoji reactionEmoji,
+     ReactionEmoji? reactionEmoji,
     required String messageId,
   }) async {
-    await _sendingHandler.sendReactionEmoji(
+  final message=  await _sendingHandler.sendReactionEmoji(
       peerUserId: peerUserId,
       reactionEmoji: reactionEmoji,
       messageId: messageId,
     );
+
+      if (message == null) return;
+
+    _addMessageToHistory(message);
+    _controller.add(message);
   }
 }

@@ -12,7 +12,7 @@ import 'chat_state.dart';
 
 class ChatController extends Notifier<ChatState> {
   StreamSubscription<Message>? _messageSubscription;
-  final _notificationDebounce = Debouncer(milliseconds: 3000);
+  final _notificationDebounce = Debouncer(milliseconds: 200);
 
   @override
   ChatState build() {
@@ -51,15 +51,12 @@ class ChatController extends Notifier<ChatState> {
     updatedMessages.update(
       message.id,
       (current) {
-        print('FOUND MESSAGE: ${current.id}');
-        print('REACTION: ${message.reactionEmoji}');
         if (message.type == MessageType.reactionEmoji) {
           return current.copyWith(reactionEmoji: message.reactionEmoji);
         }
         return current;
       },
       ifAbsent: () {
-        print('MESSAGE NOT FOUND ${message.id}');
         return message;
       },
     );
@@ -67,14 +64,10 @@ class ChatController extends Notifier<ChatState> {
     final updatedChatRooms = {...state.chatRooms};
     updatedChatRooms.update(
       message.chatId,
-      (room) => room.copyWith(
-        messages: updatedMessages,
-        lastUpdated: DateTime.now().toUtc(),
-      ),
-      ifAbsent: () => ChatRoom(
-        messages: updatedMessages,
-        lastUpdated: DateTime.now().toUtc(),
-      ),
+      (room) =>
+          room.copyWith(messages: updatedMessages, lastUpdated: DateTime.now()),
+      ifAbsent: () =>
+          ChatRoom(messages: updatedMessages, lastUpdated: DateTime.now()),
     );
 
     state = state.copyWith(
@@ -130,11 +123,13 @@ class ChatController extends Notifier<ChatState> {
   }
 
   void sendReactionEmoji({
-    required String chatId,
-    required String peerId,
-    required ReactionEmoji reactionEmoji,
+    required ReactionEmoji? reactionEmoji,
     required String messageId,
   }) {
+    final chatId = ref.read(reactionEmojiControllerProvider).currentChatId;
+    final peerId = ref.read(reactionEmojiControllerProvider).currentPeerId;
+    if (chatId == null|| peerId == null) return;
+
     final currentMessage = state.chatRooms[chatId]?.messages[messageId];
     if (currentMessage == null) return;
 
@@ -146,15 +141,5 @@ class ChatController extends Notifier<ChatState> {
           messageId: messageId,
         );
 
-    final chatRooms = {...state.chatRooms};
-    chatRooms.update(chatId, (chatRoom) {
-      final copiedMessages = {...chatRoom.messages};
-      copiedMessages[messageId] = currentMessage.copyWith(
-        reactionEmoji: reactionEmoji,
-      );
-      return chatRoom.copyWith(messages: copiedMessages);
-    });
-
-    state = state.copyWith(chatRooms: chatRooms);
   }
 }

@@ -113,6 +113,8 @@ class Message {
     return 'Message(id: $id, chatId: $chatId, senderUserId: $senderUserId, type: $type, text: $text, imagePath: $filePath, time: $time)';
   }
 
+  static const _sentinel = Object();
+
   Message copyWith({
     String? id,
     String? replyToMessageId,
@@ -120,7 +122,7 @@ class Message {
     String? senderUserId,
     MessageType? type,
     String? text,
-    ReactionEmoji? reactionEmoji,
+    Object? reactionEmoji = _sentinel,
     String? filePath,
     DateTime? time,
   }) {
@@ -131,7 +133,9 @@ class Message {
       senderUserId: senderUserId ?? this.senderUserId,
       type: type ?? this.type,
       text: text ?? this.text,
-      reactionEmoji: reactionEmoji ?? this.reactionEmoji,
+      reactionEmoji: identical(reactionEmoji, _sentinel)
+          ? this.reactionEmoji
+          : reactionEmoji as ReactionEmoji?,
       filePath: filePath ?? this.filePath,
       time: time ?? this.time,
     );

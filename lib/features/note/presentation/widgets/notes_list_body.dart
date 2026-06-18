@@ -38,17 +38,20 @@ class _NotesStreamBuilder extends ConsumerWidget {
     return notesAsync.when(
       skipLoadingOnReload: false,
       data: (notes) {
-        print('data');
         return ConditionalBuilder(
           condition: notes.isNotEmpty,
-          builder: (_) => NotesListView(notes: notes),
+          builder: (_) =>
+              NotesListView(key: const ValueKey('real'), notes: notes),
           fallback: (_) => const NothingNoteWidget(),
         );
       },
       loading: () {
-        print('loading');
         final fakeNotes = List.generate(8, (index) => Note.fake());
-        return NotesListView(notes: fakeNotes, isShimmerEnabled: true);
+        return NotesListView(
+          key: const ValueKey('fake'),
+          notes: fakeNotes,
+          isShimmerEnabled: true,
+        );
       },
 
       error: (error, stackTrace) {

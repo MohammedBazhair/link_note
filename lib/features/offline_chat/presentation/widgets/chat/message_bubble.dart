@@ -55,7 +55,9 @@ class MessageBubble extends ConsumerWidget {
             },
 
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: isMe
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
                 CustomPaint(
@@ -103,15 +105,21 @@ class MessageBubble extends ConsumerWidget {
                   Container(
                     height: 30,
                     width: double.infinity,
-                    alignment: AlignmentDirectional.topEnd,
+                    alignment: isMe
+                        ? AlignmentDirectional.topStart
+                        : AlignmentDirectional.topEnd,
                     child: Transform.translate(
-                      offset: const Offset(10, -10),
+                      offset: Offset(isMe ? -5 : 10, -10),
                       child: EmojiIcon(
-                        size: 14,
+                        size: 10,
                         reaction: message.reactionEmoji!,
                         onPressed: () {
-                          print('onPressed');
-                          // TODO: Remove Emoji On Tap
+                          ref
+                              .read(chatControllerProvider.notifier)
+                              .sendReactionEmoji(
+                                reactionEmoji: null,
+                                messageId: message.chatId,
+                              );
                         },
                         backgroundColor: backgroundColor,
                         borderColor: Theme.of(context).scaffoldBackgroundColor,

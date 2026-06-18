@@ -1,7 +1,5 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 import 'package:link_note/features/offline_chat/presentation/controllers/chat_providers.dart';
 
@@ -10,6 +8,10 @@ class ReactionEmojiController extends Notifier<ReactionEmojiState> {
   @override
   ReactionEmojiState build() {
     return ReactionEmojiState();
+  }
+
+  void loadChatData({required String chatId, required String peerId}) {
+    state = state.copyWith(currentChatId: chatId, currentPeerId: peerId);
   }
 
   void showReactionPopup(LayerLink layerLink, String messageId) {
@@ -22,14 +24,10 @@ class ReactionEmojiController extends Notifier<ReactionEmojiState> {
 
   void hideReactionPopup() {
     portalController.hide();
-    state = ReactionEmojiState();
+    state = state.copyWith(currentMessageId: null, currentLayerLink: null);
   }
 
-  void onEmojiSelected({
-    required String chatId,
-    required String peerId,
-    required ReactionEmoji reaction,
-  }) {
+  void onEmojiSelected({required ReactionEmoji reaction}) {
     final currentMessageId = state.currentMessageId;
 
     if (currentMessageId == null) return;
@@ -37,8 +35,6 @@ class ReactionEmojiController extends Notifier<ReactionEmojiState> {
     ref
         .read(chatControllerProvider.notifier)
         .sendReactionEmoji(
-          chatId: chatId,
-          peerId: peerId,
           reactionEmoji: reaction,
           messageId: currentMessageId,
         );
@@ -48,18 +44,35 @@ class ReactionEmojiController extends Notifier<ReactionEmojiState> {
 }
 
 class ReactionEmojiState {
-  ReactionEmojiState({this.currentLayerLink, this.currentMessageId});
+  ReactionEmojiState({
+    this.currentLayerLink,
+    this.currentMessageId,
+    this.currentPeerId,
+    this.currentChatId,
+  });
 
+  final String? currentPeerId;
+  final String? currentChatId;
   final String? currentMessageId;
   final LayerLink? currentLayerLink;
 
+  static const Object _sentinel = Object();
+
   ReactionEmojiState copyWith({
-    String? currentMessageId,
-    LayerLink? currentLayerLink,
+    String? currentPeerId,
+    String? currentChatId,
+    Object? currentMessageId = _sentinel,
+    Object? currentLayerLink = _sentinel,
   }) {
     return ReactionEmojiState(
-      currentMessageId: currentMessageId ?? this.currentMessageId,
-      currentLayerLink: currentLayerLink ?? this.currentLayerLink,
+      currentPeerId: currentPeerId ?? this.currentPeerId,
+      currentChatId: currentChatId ?? this.currentChatId,
+      currentMessageId: identical(currentMessageId, _sentinel)
+          ? this.currentMessageId
+          : currentMessageId as String?,
+      currentLayerLink: identical(currentLayerLink, _sentinel)
+          ? this.currentLayerLink
+          : currentLayerLink as LayerLink?,
     );
   }
 }

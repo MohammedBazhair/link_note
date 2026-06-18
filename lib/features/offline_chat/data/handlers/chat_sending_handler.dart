@@ -61,17 +61,9 @@ class ChatSendingHandler {
     );
 
     if (!sent) {
-      Logger.log(
-        error:
-            'Failed to send bytes to ${session.peerAddress} for message ${message.id}',
-      );
       // Sending failed - return null so repository won't mark message as sent
       return null;
     }
-
-    Logger.log(
-      message: 'Bytes sent to ${session.peerAddress} id=${message.id}',
-    );
 
     return message;
   }
@@ -161,21 +153,43 @@ class ChatSendingHandler {
     return message;
   }
 
-  Future<void> sendReactionEmoji({
+  Future<Message?> sendReactionEmoji({
     required String peerUserId,
-    required ReactionEmoji reactionEmoji,
+    ReactionEmoji? reactionEmoji,
     required String messageId,
   }) async {
     final session = _sessionManager.resolveSession(peerUserId);
-    if (session == null) return;
+    if (session == null) return null;
+
+    final message = Message(
+      id: messageId,
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.reactionEmoji,
+      time: DateTime.now().toUtc(),
+      chatId: Message.buildChatId(
+        _identityManager.localIdentity.uuid,
+        peerUserId,
+      ),
+      reactionEmoji: reactionEmoji,
+    );
 
     final packet = Protocol.buildPacket(
       senderUserId: _identityManager.localIdentity.uuid,
       type: MessageType.reactionEmoji,
-      payload: Uint8List.fromList(utf8.encode(reactionEmoji.name)),
+      payload: Uint8List.fromList(utf8.encode(reactionEmoji?.name ?? '')),
       messageId: messageId,
     );
 
-    await _connectionManager.sendBytes(session.peerAddress, packet);
+    final sent = await _connectionManager.sendBytes(
+      session.peerAddress,
+      packet,
+    );
+
+    if (!sent) {
+      // Sending failed - return null so repository won't mark message as sent
+      return null;
+    }
+
+    return message;
   }
 }

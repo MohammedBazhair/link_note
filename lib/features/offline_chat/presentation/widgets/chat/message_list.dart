@@ -41,6 +41,12 @@ class _MessageListState extends ConsumerState<MessageList> {
         );
       });
     });
+
+    Future.microtask(() {
+      ref
+          .read(reactionEmojiControllerProvider.notifier)
+          .loadChatData(chatId: chatId, peerId: widget.peerId);
+    });
   }
 
   @override
@@ -49,7 +55,7 @@ class _MessageListState extends ConsumerState<MessageList> {
     super.dispose();
   }
 
-  String get chatId => Message.buildChatId(widget.myId,widget.peerId);
+  String get chatId => Message.buildChatId(widget.myId, widget.peerId);
 
   @override
   Widget build(BuildContext context) {
@@ -83,11 +89,8 @@ class _MessageListState extends ConsumerState<MessageList> {
               child: Material(
                 color: Colors.transparent,
                 child: ReactionPopup(
-                  onSelected: (reaction) => reactionController.onEmojiSelected(
-                    chatId: chatId,
-                    peerId: widget.peerId,
-                    reaction: reaction,
-                  ),
+                  onSelected: (reaction) =>
+                      reactionController.onEmojiSelected(reaction: reaction),
                 ),
               ),
             ),
