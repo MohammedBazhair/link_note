@@ -40,8 +40,10 @@ class ReactionEmojiController extends Notifier<ReactionEmojiState> {
           chatId: chatId,
           peerId: peerId,
           reactionEmoji: reaction,
-          messageId:currentMessageId,
+          messageId: currentMessageId,
         );
+
+    hideReactionPopup();
   }
 }
 

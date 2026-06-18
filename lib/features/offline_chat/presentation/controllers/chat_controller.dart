@@ -48,12 +48,21 @@ class ChatController extends Notifier<ChatState> {
     final currentMessages = state.chatRooms[message.chatId]?.messages ?? {};
     final updatedMessages = {...currentMessages};
 
-    updatedMessages.update(message.id, (current) {
-      if (message.type == MessageType.reactionEmoji) {
-        return current.copyWith(reactionEmoji: message.reactionEmoji);
-      }
-      return current;
-    }, ifAbsent: () => message);
+    updatedMessages.update(
+      message.id,
+      (current) {
+        print('FOUND MESSAGE: ${current.id}');
+        print('REACTION: ${message.reactionEmoji}');
+        if (message.type == MessageType.reactionEmoji) {
+          return current.copyWith(reactionEmoji: message.reactionEmoji);
+        }
+        return current;
+      },
+      ifAbsent: () {
+        print('MESSAGE NOT FOUND ${message.id}');
+        return message;
+      },
+    );
 
     final updatedChatRooms = {...state.chatRooms};
     updatedChatRooms.update(
@@ -129,6 +138,14 @@ class ChatController extends Notifier<ChatState> {
     final currentMessage = state.chatRooms[chatId]?.messages[messageId];
     if (currentMessage == null) return;
 
+    ref
+        .read(chatRepository)
+        .sendEmoji(
+          peerUserId: peerId,
+          reactionEmoji: reactionEmoji,
+          messageId: messageId,
+        );
+
     final chatRooms = {...state.chatRooms};
     chatRooms.update(chatId, (chatRoom) {
       final copiedMessages = {...chatRoom.messages};
@@ -138,12 +155,6 @@ class ChatController extends Notifier<ChatState> {
       return chatRoom.copyWith(messages: copiedMessages);
     });
 
-    ref
-        .read(chatRepository)
-        .sendEmoji(
-          peerUserId: peerId,
-          reactionEmoji: reactionEmoji,
-          messageId: messageId,
-        );
+    state = state.copyWith(chatRooms: chatRooms);
   }
 }

@@ -86,6 +86,7 @@ class Message {
         type: packet.messageType,
         time: timeNow,
         chatId: chatId,
+        reactionEmoji: ReactionEmoji.fromString(utf8.decode(packet.payload)),
       ),
     };
   }

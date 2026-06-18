@@ -147,7 +147,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
                               ),
                             ),
 
-                            const SizedBox(height: 80),
+                            SizedBox(height: isDesktop ? 80 : 20),
 
                             GridView(
                               physics: const NeverScrollableScrollPhysics(),
@@ -156,8 +156,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: isDesktop ? 2 : 1,
-                                    mainAxisSpacing: isDesktop ? 24 : 12,
-                                    crossAxisSpacing: isDesktop ? 24 : 12,
+                                    mainAxisSpacing: isDesktop ? 24 : 3,
+                                    crossAxisSpacing: isDesktop ? 24 : 3,
                                     mainAxisExtent: 130,
                                   ),
 
@@ -173,7 +173,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen>
                               ],
                             ),
 
-                            const SizedBox(height: 25),
+                            SizedBox(height: isDesktop ? 25 : 10),
 
                             // نسيت كلمة المرور
                             RichText(

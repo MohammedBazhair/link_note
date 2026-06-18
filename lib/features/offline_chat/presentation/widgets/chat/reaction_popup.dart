@@ -57,9 +57,10 @@ class ReactionPopup extends StatelessWidget {
                   ),
                 );
               },
-              child: EmojiIcon(reaction: reaction, onPressed: (){
-
-              }),
+              child: EmojiIcon(
+                reaction: reaction,
+                onPressed: () => onSelected(reaction),
+              ),
             );
           },
         ),
