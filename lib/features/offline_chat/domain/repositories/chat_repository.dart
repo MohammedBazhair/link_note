@@ -1,3 +1,5 @@
+import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
+
 import '../../presentation/controllers/chat_state.dart';
 import '../entities/message.dart';
 
@@ -13,7 +15,7 @@ abstract class ChatRepository {
   /// Full history of messages in current session.
   Map<String, ChatRoom> get chatsHistory;
 
-  Set<String>  myChatFriendsIds(String myUserId);
+  Set<String> myChatFriendsIds(String myUserId);
 
   /// Sends a text message to the peer identified by their user id.
   void sendText({
@@ -33,6 +35,13 @@ abstract class ChatRepository {
     required String peerUserId,
     required String filePath,
     String? replyToMessageId,
+  });
+
+  /// If [reactionEmoji] is null, the existing reaction is removed.
+  void sendEmoji({
+    required String peerUserId,
+    ReactionEmoji? reactionEmoji,
+    required String messageId,
   });
 
   /// Disposes any resources held by the repository.

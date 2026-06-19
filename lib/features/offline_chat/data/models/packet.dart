@@ -1,6 +1,5 @@
 import 'dart:typed_data';
-
-import '../../domain/entities/message.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 
 class Packet {
   Packet({

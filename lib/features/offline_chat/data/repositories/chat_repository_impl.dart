@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
+import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
+
 import '../../../../core/constants/internal_constants/log.dart';
 import '../../domain/entities/message.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -201,6 +204,13 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
+  void dispose() {
+    _incomingSub.cancel();
+    _connectedSub.cancel();
+    _controller.close();
+  }
+
+  @override
   Future<void> sendText({
     required String peerUserId,
     required String text,
@@ -256,9 +266,20 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  void dispose() {
-    _incomingSub.cancel();
-    _connectedSub.cancel();
-    _controller.close();
+  void sendEmoji({
+    required String peerUserId,
+     ReactionEmoji? reactionEmoji,
+    required String messageId,
+  }) async {
+  final message=  await _sendingHandler.sendReactionEmoji(
+      peerUserId: peerUserId,
+      reactionEmoji: reactionEmoji,
+      messageId: messageId,
+    );
+
+      if (message == null) return;
+
+    _addMessageToHistory(message);
+    _controller.add(message);
   }
 }

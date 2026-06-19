@@ -1,23 +1,5 @@
-import 'dart:convert';
-
-import '../../data/models/packet.dart';
-
-enum MessageType {
-  handshake(1),
-  text(2),
-  image(3),
-  voice(4);
-
-  const MessageType(this.typeCode);
-  static MessageType fromValue(int v) {
-    return MessageType.values.firstWhere(
-      (e) => e.typeCode == v,
-      orElse: () => MessageType.text,
-    );
-  }
-
-  final int typeCode;
-}
+import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
+import 'message_type.dart';
 
 class Message {
   Message({
@@ -26,56 +8,24 @@ class Message {
     required this.type,
     this.replyToMessageId,
     this.text,
+    this.reactionEmoji,
     this.filePath,
     required this.time,
     required this.chatId,
   });
 
-  factory Message.fromPacket({
-    required Packet packet,
-    required String senderId,
-    required String myId,
-  }) {
-    final messageId = packet.messageId;
-    final replyToMessageId = packet.replyToMessageId;
-    final chatId = buildChatId(myId, senderId);
-    final timeNow = DateTime.now().toUtc();
-    return switch (packet.messageType) {
-      MessageType.text => Message(
-        id: messageId,
-        chatId: chatId,
-        senderUserId: senderId,
-        type: packet.messageType,
-        text: utf8.decode(packet.payload),
-        time: timeNow,
-        replyToMessageId: replyToMessageId
-      ),
-      MessageType.image => Message(
-        id: messageId,
-        chatId: chatId,
-        senderUserId: senderId,
-        type: packet.messageType,
-        filePath: 'received_image_${DateTime.now().millisecondsSinceEpoch}.png',
-        time: timeNow,
-        replyToMessageId: replyToMessageId
-      ),
-      MessageType.handshake => Message(
-        id: messageId,
-        senderUserId: senderId,
-        type: MessageType.handshake,
-        time: timeNow,
-        chatId: chatId,
-      ),
-      MessageType.voice => Message(
-        id: messageId,
-        chatId: chatId,
-        senderUserId: senderId,
-        type: packet.messageType,
-        filePath: 'received_voice_${DateTime.now().millisecondsSinceEpoch}.ogg',
-        time: timeNow,
-        replyToMessageId: replyToMessageId,
-      ),
-    };
+  factory Message.fromMap(Map<String, dynamic> map) {
+    return Message(
+      id: map['id'] as String,
+      replyToMessageId: map['reply_To_Message_Id'] as String?,
+      chatId: map['chat_id'] as String,
+      senderUserId: map['sender_user_id'] as String,
+      type: MessageType.fromValue(map['message_type'] as int),
+      text: map['text'] as String?,
+      reactionEmoji: ReactionEmoji.fromCode(map['reaction_emoji'] as int?),
+      filePath: map['file_path'] as String?,
+      time: DateTime.parse(map['time'] as String),
+    );
   }
 
   static String buildChatId(String a, String b) {
@@ -91,11 +41,54 @@ class Message {
   final String senderUserId;
   final MessageType type;
   final String? text;
+  final ReactionEmoji? reactionEmoji;
   final String? filePath;
   final DateTime time;
 
   @override
   String toString() {
     return 'Message(id: $id, chatId: $chatId, senderUserId: $senderUserId, type: $type, text: $text, imagePath: $filePath, time: $time)';
+  }
+
+  static const _sentinel = Object();
+
+  Message copyWith({
+    String? id,
+    String? replyToMessageId,
+    String? chatId,
+    String? senderUserId,
+    MessageType? type,
+    String? text,
+    Object? reactionEmoji = _sentinel,
+    String? filePath,
+    DateTime? time,
+  }) {
+    return Message(
+      id: id ?? this.id,
+      replyToMessageId: replyToMessageId ?? this.replyToMessageId,
+      chatId: chatId ?? this.chatId,
+      senderUserId: senderUserId ?? this.senderUserId,
+      type: type ?? this.type,
+      text: text ?? this.text,
+      reactionEmoji: identical(reactionEmoji, _sentinel)
+          ? this.reactionEmoji
+          : reactionEmoji as ReactionEmoji?,
+      filePath: filePath ?? this.filePath,
+      time: time ?? this.time,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'reply_To_Message_Id': replyToMessageId,
+      'chat_id': chatId,
+      'sender_user_id': senderUserId,
+      'message_type': type.typeCode,
+      'text': text,
+      'reaction_emoji': reactionEmoji?.name,
+      'file_path': filePath,
+      'time': time.toIso8601String(),
+    };
   }
 }

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
+
 import '../../domain/entities/message.dart';
 
 class VoiceTransferHandler {

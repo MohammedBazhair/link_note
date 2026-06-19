@@ -10,7 +10,6 @@ import '../controllers/note_providers.dart';
 import '../screens/note_editor_screen.dart';
 
 final _hoverNoteProvider = StateProvider.family.autoDispose((ref, id) => false);
-
 class NoteTile extends ConsumerWidget {
   const NoteTile({super.key, required this.note});
 
@@ -26,6 +25,7 @@ class NoteTile extends ConsumerWidget {
         (s) => s.selectedNotesIds.contains(noteId),
       ),
     );
+
     return Stack(
       clipBehavior: Clip.antiAlias,
       children: [

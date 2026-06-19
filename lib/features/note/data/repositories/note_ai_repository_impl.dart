@@ -1,6 +1,5 @@
 import 'package:http/http.dart';
 import 'package:link_note/core/features/network/connectivity_service.dart';
-
 import '../../../../core/constants/external_constants/external_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/features/ai/ai_client.dart';
@@ -52,10 +51,11 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
 
       final response = await _aiClient.generate(params);
 
-      final model = AiResponseModel.fromJson(response);
+      final model = AiResponseModel.fromMap(response);
 
+      if (model.error != null) throw AiServiceException(model.error!);
       await _userRemoteDataSource.updateCredits(credits - 1, note.ownerId!);
-      return model.text;
+      return model.resultText ?? note.title;
     } on ClientException catch (_) {
       throw const InternetException();
     } catch (e) {
@@ -82,10 +82,11 @@ class NoteAiRepositoryImpl implements NoteAiRepository {
       );
 
       final response = await _aiClient.generate(params);
-      final model = AiResponseModel.fromJson(response);
+      final model = AiResponseModel.fromMap(response);
 
+      if (model.error != null) throw AiServiceException(model.error!);
       await _userRemoteDataSource.updateCredits(credits - 1, note.ownerId!);
-      return model.text;
+      return model.resultText??note.content;
     } on ClientException catch (_) {
       throw const InternetException();
     } catch (e) {

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
+import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';
@@ -60,17 +62,9 @@ class ChatSendingHandler {
     );
 
     if (!sent) {
-      Logger.log(
-        error:
-            'Failed to send bytes to ${session.peerAddress} for message ${message.id}',
-      );
       // Sending failed - return null so repository won't mark message as sent
       return null;
     }
-
-    Logger.log(
-      message: 'Bytes sent to ${session.peerAddress} id=${message.id}',
-    );
 
     return message;
   }
@@ -156,6 +150,49 @@ class ChatSendingHandler {
     );
 
     await _connectionManager.sendBytes(session.peerAddress, metadataPacket);
+
+    return message;
+  }
+
+  Future<Message?> sendReactionEmoji({
+    required String peerUserId,
+    ReactionEmoji? reactionEmoji,
+    required String messageId,
+  }) async {
+    final session = _sessionManager.resolveSession(peerUserId);
+    if (session == null) return null;
+
+    final message = Message(
+      id: messageId,
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.reactionEmoji,
+      time: DateTime.now().toUtc(),
+      chatId: Message.buildChatId(
+        _identityManager.localIdentity.uuid,
+        peerUserId,
+      ),
+      reactionEmoji: reactionEmoji,
+    );
+
+    final payload = Uint8List(4);
+    ByteData.sublistView(payload).setUint32(0, reactionEmoji?.code ?? 0);
+    
+    final packet = Protocol.buildPacket(
+      senderUserId: _identityManager.localIdentity.uuid,
+      type: MessageType.reactionEmoji,
+      payload:payload,
+      messageId: messageId,
+    );
+
+    final sent = await _connectionManager.sendBytes(
+      session.peerAddress,
+      packet,
+    );
+
+    if (!sent) {
+      // Sending failed - return null so repository won't mark message as sent
+      return null;
+    }
 
     return message;
   }

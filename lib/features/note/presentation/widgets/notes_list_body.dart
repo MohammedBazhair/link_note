@@ -38,17 +38,12 @@ class _NotesStreamBuilder extends ConsumerWidget {
     return notesAsync.when(
       skipLoadingOnReload: false,
       data: (notes) {
-        print('data');
-        return ConditionalBuilder(
-          condition: notes.isNotEmpty,
-          builder: (_) => NotesListView(notes: notes),
-          fallback: (_) => const NothingNoteWidget(),
-        );
+        if (notes.isEmpty) return const NothingNoteWidget();
+        return NotesListView(notes: notes);
       },
       loading: () {
-        print('loading');
-        final fakeNotes = List.generate(8, (index) => Note.fake());
-        return NotesListView(notes: fakeNotes, isShimmerEnabled: true);
+        final fakeNotes = List.generate(12, (index) => Note.fake());
+        return NotesListView(notes: fakeNotes, isShimmerLoading: true);
       },
 
       error: (error, stackTrace) {
@@ -70,7 +65,7 @@ class _NotesSearchResults extends ConsumerWidget {
     if (isLoading) {
       final fakeNotes = List.generate(8, (index) => Note.fake());
 
-      return NotesListView(notes: fakeNotes, isShimmerEnabled: isLoading);
+      return NotesListView(notes: fakeNotes);
     }
 
     return ConditionalBuilder(

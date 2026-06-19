@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../domain/entities/message.dart';
 import '../controllers/chat_providers.dart';
@@ -19,7 +20,7 @@ class TestChatScreen extends StatelessWidget {
 
           children: [
             Expanded(
-              child: MessageList(chatId: '', myId: 'user_1'),
+              child: MessageList(peerId: '', myId: 'user_1'),
             ),
 
             ChatInput(peerId: ''),
