@@ -1,5 +1,6 @@
 import 'package:link_note/core/constants/external_constants/external_constants.dart';
 import 'package:link_note/core/features/database/local/local_database_service.dart';
+import 'package:link_note/features/offline_chat/data/models/chat_model.dart';
 import 'package:link_note/features/offline_chat/domain/datasources/messages_local_data_source.dart';
 import 'package:link_note/features/offline_chat/domain/entities/message.dart';
 import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
@@ -10,6 +11,7 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
   final LocalDatabaseService _db;
 
   final _messagesTable = ExternalConsts.messagesTable;
+  final _chatsTable = ExternalConsts.chatsTable;
 
   @override
   Future<void> saveMessage(Message message) async {
@@ -60,5 +62,15 @@ class MessagesLocalDataSourceImpl implements MessagesLocalDataSource {
       column: 'id',
       table: _messagesTable,
     );
+  }
+
+  @override
+  Future<void> createChat(ChatModel chatModel) async {
+    await _db.insertRow(map: chatModel.toMap(), table: _chatsTable);
+  }
+
+  @override
+  Future<void> deleteChat(String chatId) async{
+    await _db.deleteWhere(table: _chatsTable, filters: {'id': chatId});
   }
 }
