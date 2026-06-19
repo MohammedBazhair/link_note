@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/constants/colors/colors.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import 'package:link_note/features/offline_chat/presentation/widgets/chat/reaction_popup.dart';
 import '../../../../../core/constants/internal_constants/log.dart';
 import '../../../../../core/extensions/extensions.dart';
@@ -34,99 +36,116 @@ class MessageBubble extends ConsumerWidget {
     final reactionController = ref.read(
       reactionEmojiControllerProvider.notifier,
     );
-    return CompositedTransformTarget(
-      link: layerLink,
-      child: GestureDetector(
-        onLongPress: () {
-          reactionController.showReactionPopup(layerLink, message.id);
-        },
-        child: Align(
-          alignment: isMe
-              ? AlignmentDirectional.centerStart
-              : AlignmentDirectional.centerEnd,
-          child: Dismissible(
-            key: ValueKey(message.id),
-            direction: DismissDirection.endToStart,
-            dismissThresholds: const {DismissDirection.endToStart: 0.5},
-            confirmDismiss: (direction) {
-              ref.read(replyToMessageProvider.notifier).state = message;
+    final isSelectedMessage = ref.watch(
+      chatContextualActionBarController.select(
+        (s) => s.selectedMessage?.id == message.id,
+      ),
+    );
+    return ColoredBox(
+      color: isSelectedMessage
+          ? DarkColors.primary.withAlpha(120)
+          : Colors.transparent,
+      child: CompositedTransformTarget(
+        link: layerLink,
+        child: GestureDetector(
+          onLongPress: () {
+            reactionController.showReactionPopup(layerLink, message.id);
+            ref
+                .read(chatContextualActionBarController.notifier)
+                .selectMessage(message);
+          },
+          child: Align(
+            alignment: isMe
+                ? AlignmentDirectional.centerStart
+                : AlignmentDirectional.centerEnd,
+            child: Dismissible(
+              key: ValueKey(message.id),
+              direction: DismissDirection.endToStart,
+              dismissThresholds: const {DismissDirection.endToStart: 0.5},
+              confirmDismiss: (direction) {
+                ref.read(replyToMessageProvider.notifier).state = message;
 
-              return Future.value(false);
-            },
+                return Future.value(false);
+              },
 
-            child: Column(
-              crossAxisAlignment: isMe
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomPaint(
-                  painter: hasTail
-                      ? TailMessagePaint(
-                          isMe: isMe,
+              child: Column(
+                crossAxisAlignment: isMe
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomPaint(
+                    painter: hasTail
+                        ? TailMessagePaint(
+                            isMe: isMe,
+                            color: backgroundColor,
+                            textDirection: Directionality.of(context),
+                          )
+                        : null,
+                    child: IntrinsicHeight(
+                      child: Container(
+                        padding: EdgeInsets.all(
+                          message.type == MessageType.image ? 3 : 8,
+                        ),
+                        decoration: BoxDecoration(
                           color: backgroundColor,
-                          textDirection: Directionality.of(context),
-                        )
-                      : null,
-                  child: IntrinsicHeight(
-                    child: Container(
-                      padding: EdgeInsets.all(
-                        message.type == MessageType.image ? 3 : 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        borderRadius: !hasTail
-                            ? BorderRadius.circular(13)
-                            : BorderRadiusDirectional.only(
-                                topStart: const Radius.circular(13),
-                                topEnd: const Radius.circular(13),
-                                bottomStart: isMe
-                                    ? Radius.zero
-                                    : const Radius.circular(13),
-                                bottomEnd: !isMe
-                                    ? Radius.zero
-                                    : const Radius.circular(13),
+                          borderRadius: !hasTail
+                              ? BorderRadius.circular(13)
+                              : BorderRadiusDirectional.only(
+                                  topStart: const Radius.circular(13),
+                                  topEnd: const Radius.circular(13),
+                                  bottomStart: isMe
+                                      ? Radius.zero
+                                      : const Radius.circular(13),
+                                  bottomEnd: !isMe
+                                      ? Radius.zero
+                                      : const Radius.circular(13),
+                                ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 15,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (repliedMessage != null)
+                              ReplyMessageWidget(
+                                repliedMessage: repliedMessage!,
                               ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 15,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (repliedMessage != null)
-                            ReplyMessageWidget(repliedMessage: repliedMessage!),
-                          MessageContnetWidget(message: message, isMe: isMe),
-                        ],
+                            MessageContnetWidget(message: message, isMe: isMe),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (message.reactionEmoji != null)
-                  Container(
-                    height: 30,
-                    width: double.infinity,
-                    alignment: isMe
-                        ? AlignmentDirectional.topStart
-                        : AlignmentDirectional.topEnd,
-                    child: Transform.translate(
-                      offset: Offset(isMe ? -5 : 10, -10),
-                      child: EmojiIcon(
-                        size: 10,
-                        reaction: message.reactionEmoji!,
-                        onPressed: () {
-                          ref
-                              .read(chatControllerProvider.notifier)
-                              .sendReactionEmoji(
-                                reactionEmoji: null,
-                                messageId: message.chatId,
-                              );
-                        },
-                        backgroundColor: backgroundColor,
-                        borderColor: Theme.of(context).scaffoldBackgroundColor,
+                  if (message.reactionEmoji != null)
+                    Container(
+                      height: 30,
+                      width: double.infinity,
+                      alignment: isMe
+                          ? AlignmentDirectional.topStart
+                          : AlignmentDirectional.topEnd,
+                      child: Transform.translate(
+                        offset: Offset(isMe ? -5 : 10, -10),
+                        child: EmojiIcon(
+                          size: 10,
+                          reaction: message.reactionEmoji!,
+                          onPressed: () {
+                            ref
+                                .read(chatControllerProvider.notifier)
+                                .sendReactionEmoji(
+                                  reactionEmoji: null,
+                                  messageId: message.chatId,
+                                );
+                          },
+                          backgroundColor: backgroundColor,
+                          borderColor: Theme.of(
+                            context,
+                          ).scaffoldBackgroundColor,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

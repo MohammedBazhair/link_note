@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 
 import '../../../../../core/extensions/extensions.dart';
 import '../../../../audio/presentation/controller/audio_provider.dart';

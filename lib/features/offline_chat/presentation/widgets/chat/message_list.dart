@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:link_note/core/extensions/extensions.dart';
 import 'package:link_note/features/offline_chat/domain/entities/message.dart';
 import '../../controllers/chat_providers.dart';
 import 'message_bubble.dart';
@@ -40,6 +41,14 @@ class _MessageListState extends ConsumerState<MessageList> {
           curve: Curves.easeOutCubic,
         );
       });
+    });
+
+    ref.listenManual(chatContextualActionBarController, (_, state) {
+      final errorMessage = state.errorMessage;
+      final successMessage = state.successMessage;
+
+      if (errorMessage != null) context.showSnakbar(errorMessage);
+      if (successMessage != null) context.showSnakbar(successMessage);
     });
 
     Future.microtask(() {

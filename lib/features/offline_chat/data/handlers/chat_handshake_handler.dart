@@ -1,6 +1,5 @@
 import 'dart:convert';
-
-import '../../domain/entities/message.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import '../models/nearby_identity_model.dart';
 import '../models/packet.dart';
 import '../models/protocol.dart';

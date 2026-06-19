@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import '../../../../core/constants/internal_constants/log.dart';
-import '../../domain/entities/message.dart';
 import 'packet.dart';
 
 /// Binary protocol encoder/decoder for chat messages.

@@ -1,27 +1,5 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
 import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
-
-import '../../data/models/packet.dart';
-
-enum MessageType {
-  handshake(1),
-  text(2),
-  image(3),
-  voice(4),
-  reactionEmoji(5);
-
-  const MessageType(this.typeCode);
-  static MessageType fromValue(int v) {
-    return MessageType.values.firstWhere(
-      (e) => e.typeCode == v,
-      orElse: () => MessageType.text,
-    );
-  }
-
-  final int typeCode;
-}
+import 'message_type.dart';
 
 class Message {
   Message({
@@ -36,59 +14,18 @@ class Message {
     required this.chatId,
   });
 
-  factory Message.fromPacket({
-    required Packet packet,
-    required String senderId,
-    required String myId,
-  }) {
-    final messageId = packet.messageId;
-    final replyToMessageId = packet.replyToMessageId;
-    final chatId = buildChatId(myId, senderId);
-    final timeNow = DateTime.now().toUtc();
-    return switch (packet.messageType) {
-      MessageType.text => Message(
-        id: messageId,
-        chatId: chatId,
-        senderUserId: senderId,
-        type: packet.messageType,
-        text: utf8.decode(packet.payload),
-        time: timeNow,
-        replyToMessageId: replyToMessageId,
-      ),
-      MessageType.image => Message(
-        id: messageId,
-        chatId: chatId,
-        senderUserId: senderId,
-        type: packet.messageType,
-        filePath: 'received_image_${DateTime.now().millisecondsSinceEpoch}.png',
-        time: timeNow,
-        replyToMessageId: replyToMessageId,
-      ),
-      MessageType.handshake => Message(
-        id: messageId,
-        senderUserId: senderId,
-        type: MessageType.handshake,
-        time: timeNow,
-        chatId: chatId,
-      ),
-      MessageType.voice => Message(
-        id: messageId,
-        chatId: chatId,
-        senderUserId: senderId,
-        type: packet.messageType,
-        filePath: 'received_voice_${DateTime.now().millisecondsSinceEpoch}.ogg',
-        time: timeNow,
-        replyToMessageId: replyToMessageId,
-      ),
-      MessageType.reactionEmoji => Message(
-        id: messageId,
-        senderUserId: senderId,
-        type: packet.messageType,
-        time: timeNow,
-        chatId: chatId,
-        reactionEmoji: ReactionEmoji.fromString(utf8.decode(packet.payload)),
-      ),
-    };
+  factory Message.fromMap(Map<String, dynamic> map) {
+    return Message(
+      id: map['id'] as String,
+      replyToMessageId: map['reply_To_Message_Id'] as String?,
+      chatId: map['chat_id'] as String,
+      senderUserId: map['sender_user_id'] as String,
+      type: MessageType.fromValue(map['message_type'] as int),
+      text: map['text'] as String?,
+      reactionEmoji: ReactionEmoji.fromCode(map['reaction_emoji'] as int?),
+      filePath: map['file_path'] as String?,
+      time: DateTime.parse(map['time'] as String),
+    );
   }
 
   static String buildChatId(String a, String b) {
@@ -139,5 +76,19 @@ class Message {
       filePath: filePath ?? this.filePath,
       time: time ?? this.time,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'reply_To_Message_Id': replyToMessageId,
+      'chat_id': chatId,
+      'sender_user_id': senderUserId,
+      'message_type': type.typeCode,
+      'text': text,
+      'reaction_emoji': reactionEmoji?.name,
+      'file_path': filePath,
+      'time': time.toIso8601String(),
+    };
   }
 }

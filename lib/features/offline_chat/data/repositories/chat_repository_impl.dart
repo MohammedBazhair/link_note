@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 
 import '../../../../core/constants/internal_constants/log.dart';

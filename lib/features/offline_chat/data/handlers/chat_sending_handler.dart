@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 import 'package:uuid/uuid.dart';
 
@@ -173,10 +174,13 @@ class ChatSendingHandler {
       reactionEmoji: reactionEmoji,
     );
 
+    final payload = Uint8List(4);
+    ByteData.sublistView(payload).setUint32(0, reactionEmoji?.code ?? 0);
+    
     final packet = Protocol.buildPacket(
       senderUserId: _identityManager.localIdentity.uuid,
       type: MessageType.reactionEmoji,
-      payload: Uint8List.fromList(utf8.encode(reactionEmoji?.name ?? '')),
+      payload:payload,
       messageId: messageId,
     );
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:link_note/core/utils/debouncer.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import 'package:link_note/features/offline_chat/domain/entities/reaction_emoji.dart';
 
 import '../../../audio/presentation/controller/audio_provider.dart';

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:link_note/core/models/snack_bar_action_model.dart';
 import '../constants/external_constants/external_constants.dart';
 import '../constants/internal_constants/log.dart';
@@ -125,4 +126,9 @@ Is Tablet: $isTablet
 ''',
     );
   }
+}
+
+extension ClipboardExtensions on String {
+  Future<void> copyToClipboard() =>
+      Clipboard.setData(ClipboardData(text: this));
 }

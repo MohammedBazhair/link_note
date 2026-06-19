@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'package:link_note/features/offline_chat/data/models/packet_to_message_mapper.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import '../../domain/entities/chat_session.dart';
 import '../../domain/entities/message.dart';
 import '../models/incoming_frame.dart';
@@ -35,11 +36,8 @@ class IncomingMessageHandler {
       case MessageType.handshake:
         return null;
       case MessageType.text:
-        return Message.fromPacket(
-          packet: packet,
-          myId: _identityManager.localIdentity.uuid,
-          senderId: packet.senderUserId,
-        );
+        return packet.toMessage(myId: _identityManager.localIdentity.uuid);
+
       case MessageType.image:
         final payloadId = int.tryParse(utf8.decode(packet.payload));
         if (payloadId != null) {
@@ -65,12 +63,7 @@ class IncomingMessageHandler {
         }
         return null;
       case MessageType.reactionEmoji:
-return Message.fromPacket(
-          packet: packet,
-          myId: _identityManager.localIdentity.uuid,
-          senderId: packet.senderUserId,
-          
-        );
+        return packet.toMessage(myId: _identityManager.localIdentity.uuid);
     }
   }
 }

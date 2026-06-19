@@ -23,7 +23,7 @@ Future<Override> getOverrideDatabase() async {
 Future<Database> _initDatabase() async {
   final dbPath = await getDatabaseFilePath();
   Logger.log(message: 'Database path: $dbPath');
-  
+
   if (Platform.isWindows) {
     final winDb = await databaseFactory.openDatabase(
       dbPath,
@@ -39,7 +39,7 @@ Future<Database> _initDatabase() async {
 
 Future<String> getDatabaseFilePath() async {
   try {
-    if(!kDebugMode){
+    if (!kDebugMode) {
       final dbPath = await getDatabasesPath();
       return join(dbPath, ExternalConsts.databaseName);
     }
@@ -53,13 +53,21 @@ Future<String> getDatabaseFilePath() async {
 }
 
 Future<void> _onCreate(Database db, int version) async {
-  final futures = [
+  await db.execute(ExternalConsts.createTableChats);
+
+  final tablesFutures = [
     db.execute(ExternalConsts.createTableNotesQuery),
     db.execute(ExternalConsts.createTableSyncChangesQuery),
     db.execute(ExternalConsts.createTableSyncStateQuery),
+    db.execute(ExternalConsts.createTableMessages),
   ];
 
-  await Future.wait(futures);
+  await Future.wait(tablesFutures);
 
-  await db.execute(ExternalConsts.createIndexesOfsyncChangesQuery);
+  final indexexFutures = [
+    db.execute(ExternalConsts.createIndexesOfsyncChangesQuery),
+    db.execute(ExternalConsts.createIndexesOfChats),
+  ];
+
+  await Future.wait(indexexFutures);
 }

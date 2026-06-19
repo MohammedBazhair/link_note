@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:link_note/features/offline_chat/domain/entities/message_type.dart';
 import '../../../../core/constants/assets/app_assets.dart';
 import '../../domain/entities/message.dart';
 import '../controllers/chat_providers.dart';
